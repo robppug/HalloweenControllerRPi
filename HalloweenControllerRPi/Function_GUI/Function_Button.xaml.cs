@@ -1,10 +1,13 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Function_GUI;
+using HalloweenControllerRPi.Functions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Xml;
 using System.Xml.Serialization;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
@@ -44,16 +47,16 @@ namespace HalloweenControllerRPi
 
          GUIType = guitype;
 
-         //button_Function.Text = text;
-         buttonFunction.DragStarting += ButtonFunction_DragStarting;
+         textBlock.Text = text;
          //button_Function.MouseDown += new MouseEventHandler(b_MouseDown);
          //button_Function.MouseMove += new MouseEventHandler(b_MouseMove);
          //MouseDown += Function_Button_MouseDown;
          Index = 0;
       }
 
-      private void ButtonFunction_DragStarting(UIElement sender, DragStartingEventArgs args)
+      private void ButtonFunction_DragEnter(object sender, DragEventArgs e)
       {
+         throw new NotImplementedException();
       }
 
       /// <summary>
@@ -67,7 +70,7 @@ namespace HalloweenControllerRPi
          : this(guitype, text, color)
       {
          Index = index;
-         //button_Function.Text = "#" + index.ToString();
+         textBlock.Text = text + Convert.ToString(" #" + index.ToString());
       }
 
       public void SetImage(Image img)
@@ -119,6 +122,13 @@ namespace HalloweenControllerRPi
          //  writer.WriteAttributeString("Index", this.Index.ToString());
 
          //(_funcGUI as IXmlSerializable).WriteXml(writer);
+      }
+
+      private void textBlock_DragStarting(UIElement sender, DragStartingEventArgs args)
+      {
+         args.DragUI.SetContentFromDataPackage();
+         args.Data.RequestedOperation = DataPackageOperation.Copy;
+         args.Data.SetData(StandardDataFormats.Text, this.GetType().ToString());
       }
    }
 }

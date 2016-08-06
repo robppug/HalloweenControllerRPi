@@ -1,4 +1,5 @@
-﻿using Microsoft.IoT.Lightning.Providers;
+﻿using HalloweenControllerRPi.Function_GUI;
+using Microsoft.IoT.Lightning.Providers;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -9,6 +10,9 @@ using Windows.Devices.Pwm;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
+using HalloweenControllerRPi.Device;
+using HalloweenControllerRPi.Functions;
+using System.Collections.Generic;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -17,7 +21,7 @@ namespace HalloweenControllerRPi
    /// <summary>
    /// An empty page that can be used on its own or navigated to within a Frame.
    /// </summary>
-   public sealed partial class MainPage : Page
+   public sealed partial class MainPage : Page, IHostApp
    {
       private enum tenPWMChannel
       {
@@ -58,16 +62,18 @@ namespace HalloweenControllerRPi
       {
          this.InitializeComponent();
 
-         this.Available_Statics.Children.Add(new Function_Button());
+         this.Available_Statics.Items.Add(new Function_Button_SOUND(0));
 
-         this.Available_Board.Children.Add(new Function_Button());
+         this.Available_Board.Items.Add(new Function_Button_INPUT(0));
+         this.Available_Board.Items.Add(new Function_Button_PWM(0));
+         this.Available_Board.Items.Add(new Function_Button_RELAY(0));
+
 
          this.Loaded += OnLoaded;
       }
 
       private async void OnLoaded(object sender, RoutedEventArgs e)
       {
-
          //Setup the GPIO, PWM and I2C drivers
          if (LightningProvider.IsLightningEnabled)
          {
@@ -164,6 +170,41 @@ namespace HalloweenControllerRPi
          if (this.ledPercent != null)
             this.ledPercent.Text = pwmDutySetting.ToString() + "%";
          pwmToggle = true;
+      }
+
+      private void pivotContainer_SelectionChanged(object sender, SelectionChangedEventArgs e)
+      {
+         Pivot pItem = (sender as Pivot);
+
+         switch(pItem.SelectedIndex)
+         {
+            case 0:
+               break;
+            case 1:
+               break;
+            default:
+               break;
+         }
+      }
+
+      public void FireCommand(string cmd)
+      {
+         throw new NotImplementedException();
+      }
+
+      public string BuildCommand(string function, string subFunc, params string[] data)
+      {
+         throw new NotImplementedException();
+      }
+
+      public List<Command> GetSubFunctionCommandsList(Command functionKey)
+      {
+         throw new NotImplementedException();
+      }
+
+      public void TriggerEnd(Function func)
+      {
+         throw new NotImplementedException();
       }
    }
 }

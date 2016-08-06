@@ -1,0 +1,24 @@
+﻿<UserControl
+    x:Class="HalloweenControllerRPi.Function_GUI.Func_PWM_GUI"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:HalloweenControllerRPi.Function_GUI"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="245"
+    d:DesignWidth="240">
+
+   <Grid>
+      <TextBlock x:Name="textTitle" TextWrapping="Wrap" Text="PWM (#)" Foreground="Black" Margin="2,2,0,0"/>
+      <Slider x:Name="slider_Duration" VerticalAlignment="Top" Margin="5,60,5,0" Value="500" Maximum="60000" Minimum="10" TickFrequency="5000" ValueChanged="slider_Duration_ValueChanged"/>
+      <Slider x:Name="slider_MaxLevel" VerticalAlignment="Top" Margin="5,102,5,0" Value="50" TickFrequency="5" ValueChanged="slider_MaxLevel_ValueChanged"/>
+      <Slider x:Name="slider_StartDelay" VerticalAlignment="Top" Margin="5,144,5,0" TickFrequency="10" Value="0" ValueChanged="slider_StartDelay_ValueChanged"/>
+      <Slider x:Name="slider_UpdateRate" VerticalAlignment="Top" Margin="5,186,5,0" Minimum="1" Value="10" TickFrequency="1" ValueChanged="slider_UpdateRate_ValueChanged"/>
+      <ComboBox x:Name="comboBox_Functions" HorizontalAlignment="Left" VerticalAlignment="Top" Width="220" Margin="10,30,10,0" SelectionChanged="comboBox_Functions_SelectionChanged"/>
+      <TextBlock x:Name="textBlock_Duration" HorizontalAlignment="Left" Margin="121,91,0,0" TextWrapping="Wrap" Text="Duration: 500 (ms)" VerticalAlignment="Top" Width="109" FontSize="10"/>
+      <TextBlock x:Name="textBlock_MaxLevel" HorizontalAlignment="Left" Margin="121,133,0,0" TextWrapping="Wrap" Text="Max Level: 50 (%)" VerticalAlignment="Top" Width="109" FontSize="10"/>
+      <TextBlock x:Name="textBlock_StartDelay" HorizontalAlignment="Left" Margin="121,175,0,0" TextWrapping="Wrap" Text="Start Delay: 0 (ms)" VerticalAlignment="Top" Width="109" FontSize="10"/>
+      <TextBlock x:Name="textBlock_UpdateRate" HorizontalAlignment="Left" Margin="121,217,0,0" TextWrapping="Wrap" Text="Update Rate: 10 (ms)" VerticalAlignment="Top" Width="109" FontSize="10"/>
+   </Grid>
+</UserControl>

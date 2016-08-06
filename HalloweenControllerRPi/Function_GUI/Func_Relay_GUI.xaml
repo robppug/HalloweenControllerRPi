@@ -1,16 +1,17 @@
 ﻿<UserControl
-    x:Class="HalloweenControllerRPi.Function_GUI.Func_Input_GUI"
+    x:Class="HalloweenControllerRPi.Function_GUI.Func_Relay_GUI"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:HalloweenControllerRPi.Function_GUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    d:DesignHeight="70"
-    d:DesignWidth="140">
+    d:DesignHeight="120"
+    d:DesignWidth="240">
 
    <Grid>
-      <TextBlock x:Name="textTitle" TextWrapping="Wrap" Text="Input (#)" Foreground="White" Margin="5,0,0,0"/>
-      <ComboBox x:Name="comboBox_TrigEdge" HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="Auto" Margin="10,26,10,10"/>
+      <TextBlock x:Name="textTitle" TextWrapping="Wrap" Text="Relay (#)" Foreground="Black" Margin="2,2,0,0"/>
+      <Slider x:Name="slider_Duration" VerticalAlignment="Stretch" Margin="5,30,5,0"/>
+      <Slider x:Name="slider_StartDelay" VerticalAlignment="Stretch" Margin="5,72,5,0"/>
    </Grid>
 </UserControl>
