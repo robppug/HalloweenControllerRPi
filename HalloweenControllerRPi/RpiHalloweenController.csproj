@@ -106,6 +106,9 @@
     <Compile Include="Container\GroupContainer.xaml.cs">
       <DependentUpon>GroupContainer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Container\GroupContainerTriggered.xaml.cs">
+      <DependentUpon>GroupContainerTriggered.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Device\Command.cs" />
     <Compile Include="Device\CommandEventArgs.cs" />
     <Compile Include="Functions\Function.cs" />
@@ -155,6 +158,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="Container\GroupContainer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Container\GroupContainerTriggered.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

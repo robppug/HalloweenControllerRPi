@@ -21,6 +21,7 @@ namespace HalloweenControllerRPi.Function_GUI
    public sealed partial class Func_Input_GUI : UserControl
    {
       private Func_INPUT _Func;
+      private bool _boInitialised = false;
 
       public Function Func
       {
@@ -31,36 +32,62 @@ namespace HalloweenControllerRPi.Function_GUI
       public Func_Input_GUI()
       {
          this.InitializeComponent();
+
+         _boInitialised = true;
       }
-      public Func_Input_GUI(IHostApp host, uint index, Function.tenTYPE entype)
+
+      public Func_Input_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
       {
          this._Func = new Func_INPUT(host, entype);
          this._Func.Index = index;
          this._Func.FuncButtonType = typeof(Function_Button_INPUT);
 
-         this.InitializeComponent();
+         this.textTitle.Text = "Input #" + index;
+         this.textTitle.DoubleTapped += TextTitle_DoubleTapped;
 
-         //foreach (Control c in this.Controls)
-         //{
-         //   c.MouseDown += OnMouseDown;
-         //}
-
-         //this.gb_FunctionName.Text = "Input #" + index;
-         //this.gb_FunctionName.MouseClick += gb_FunctionName_MouseClick;
-
-         //this.comboBox_TrigEdge.SelectedIndex = 0;
+         this.comboBox_TrigEdge.SelectedIndex = 0;
       }
-      //private void gb_FunctionName_MouseClick(object sender, MouseEventArgs e)
-      //{
-         //if (e.Button == System.Windows.Forms.MouseButtons.Right)
-         //{
-         //   this.SetCustomName();
-         //}
-      //}
-      private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+
+      private void TextTitle_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
       {
-         //this._Func.triggerLevel = (Func_INPUT.TriggerLvl)(sender as ComboBox).SelectedIndex;
+         if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
+         {
+            this.SetCustomName();
+         }
       }
 
+      #region XML Handling
+      private void comboBox_TrigEdge_SelectionChanged(object sender, SelectionChangedEventArgs e)
+      {
+         this._Func.triggerLevel = (Func_INPUT.TriggerLvl)(sender as ComboBox).SelectedIndex;
+      }
+
+      public void ReadXml(System.Xml.XmlReader reader)
+      {
+         this.textTitle.Text = reader.GetAttribute("CustomName");
+
+         this._Func.ReadXml(reader);
+
+         this.comboBox_TrigEdge.SelectedIndex = (int)this._Func.triggerLevel;
+      }
+
+      public System.Xml.Schema.XmlSchema GetSchema()
+      {
+         throw new NotImplementedException();
+      }
+
+      public void WriteXml(System.Xml.XmlWriter writer)
+      {
+         writer.WriteAttributeString("Type", GetType().ToString());
+         writer.WriteAttributeString("CustomName", this.textTitle.Text);
+
+         this._Func.WriteXml(writer);
+      } 
+      #endregion
+
+      public void SetCustomName()
+      {
+         //new PopupTextBox().SetCustomName(gb_FunctionName);
+      }
    }
 }

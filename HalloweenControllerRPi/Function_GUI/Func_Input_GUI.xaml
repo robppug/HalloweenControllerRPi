@@ -9,8 +9,9 @@
     d:DesignHeight="70"
     d:DesignWidth="140">
 
-   <Grid>
-      <TextBlock x:Name="textTitle" TextWrapping="Wrap" Text="Input (#)" Foreground="White" Margin="5,0,0,0"/>
-      <ComboBox x:Name="comboBox_TrigEdge" HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="Auto" Margin="10,26,10,10"/>
+   <Grid Background="LightGray">
+      <TextBlock x:Name="textTitle" TextWrapping="Wrap" Text="Input (#)" Foreground="Black" Margin="5,0,0,0"/>
+      <ComboBox x:Name="comboBox_TrigEdge" HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="Auto" Margin="5,26,5,0" Height="29" FontSize="12" SelectionChanged="comboBox_TrigEdge_SelectionChanged"/>
+      <TextBlock x:Name="textTriggerEdge" TextWrapping="Wrap" Text="Trigger Edge" Foreground="Black" Margin="60,55,0,0" FontSize="10"/>
    </Grid>
 </UserControl>

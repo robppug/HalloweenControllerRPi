@@ -1,18 +1,8 @@
 ﻿using HalloweenControllerRPi.Functions;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -32,6 +22,7 @@ namespace HalloweenControllerRPi.Function_GUI
       public Func_PWM_GUI()
       {
          this.InitializeComponent();
+
          _boInitialised = true;
       }
 
@@ -67,7 +58,7 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
          {
-            //   this.SetCustomName();
+            this.SetCustomName();
          }
       }
 
@@ -115,6 +106,7 @@ namespace HalloweenControllerRPi.Function_GUI
          }
       }
 
+      #region XML Handling
       public void ReadXml(System.Xml.XmlReader reader)
       {
          this._Func.Delay_ms = Convert.ToUInt16(reader.GetAttribute("Delay"));
@@ -140,7 +132,21 @@ namespace HalloweenControllerRPi.Function_GUI
          }
          catch { }
       }
-      
+
+      public System.Xml.Schema.XmlSchema GetSchema()
+      {
+         throw new NotImplementedException();
+      }
+
+      public void WriteXml(System.Xml.XmlWriter writer)
+      {
+         writer.WriteAttributeString("Type", GetType().ToString());
+         writer.WriteAttributeString("CustomName", this.textTitle.Text);
+
+         this._Func.WriteXml(writer);
+      } 
+      #endregion
+
       public void SetCustomName()
       {
          //new PopupTextBox().SetCustomName(gb_FunctionName);

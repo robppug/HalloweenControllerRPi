@@ -81,17 +81,25 @@ namespace HalloweenControllerRPi.Container
          Type[] allowedTypes = new Type[] { typeof(Function_Button_RELAY),
                                             typeof(Function_Button_PWM),
                                             typeof(Function_Button_SOUND)};
+
+
+
          /* Check if the dragged item is one of the allowed dragged item TYPES. */
          foreach (Type type in allowedTypes)
          {
-            var items = await e.DataView.GetTextAsync(StandardDataFormats.Text);
-
-            if (items != null)
+            if (e.DataView.Contains("Type"))
             {
+               var items = await e.DataView.GetDataAsync("Type");
+
                if (type.ToString() == items.ToString())
                {
+                  uint idx = 0;
+
+                  if(e.DataView.Contains("Index"))
+                     idx = (uint)await e.DataView.GetDataAsync("Index");
+
                   /* Only allow ONE of each function in the Always Actives group */
-                  draggedItem = (Function_Button)Activator.CreateInstance(type, (uint)0/*draggedItem.Index*/, Function.tenTYPE.TYPE_CONSTANT);
+                  draggedItem = (Function_Button)Activator.CreateInstance(type, idx, Function.tenTYPE.TYPE_CONSTANT);
 
                   //Container.Children.Add(draggedItem);
                   
@@ -107,13 +115,36 @@ namespace HalloweenControllerRPi.Container
 
       private async void Panel_DragEnter(object sender, DragEventArgs e)
       {
-         var items = await e.DataView.GetTextAsync(StandardDataFormats.Text);
-
-         if (items != null)
+         if (e.DataView.Contains("Type"))
          {
+            var items = await e.DataView.GetTextAsync("Type");
+
             if (items.ToString() != typeof(Function_Button_INPUT).ToString())
+            {
+               e.DragUIOverride.Caption = "Add to Always Active Group...";
+               e.DragUIOverride.IsCaptionVisible = true;
                e.AcceptedOperation = DataPackageOperation.Copy;
+            }
          }
+      }
+
+      /// <summary>
+      /// Adds a new Trigger group with the specified INDEX.
+      /// </summary>
+      /// <param name="idx"></param>
+      public void AddTriggerGroup(uint idx)
+      {
+         GroupContainerTriggered groupContainerTriggered = new GroupContainerTriggered(idx);
+
+         Container.Children.Add(groupContainerTriggered);
+      }
+
+      /// <summary>
+      /// Adds a new Trigger group with the next availble INDEX.
+      /// </summary>
+      public void AddTriggerGroup()
+      {
+         AddTriggerGroup((uint)Container.Children.Count);
       }
    }
 }

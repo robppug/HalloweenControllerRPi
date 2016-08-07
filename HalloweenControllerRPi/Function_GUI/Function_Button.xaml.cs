@@ -35,6 +35,7 @@ namespace HalloweenControllerRPi
       {
          this.InitializeComponent();
       }
+
       /// <summary>
       /// Function_Button Constructor
       /// </summary>
@@ -52,11 +53,6 @@ namespace HalloweenControllerRPi
          //button_Function.MouseMove += new MouseEventHandler(b_MouseMove);
          //MouseDown += Function_Button_MouseDown;
          Index = 0;
-      }
-
-      private void ButtonFunction_DragEnter(object sender, DragEventArgs e)
-      {
-         throw new NotImplementedException();
       }
 
       /// <summary>
@@ -87,14 +83,6 @@ namespace HalloweenControllerRPi
          //(sender as Function_Button).DoDragDrop(dataObj, DragDropEffects.Copy);
       //}
 
-      //private void b_MouseMove(object sender, MouseEventArgs e)
-      //{
-         //if (isDragging)
-         //{
-            //   (sender as Control).Location = e.Location;
-         //}
-      //}
-
       //private void b_MouseDown(object sender, MouseEventArgs e)
       //{
          //if (e.Button == System.Windows.Forms.MouseButtons.Left)
@@ -118,17 +106,24 @@ namespace HalloweenControllerRPi
 
       public void WriteXml(XmlWriter writer)
       {
-         //   writer.WriteAttributeString("Type", GetType().ToString());
-         //  writer.WriteAttributeString("Index", this.Index.ToString());
+         writer.WriteAttributeString("Type", GetType().ToString());
+         writer.WriteAttributeString("Index", this.Index.ToString());
 
          //(_funcGUI as IXmlSerializable).WriteXml(writer);
       }
 
       private void textBlock_DragStarting(UIElement sender, DragStartingEventArgs args)
       {
-         args.DragUI.SetContentFromDataPackage();
-         args.Data.RequestedOperation = DataPackageOperation.Copy;
-         args.Data.SetData(StandardDataFormats.Text, this.GetType().ToString());
+         if (sender == this.textBlock)
+         {
+            args.DragUI.SetContentFromDataPackage();
+            args.Data.RequestedOperation = DataPackageOperation.Copy;
+
+            args.Data.SetData("Type", this.GetType().ToString());
+            args.Data.SetData("Index", this.Index);
+            args.Data.SetData("OnlyOne", this.OneOnly);
+            args.Data.SetData("IsRemovable", this.IsRemoveable);
+         }
       }
    }
 }

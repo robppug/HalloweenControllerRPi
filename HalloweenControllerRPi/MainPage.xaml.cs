@@ -62,12 +62,16 @@ namespace HalloweenControllerRPi
       {
          this.InitializeComponent();
 
-         this.Available_Statics.Items.Add(new Function_Button_SOUND(0));
+         this.Available_Statics.Items.Add(new Function_Button_SOUND(4));
 
-         this.Available_Board.Items.Add(new Function_Button_INPUT(0));
-         this.Available_Board.Items.Add(new Function_Button_PWM(0));
-         this.Available_Board.Items.Add(new Function_Button_RELAY(0));
+         this.Available_Board.Items.Add(new Function_Button_INPUT(1));
+         this.Available_Board.Items.Add(new Function_Button_PWM(2));
+         this.Available_Board.Items.Add(new Function_Button_RELAY(3));
 
+         foreach (Function_Button fb in Available_Board.Items)
+         {
+            fb.Height = Available_Board.Height;
+         }
 
          this.Loaded += OnLoaded;
       }
@@ -205,6 +209,11 @@ namespace HalloweenControllerRPi
       public void TriggerEnd(Function func)
       {
          throw new NotImplementedException();
+      }
+
+      private void buttonAdd_Click(object sender, RoutedEventArgs e)
+      {
+         this.groupContainer_Trigged.AddTriggerGroup();
       }
    }
 }

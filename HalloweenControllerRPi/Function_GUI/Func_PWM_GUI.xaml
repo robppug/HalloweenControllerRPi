@@ -9,7 +9,7 @@
     d:DesignHeight="245"
     d:DesignWidth="240">
 
-   <Grid>
+   <Grid Background="LightGray">
       <TextBlock x:Name="textTitle" TextWrapping="Wrap" Text="PWM (#)" Foreground="Black" Margin="2,2,0,0"/>
       <Slider x:Name="slider_Duration" VerticalAlignment="Top" Margin="5,60,5,0" Value="500" Maximum="60000" Minimum="10" TickFrequency="5000" ValueChanged="slider_Duration_ValueChanged"/>
       <Slider x:Name="slider_MaxLevel" VerticalAlignment="Top" Margin="5,102,5,0" Value="50" TickFrequency="5" ValueChanged="slider_MaxLevel_ValueChanged"/>

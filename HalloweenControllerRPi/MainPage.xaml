@@ -15,6 +15,7 @@
 			Margin="10,42,0,0"
 			HorizontalAlignment="Left"
 			VerticalAlignment="Top"
+         ScrollViewer.VerticalScrollBarVisibility="Disabled"
 			AllowDrop="True"
 			CanDragItems="True" />
       <Border Width="640"
@@ -30,6 +31,7 @@
 			Margin="650,42,-10,0"
 			HorizontalAlignment="Left"
 			VerticalAlignment="Top"
+         ScrollViewer.VerticalScrollBarVisibility="Disabled"
 			AllowDrop="True"
 			CanDragItems="True" />
       <Border Width="620"
@@ -69,53 +71,24 @@
 			SelectionHighlightColor="{x:Null}">
 			<Run Text="0%" />
       </TextBlock>
-      <Pivot x:Name="pivotContainer" 
-      			Margin="10,190,10,0" 
-			BorderBrush="Black" 
-			BorderThickness="1" 
-			SelectionChanged="pivotContainer_SelectionChanged" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="1260" FontSize="10">
+      <Pivot x:Name="pivotContainer" Margin="10,196,10,0" SelectionChanged="pivotContainer_SelectionChanged" VerticalAlignment="Top" HorizontalAlignment="Stretch" Width="1260" FontSize="10">
          <PivotItem x:Name="pivotItemContainer" Margin="0,0,0,0" Header="Always Active" FontSize="10">
-            <Border BorderBrush="Black" BorderThickness="2">
+            <Border BorderBrush="Black" BorderThickness="2" HorizontalAlignment="Stretch">
                <Grid x:Name="gridAlwaysActives" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                   <Container:GroupContainer x:Name="groupContainer_AlwaysActive" VerticalAlignment="Top" FuncAlwaysActive="True" AllowDrop="True" HorizontalContentAlignment="Stretch" Margin="0,0,72,0" Height="462"/>
                   <Button x:Name="buttonStart" Content="START" HorizontalAlignment="Right" VerticalAlignment="Top" Width="72"/>
-                  <Button x:Name="buttonStop" Content="STOP" HorizontalAlignment="Stretch" Margin="1184,32,0,0" VerticalAlignment="Top"/>
+                  <Button x:Name="buttonStop" Content="STOP" HorizontalAlignment="Right" Margin="1184,32,0,0" VerticalAlignment="Top" Width="72"/>
                </Grid>
             </Border>
          </PivotItem>
-         <PivotItem Margin="0,0,0,0"
-				Header="Triggered"
-            FontSize="10">
-            <Grid x:Name="gridTriggered"
-					Margin="0,0,0,0"
-					HorizontalAlignment="Stretch"
-					VerticalAlignment="Stretch"
-					AllowDrop="True"
-					Background="#FFECECEC">
-               <Grid.ColumnDefinitions>
-                  <ColumnDefinition MinWidth="1100" Width="Auto" />
-                  <ColumnDefinition Width="Auto" MinWidth="120" />
-               </Grid.ColumnDefinitions>
-               <Button x:Name="buttonAdd"
-						Grid.Column="1"
-						Width="120"
-						Height="50"
-						HorizontalAlignment="Stretch"
-						VerticalAlignment="Top"
-						AllowDrop="False"
-						Content="Add"
-						FontSize="24" />
-               <Button x:Name="buttonTrigger"
-						Grid.Column="1"
-						Width="120"
-						Height="50"
-						Margin="0,50,0,0"
-						HorizontalAlignment="Stretch"
-						VerticalAlignment="Top"
-						AllowDrop="False"
-						Content="Trigger"
-						FontSize="24" />
-            </Grid>
+         <PivotItem Margin="0,0,0,0" Header="Triggered" FontSize="10">
+            <Border BorderBrush="Black" BorderThickness="2">
+               <Grid x:Name="gridTriggered" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                  <Container:GroupContainer x:Name="groupContainer_Trigged" VerticalAlignment="Top" FuncAlwaysActive="False" AllowDrop="True" HorizontalContentAlignment="Stretch" Margin="0,0,72,0" Height="462"/>
+                  <Button x:Name="buttonAdd" Content="ADD" HorizontalAlignment="Right" VerticalAlignment="Top" Width="72" Click="buttonAdd_Click"/>
+                  <Button x:Name="buttonTrigger" Content="FIRE" HorizontalAlignment="Right" Margin="1184,32,0,0" VerticalAlignment="Top" Width="72"/>
+               </Grid>
+            </Border>
          </PivotItem>
       </Pivot>
    </Grid>

@@ -1,19 +1,9 @@
 ﻿using HalloweenControllerRPi.Functions;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Xml.Serialization;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -22,6 +12,7 @@ namespace HalloweenControllerRPi.Function_GUI
    public partial class Func_Relay_GUI : UserControl, IXmlSerializable, IFunctionGUI
    {
       private Func_RELAY _Func;
+      private bool _boInitialised = false;
 
       public Function Func
       {
@@ -29,30 +20,27 @@ namespace HalloweenControllerRPi.Function_GUI
          set { this._Func = (value as Func_RELAY); }
       }
 
-      public Func_Relay_GUI() { }
+      public Func_Relay_GUI()
+      {
+         this.InitializeComponent();
 
-      public Func_Relay_GUI(IHostApp host, uint index, Function.tenTYPE entype)
+         _boInitialised = true;
+      }
+
+      public Func_Relay_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
       {
          _Func = new Func_RELAY(host, entype);
+
          this._Func.Index = index;
-
-         InitializeComponent();
-
-         //foreach (Control c in this.Controls)
-         //{
-         //   c.MouseDown += OnMouseDown;
-         //}
-
-         //this.gb_FunctionName.Text = "Relay #" + index;
-         //this.gb_FunctionName.MouseClick += gb_FunctionName_MouseClick;
+         
+         this.textTitle.Text = "Relay #" + index;
+         this.textTitle.DoubleTapped += TextTitle_DoubleTapped;
          this._Func.Duration_ms = (uint)slider_Duration.Value;
          this._Func.Delay_ms = (uint)slider_StartDelay.Value;
 
          /* If function is in an ALWAYS_ACTIVE group, disable pointless controls */
          if (entype == Func_RELAY.tenTYPE.TYPE_CONSTANT)
          {
-            //this.label_Duration.Enabled = false;
-            //this.label_StartDelay.Enabled = false;
             this.slider_Duration.IsEnabled = false;
             this.slider_StartDelay.IsEnabled = false;
          }
@@ -60,39 +48,41 @@ namespace HalloweenControllerRPi.Function_GUI
          this._Func.FuncButtonType = typeof(Function_Button_RELAY);
       }
 
-      //private void gb_FunctionName_MouseClick(object sender, MouseEventArgs e)
-      //{
-      //   if (e.Button == System.Windows.Forms.MouseButtons.Right)
-      //   {
-      //      this.SetCustomName();
-      //   }
-      //}
-
-      //private void OnMouseDown(object sender, MouseEventArgs e)
-      //{
-         //MessageBox.Show(e.ToString());
-      //}
-
-      private void trackBar_Duration_Scroll(object sender, EventArgs e)
+      private void TextTitle_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
       {
-         this._Func.Duration_ms = (uint)(sender as Slider).Value;
-         //this.label_Duration.Text = "Duration: " + this._Func.Duration_ms.ToString() + " (ms)";
+         if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
+         {
+            this.SetCustomName();
+         }
       }
 
-      private void trackBar_StartDelay_Scroll(object sender, EventArgs e)
+      private void slider_Duration_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
       {
-         this._Func.Delay_ms = (uint)(sender as Slider).Value;
-         //this.label_StartDelay.Text = "Start Delay: " + this._Func.Delay_ms.ToString() + " (ms)";
+         if (_boInitialised == true)
+         {
+            this._Func.Duration_ms = (uint)(sender as Slider).Value;
+            this.textBlock_Duration.Text = "Duration: " + this._Func.Duration_ms.ToString() + " (ms)";
+         }
       }
 
+      private void slider_StartDelay_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+      {
+         if (_boInitialised == true)
+         {
+            this._Func.Delay_ms = (uint)(sender as Slider).Value;
+            this.textBlock_StartDelay.Text = "Start Delay: " + this._Func.Delay_ms.ToString() + " (ms)";
+         }
+      }
+
+      #region XML Handling
       public void ReadXml(System.Xml.XmlReader reader)
       {
          this._Func.Delay_ms = Convert.ToUInt16(reader.GetAttribute("Delay"));
          this._Func.Duration_ms = Convert.ToUInt16(reader.GetAttribute("Duration"));
-         //this.gb_FunctionName.Text = reader.GetAttribute("CustomName");
+         this.textTitle.Text = reader.GetAttribute("CustomName");
 
-         //this.label_StartDelay.Text = "Start Delay: " + this._Func.Delay_ms.ToString() + " (ms)";
-         //this.label_Duration.Text = "Duration: " + this._Func.Duration_ms.ToString() + " (ms)";
+         this.textBlock_StartDelay.Text = "Start Delay: " + this._Func.Delay_ms.ToString() + " (ms)";
+         this.textBlock_Duration.Text = "Duration: " + this._Func.Duration_ms.ToString() + " (ms)";
 
          /* Ignore MIN/MAX limits. */
          try
@@ -111,11 +101,12 @@ namespace HalloweenControllerRPi.Function_GUI
       public void WriteXml(System.Xml.XmlWriter writer)
       {
          writer.WriteAttributeString("Type", GetType().ToString());
-         //writer.WriteAttributeString("CustomName", this.gb_FunctionName.Text);
+         writer.WriteAttributeString("CustomName", this.textTitle.Text);
 
          this._Func.WriteXml(writer);
       }
 
+      #endregion
       public void SetCustomName()
       {
          //new PopupTextBox().SetCustomName(gb_FunctionName);
