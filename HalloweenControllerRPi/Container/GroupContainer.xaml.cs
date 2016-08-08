@@ -62,15 +62,15 @@ namespace HalloweenControllerRPi.Container
       {
          if (FuncAlwaysActive == true)
          {
-            Container.AllowDrop = true;
-            Container.Drop += this.Panel_DragDrop;
-            Container.DragEnter += this.Panel_DragEnter;
+            this.AllowDrop = true;
+            this.Drop += this.Panel_DragDrop;
+            this.DragEnter += this.Panel_DragEnter;
          }
          else
          {
-            Container.AllowDrop = false;
-            Container.Drop -= this.Panel_DragDrop;
-            Container.DragEnter -= this.Panel_DragEnter;
+            this.AllowDrop = false;
+            this.Drop -= this.Panel_DragDrop;
+            this.DragEnter -= this.Panel_DragEnter;
          }
       }
 
@@ -104,7 +104,7 @@ namespace HalloweenControllerRPi.Container
                   //Container.Children.Add(draggedItem);
                   
                   /* Create an instance of the FUNCTION GUI */
-                  FuncGUI = (Control)Activator.CreateInstance(draggedItem.GUIType, (this.Parent as IHostApp), draggedItem.Index, Function.tenTYPE.TYPE_CONSTANT);
+                  FuncGUI = (Control)Activator.CreateInstance(draggedItem.GUIType, MainPage.HostApp, draggedItem.Index, Function.tenTYPE.TYPE_CONSTANT);
 
                   Container.Children.Add(FuncGUI); 
                   return;
@@ -135,6 +135,7 @@ namespace HalloweenControllerRPi.Container
       public void AddTriggerGroup(uint idx)
       {
          GroupContainerTriggered groupContainerTriggered = new GroupContainerTriggered(idx);
+         groupContainerTriggered.HorizontalAlignment = HorizontalAlignment.Stretch;
 
          Container.Children.Add(groupContainerTriggered);
       }
@@ -145,6 +146,20 @@ namespace HalloweenControllerRPi.Container
       public void AddTriggerGroup()
       {
          AddTriggerGroup((uint)Container.Children.Count);
+      }
+
+      /// <summary>
+      /// Trigger received, parse through all Trigger groups and fire the trigger command.
+      /// </summary>
+      /// <param name="cFunc"></param>
+      /// <param name="cIndex"></param>
+      /// <param name="u32Value"></param>
+      public void ProcessTrigger(char cFunc, char cIndex, uint u32Value)
+      {
+         foreach (GroupContainerTriggered gt in this.Container.Children)
+         {
+            gt.boProcessRequest(cFunc, cIndex, u32Value);
+         }
       }
    }
 }

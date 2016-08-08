@@ -23,6 +23,8 @@ namespace HalloweenControllerRPi
    /// </summary>
    public sealed partial class MainPage : Page, IHostApp
    {
+      public List<Controller> lControllers;
+
       private enum tenPWMChannel
       {
          enChan1 = 0,
@@ -43,6 +45,8 @@ namespace HalloweenControllerRPi
          enChan16
       };
 
+      static public IHostApp HostApp;
+
       static private GpioPin GPIO_4;
       static private PwmPin PWM_4;
       static private Double pwmDutySetting;
@@ -61,6 +65,8 @@ namespace HalloweenControllerRPi
       public MainPage()
       {
          this.InitializeComponent();
+
+         HostApp = this;
 
          this.Available_Statics.Items.Add(new Function_Button_SOUND(4));
 
@@ -191,6 +197,18 @@ namespace HalloweenControllerRPi
          }
       }
 
+      private void buttonAdd_Click(object sender, RoutedEventArgs e)
+      {
+         this.groupContainer_Trigged.AddTriggerGroup();
+      }
+
+      private void buttonTrigger_Click(object sender, RoutedEventArgs e)
+      {
+         CommandEventArgs args = new CommandEventArgs('I', (char)1, (char)1);
+
+         this.groupContainer_Trigged.ProcessTrigger(args.Commamd, args.Par1, args.Par2);
+      }
+
       public void FireCommand(string cmd)
       {
          throw new NotImplementedException();
@@ -209,11 +227,6 @@ namespace HalloweenControllerRPi
       public void TriggerEnd(Function func)
       {
          throw new NotImplementedException();
-      }
-
-      private void buttonAdd_Click(object sender, RoutedEventArgs e)
-      {
-         this.groupContainer_Trigged.AddTriggerGroup();
       }
    }
 }

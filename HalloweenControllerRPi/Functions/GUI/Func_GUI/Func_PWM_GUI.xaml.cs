@@ -1,5 +1,6 @@
 ﻿using HalloweenControllerRPi.Functions;
 using System;
+using System.Xml.Serialization;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
@@ -8,7 +9,7 @@ using Windows.UI.Xaml.Input;
 
 namespace HalloweenControllerRPi.Function_GUI
 {
-   public sealed partial class Func_PWM_GUI : UserControl
+   public sealed partial class Func_PWM_GUI : UserControl, IXmlSerializable, IFunctionGUI
    {
       private Func_PWM _Func;
       private bool _boInitialised = false;

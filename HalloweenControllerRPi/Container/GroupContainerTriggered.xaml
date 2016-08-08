@@ -10,9 +10,11 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
 
-   <ScrollViewer VerticalScrollBarVisibility="Auto">
-      <UniversalWrapPanel:UniversalWrapPanel x:Name="Container" AllowDrop="True" MinHeight="300" MinWidth="400" Background="LightGray" Loaded="Panel_Loaded" Orientation="Horizontal">
-         <Image x:Name="imageTrigger" MinHeight="300" MinWidth="60" VerticalAlignment="Stretch" Source="ms-appx:///Assets/Square44x44Logo.png" Stretch="Fill"/>
-      </UniversalWrapPanel:UniversalWrapPanel>
-   </ScrollViewer>
+   <Border BorderThickness="1" BorderBrush="Black">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+         <UniversalWrapPanel:UniversalWrapPanel x:Name="Container" HorizontalAlignment="Left" VerticalAlignment="Top" AllowDrop="True" MinHeight="300" MinWidth="400" Background="LightGray" Loaded="Panel_Loaded" Orientation="Horizontal" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+            <Image x:Name="imageTrigger" MinHeight="300" MinWidth="60" Source="ms-appx:///Assets/blank.png" Stretch="Fill" Width="52"/>
+         </UniversalWrapPanel:UniversalWrapPanel>
+      </ScrollViewer>
+   </Border>
 </UserControl>

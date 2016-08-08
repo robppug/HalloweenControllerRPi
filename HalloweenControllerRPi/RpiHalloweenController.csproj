@@ -8,7 +8,7 @@
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HalloweenControllerRPi</RootNamespace>
-    <AssemblyName>Halloween Controller RPi</AssemblyName>
+    <AssemblyName>HalloweenControllerRPi</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
@@ -111,28 +111,30 @@
     </Compile>
     <Compile Include="Device\Command.cs" />
     <Compile Include="Device\CommandEventArgs.cs" />
+    <Compile Include="Device\Controller.cs" />
+    <Compile Include="Device\IController.cs" />
     <Compile Include="Functions\Function.cs" />
     <Compile Include="Functions\Func_INPUT.cs" />
     <Compile Include="Functions\Func_Relay.cs" />
     <Compile Include="Functions\Func_PWM.cs" />
     <Compile Include="Functions\iFunction.cs" />
-    <Compile Include="Function_GUI\Function_Button.xaml.cs">
+    <Compile Include="Functions\GUI\Function_Button\Function_Button.xaml.cs">
       <DependentUpon>Function_Button.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Function_GUI\Function_Button_SOUND.cs" />
-    <Compile Include="Function_GUI\Function_Button_RELAY.cs" />
-    <Compile Include="Function_GUI\Function_Button_PWM.cs" />
-    <Compile Include="Function_GUI\Function_Button_INPUT.cs" />
-    <Compile Include="Function_GUI\Func_Relay_GUI.xaml.cs">
+    <Compile Include="Functions\GUI\Function_Button\Function_Button_SOUND.cs" />
+    <Compile Include="Functions\GUI\Function_Button\Function_Button_RELAY.cs" />
+    <Compile Include="Functions\GUI\Function_Button\Function_Button_PWM.cs" />
+    <Compile Include="Functions\GUI\Function_Button\Function_Button_INPUT.cs" />
+    <Compile Include="Functions\GUI\Func_GUI\Func_Relay_GUI.xaml.cs">
       <DependentUpon>Func_Relay_GUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Function_GUI\Func_PWM_GUI.xaml.cs">
+    <Compile Include="Functions\GUI\Func_GUI\Func_PWM_GUI.xaml.cs">
       <DependentUpon>Func_PWM_GUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Function_GUI\Func_Input_GUI.xaml.cs">
+    <Compile Include="Functions\GUI\Func_GUI\Func_Input_GUI.xaml.cs">
       <DependentUpon>Func_Input_GUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Function_GUI\iFunctionGUI.cs" />
+    <Compile Include="Functions\GUI\iFunctionGUI.cs" />
     <Compile Include="IHostApp.cs" />
     <Compile Include="MainPage.xaml.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -143,6 +145,12 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\blank.png" />
+    <Content Include="Assets\input.png" />
+    <Content Include="Assets\pwm.png" />
+    <Content Include="Assets\relay.png" />
+    <Content Include="Assets\sound.png" />
+    <Content Include="Assets\trigger.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -165,19 +173,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Function_GUI\Function_Button.xaml">
+    <Page Include="Functions\GUI\Function_Button\Function_Button.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Function_GUI\Func_Relay_GUI.xaml">
+    <Page Include="Functions\GUI\Func_GUI\Func_Relay_GUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Function_GUI\Func_PWM_GUI.xaml">
+    <Page Include="Functions\GUI\Func_GUI\Func_PWM_GUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Function_GUI\Func_Input_GUI.xaml">
+    <Page Include="Functions\GUI\Func_GUI\Func_Input_GUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

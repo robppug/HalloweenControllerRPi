@@ -26,9 +26,9 @@
 			BorderBrush="Black"
 			BorderThickness="2" ScrollViewer.VerticalScrollBarVisibility="Disabled" />
       <GridView x:Name="Available_Statics"
-			Width="640"
+			Width="620"
 			Height="150"
-			Margin="650,42,-10,0"
+			Margin="650,42,0,0"
 			HorizontalAlignment="Left"
 			VerticalAlignment="Top"
          ScrollViewer.VerticalScrollBarVisibility="Disabled"
@@ -71,7 +71,7 @@
 			SelectionHighlightColor="{x:Null}">
 			<Run Text="0%" />
       </TextBlock>
-      <Pivot x:Name="pivotContainer" Margin="10,196,10,0" SelectionChanged="pivotContainer_SelectionChanged" VerticalAlignment="Top" HorizontalAlignment="Stretch" Width="1260" FontSize="10">
+      <Pivot x:Name="pivotContainer" Margin="10,196,10,0" SelectionChanged="pivotContainer_SelectionChanged" VerticalAlignment="Top" HorizontalAlignment="Stretch" Width="Auto" FontSize="10">
          <PivotItem x:Name="pivotItemContainer" Margin="0,0,0,0" Header="Always Active" FontSize="10">
             <Border BorderBrush="Black" BorderThickness="2" HorizontalAlignment="Stretch">
                <Grid x:Name="gridAlwaysActives" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
@@ -86,7 +86,7 @@
                <Grid x:Name="gridTriggered" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                   <Container:GroupContainer x:Name="groupContainer_Trigged" VerticalAlignment="Top" FuncAlwaysActive="False" AllowDrop="True" HorizontalContentAlignment="Stretch" Margin="0,0,72,0" Height="462"/>
                   <Button x:Name="buttonAdd" Content="ADD" HorizontalAlignment="Right" VerticalAlignment="Top" Width="72" Click="buttonAdd_Click"/>
-                  <Button x:Name="buttonTrigger" Content="FIRE" HorizontalAlignment="Right" Margin="1184,32,0,0" VerticalAlignment="Top" Width="72"/>
+                  <Button x:Name="buttonTrigger" Content="FIRE" HorizontalAlignment="Right" Margin="1184,32,0,0" VerticalAlignment="Top" Width="72" Click="buttonTrigger_Click"/>
                </Grid>
             </Border>
          </PivotItem>

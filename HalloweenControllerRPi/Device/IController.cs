@@ -5,16 +5,9 @@ using System.Collections.Generic;
 namespace HalloweenControllerRPi
 {
    /// <summary>
-   /// Event type for stuff and things
-   /// </summary>
-   /// <param name="sender"></param>
-   /// <param name="args"></param>
-   public delegate void HostedMessageDelegate(object sender, CommandEventArgs args);
-
-   /// <summary>
    /// Host for processings
    /// </summary>
-   public interface IHostApp
+   public interface IHostController
    {
       /// <summary>
       /// Write a command on the serial port
