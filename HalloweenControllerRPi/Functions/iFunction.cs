@@ -1,13 +1,14 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Device;
+using System;
 
 namespace HalloweenControllerRPi.Functions
 {
    /// <summary>
    /// Controller FUNCTION interface definition
    /// </summary>
-   internal interface iFunction
+   interface IFunction
    {
-      //Command FunctionKeyCommand { get; set; }
+      Command FunctionKeyCommand { get; set; }
 
       uint Duration_ms { get; set; }
       uint Delay_ms { get; set; }
@@ -18,7 +19,6 @@ namespace HalloweenControllerRPi.Functions
       EventHandler evOnDurationEnd { get; set; }
 
       bool boProcessRequest(char cFunc, char cFuncIndex, uint u32FuncValue);
-
       bool boCheckTriggerConditions(uint u32FuncValue);
    }
 }

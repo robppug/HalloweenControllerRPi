@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Device;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace HalloweenControllerRPi.Functions
       public Func_RELAY(IHostApp host, tenTYPE entype)
          : base(host, entype)
       {
-         //this.FunctionKeyCommand = new Command("RELAY", 'R');
+         FunctionKeyCommand = new Command("RELAY", 'R');
 
          evOnDelayEnd += OnTrigger;
          evOnDurationEnd += OnDurationEnd;

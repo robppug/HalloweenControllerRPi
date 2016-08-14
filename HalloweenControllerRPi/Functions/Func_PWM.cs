@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Device;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -49,7 +50,7 @@ namespace HalloweenControllerRPi.Functions
       {
          _Function = tenFUNCTION.FUNC_OFF;
 
-         //FunctionKeyCommand = new Command("PWM", 'T');
+         FunctionKeyCommand = new Command("PWM", 'T');
 
          evOnDelayEnd += OnTrigger;
          evOnDurationEnd += OnDurationEnd;

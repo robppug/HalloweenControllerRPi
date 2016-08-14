@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Device;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,7 +21,7 @@ namespace HalloweenControllerRPi.Functions
       public Func_INPUT(IHostApp host, tenTYPE entype)
          : base(host, entype)
       {
-         //FunctionKeyCommand = new Command("INPUT", 'I');
+         FunctionKeyCommand = new Command("INPUT", 'I');
 
          evOnTrigger += new EventHandler(OnTrigger);
       }

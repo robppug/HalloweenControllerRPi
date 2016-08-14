@@ -12,7 +12,7 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
+    <TargetPlatformMinVersion>10.0.10586.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -111,13 +111,17 @@
     </Compile>
     <Compile Include="Device\Command.cs" />
     <Compile Include="Device\CommandEventArgs.cs" />
-    <Compile Include="Device\Controller.cs" />
-    <Compile Include="Device\IController.cs" />
+    <Compile Include="Device\Controllers\HWSimulatedUI.xaml.cs">
+      <DependentUpon>HWSimulatedUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Device\HWInterface.cs" />
+    <Compile Include="Device\IHWInterface.cs" />
+    <Compile Include="FileHandler.cs" />
     <Compile Include="Functions\Function.cs" />
     <Compile Include="Functions\Func_INPUT.cs" />
     <Compile Include="Functions\Func_Relay.cs" />
     <Compile Include="Functions\Func_PWM.cs" />
-    <Compile Include="Functions\iFunction.cs" />
+    <Compile Include="Functions\IFunction.cs" />
     <Compile Include="Functions\GUI\Function_Button\Function_Button.xaml.cs">
       <DependentUpon>Function_Button.xaml</DependentUpon>
     </Compile>
@@ -134,7 +138,7 @@
     <Compile Include="Functions\GUI\Func_GUI\Func_Input_GUI.xaml.cs">
       <DependentUpon>Func_Input_GUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Functions\GUI\iFunctionGUI.cs" />
+    <Compile Include="Functions\GUI\IFunctionGUI.cs" />
     <Compile Include="IHostApp.cs" />
     <Compile Include="MainPage.xaml.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -173,6 +177,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Device\Controllers\HWSimulatedUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Functions\GUI\Function_Button\Function_Button.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -199,7 +207,6 @@
       <Name>Windows IoT Extensions for the UWP</Name>
     </SDKReference>
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

@@ -23,6 +23,9 @@ using Windows.UI.Xaml.Navigation;
 
 namespace HalloweenControllerRPi
 {
+   /// <summary>
+   /// Class handling the available FUNCTION GUI processes.
+   /// </summary>
    public partial class Function_Button : UserControl, IXmlSerializable
    {
       public Type GUIType;
@@ -42,10 +45,8 @@ namespace HalloweenControllerRPi
       /// <param name="guitype"></param>
       /// <param name="text"></param>
       /// <param name="color"></param>
-      public Function_Button(Type guitype, string text, Color color)
+      public Function_Button(Type guitype, string text, Color color) : this()
       {
-         InitializeComponent();
-
          GUIType = guitype;
 
          textBlock.Text = text;
@@ -74,37 +75,18 @@ namespace HalloweenControllerRPi
          //button_Function.Image = img;
       }
 
-      //private void Function_Button_MouseDown(object sender, MouseEventArgs e)
-      //{
-         //DataObject dataObj = new DataObject((sender as Function_Button));
-
-         //dataObj.SetData(typeof(Function_Button), sender);
-
-         //(sender as Function_Button).DoDragDrop(dataObj, DragDropEffects.Copy);
-      //}
-
-      //private void b_MouseDown(object sender, MouseEventArgs e)
-      //{
-         //if (e.Button == System.Windows.Forms.MouseButtons.Left)
-         //{
-         //   Function_Button b = (Function_Button)(sender as Button).Parent;
-
-         //   b.Parent.DoDragDrop(b, DragDropEffects.Copy);
-         //}
-      //}
-
       public System.Xml.Schema.XmlSchema GetSchema()
       {
          throw new NotImplementedException();
       }
 
-      public void ReadXml(XmlReader reader)
+      virtual public void ReadXml(XmlReader reader)
       {
          /* Load and process the data in the handling XML Reader */
          //(_funcGUI as IXmlSerializable).ReadXml(reader);
       }
 
-      public void WriteXml(XmlWriter writer)
+      virtual public void WriteXml(XmlWriter writer)
       {
          writer.WriteAttributeString("Type", GetType().ToString());
          writer.WriteAttributeString("Index", this.Index.ToString());

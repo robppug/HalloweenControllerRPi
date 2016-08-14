@@ -1,18 +1,21 @@
-﻿using HalloweenControllerRPi.Function_GUI;
+﻿using HalloweenControllerRPi.Device;
+using HalloweenControllerRPi.Device.Controllers;
+using HalloweenControllerRPi.Function_GUI;
+using HalloweenControllerRPi.Functions;
 using Microsoft.IoT.Lightning.Providers;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Devices;
 using Windows.Devices.Gpio;
+using Windows.Devices.Gpio.Provider;
 using Windows.Devices.I2c;
-using Windows.Devices.Pwm;
+using Windows.Devices.I2c.Provider;
+using Windows.Devices.Pwm.Provider;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using HalloweenControllerRPi.Device;
-using HalloweenControllerRPi.Functions;
-using System.Collections.Generic;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -21,9 +24,9 @@ namespace HalloweenControllerRPi
    /// <summary>
    /// An empty page that can be used on its own or navigated to within a Frame.
    /// </summary>
-   public sealed partial class MainPage : Page, IHostApp
+   public partial class MainPage : Page, IHostApp
    {
-      public List<Controller> lControllers;
+      public List<HWInterface> lHWInterfaces = new List<HWInterface>();
 
       private enum tenPWMChannel
       {
@@ -47,11 +50,9 @@ namespace HalloweenControllerRPi
 
       static public IHostApp HostApp;
 
-      static private GpioPin GPIO_4;
-      static private PwmPin PWM_4;
       static private Double pwmDutySetting;
       static private bool pwmToggle = false;
-      private static I2cDevice sensor;
+      private static I2cDevice device;
 
       private static byte[] bMODE1 = new byte[1] { 0x00 };
       private static byte[] bMODE2 = new byte[1] { 0x01 };
@@ -61,6 +62,7 @@ namespace HalloweenControllerRPi
       private static byte[] LED0_OFF_H = new byte[1] { 0x09 };
       static public Stopwatch sWatch;
       static public long TriggerTime;
+      public static MainPage Current;
 
       public MainPage()
       {
@@ -80,36 +82,61 @@ namespace HalloweenControllerRPi
          }
 
          this.Loaded += OnLoaded;
+         this.Unloaded += OnUnloaded;
+      }
+
+      private void OnUnloaded(object sender, RoutedEventArgs e)
+      {
+         if( lHWInterfaces.Count > 0 )
+         {
+            foreach( IHWInterface hw in lHWInterfaces)
+            {
+               hw.Disconnect();
+            }
+         }
       }
 
       private async void OnLoaded(object sender, RoutedEventArgs e)
       {
+         HWInterface HWDevice = new HWSimulated();
+
+         //HWDevice.CommandReceived += this.ev_CommandReceived_SerialPort;
+         //HWDevice.VersionInfoUpdated += this.ev_VersionInfoUpdated;
+         //HWDevice.FunctionAdded += this.ev_FunctionAdded;
+
+         HWDevice.Connect();
+         HWDevice.DevicePID = 0xAAAA;
+
+         lHWInterfaces.Add(HWDevice);
+
          //Setup the GPIO, PWM and I2C drivers
          if (LightningProvider.IsLightningEnabled)
          {
             LowLevelDevicesController.DefaultProvider = LightningProvider.GetAggregateProvider();
 
-            I2cController controller = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
             I2cConnectionSettings i2cSettings = new I2cConnectionSettings(0x40);
             i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
             i2cSettings.SharingMode = I2cSharingMode.Exclusive;
-            sensor = controller.GetDevice(i2cSettings);
+
+            I2cController i2cTest = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
+            
+            device = i2cTest.GetDevice(i2cSettings);
 
             textBox_GPIOStatus.Text = "GPIO pin initialized correctly.";
 
             byte[] buffer = new byte[10];
 
             /* Change to NORMAL mode */
-            sensor.Write(new byte[2] { 0x00, 0x00 });
+            device.Write(new byte[2] { 0x00, 0x00 });
 
             await Task.Delay(1);
 
             foreach (tenPWMChannel c in Enum.GetValues(typeof(tenPWMChannel)))
             {
-               sensor.Write(new byte[2] { (byte)(LED0_ON_L[0] + ((byte)c * 4)), 0x00 });
-               sensor.Write(new byte[2] { (byte)(LED0_ON_H[0] + ((byte)c * 4)), 0x00 });
-               sensor.Write(new byte[2] { (byte)(LED0_OFF_L[0] + ((byte)c * 4)), 0x00 });
-               sensor.Write(new byte[2] { (byte)(LED0_OFF_H[0] + ((byte)c * 4)), 0x00 });
+               device.Write(new byte[2] { (byte)(LED0_ON_L[0] + ((byte)c * 4)), 0x00 });
+               device.Write(new byte[2] { (byte)(LED0_ON_H[0] + ((byte)c * 4)), 0x00 });
+               device.Write(new byte[2] { (byte)(LED0_OFF_L[0] + ((byte)c * 4)), 0x00 });
+               device.Write(new byte[2] { (byte)(LED0_OFF_H[0] + ((byte)c * 4)), 0x00 });
             }
          }
 
@@ -150,8 +177,8 @@ namespace HalloweenControllerRPi
                      if (bPWMOutput > 4096)
                         bPWMOutput = 0;
 
-                     sensor.Write(new byte[2] { (byte)(LED0_ON_L[0] + ((byte)c * 4)), 0x00 });
-                     sensor.Write(new byte[2] { (byte)(LED0_ON_H[0] + ((byte)c * 4)), 0x00 });
+                     device.Write(new byte[2] { (byte)(LED0_ON_L[0] + ((byte)c * 4)), 0x00 });
+                     device.Write(new byte[2] { (byte)(LED0_ON_H[0] + ((byte)c * 4)), 0x00 });
 
                      uMax = bPWMOutput;
                      switch (c)
@@ -166,8 +193,8 @@ namespace HalloweenControllerRPi
                            break;
                      }
 
-                     sensor.Write(new byte[2] { (byte)(LED0_OFF_L[0] + ((byte)c * 4)), (byte)(uMax & 0xFF) });
-                     sensor.Write(new byte[2] { (byte)(LED0_OFF_H[0] + ((byte)c * 4)), (byte)((uMax >> 8) & 0xFF) });
+                     device.Write(new byte[2] { (byte)(LED0_OFF_L[0] + ((byte)c * 4)), (byte)(uMax & 0xFF) });
+                     device.Write(new byte[2] { (byte)(LED0_OFF_H[0] + ((byte)c * 4)), (byte)((uMax >> 8) & 0xFF) });
                   }
                }
             }
@@ -211,22 +238,43 @@ namespace HalloweenControllerRPi
 
       public void FireCommand(string cmd)
       {
-         throw new NotImplementedException();
+         lHWInterfaces[0].FireCommand(cmd);
       }
 
       public string BuildCommand(string function, string subFunc, params string[] data)
       {
-         throw new NotImplementedException();
+         return lHWInterfaces[0].BuildCommand(function, subFunc, data);
       }
 
       public List<Command> GetSubFunctionCommandsList(Command functionKey)
       {
-         throw new NotImplementedException();
+         List<Command> availableSubFuncCommands = null;
+
+         foreach (Command c in lHWInterfaces[0].Commands.Keys)
+         {
+            if (c.Key == functionKey.Key)
+            {
+               availableSubFuncCommands = lHWInterfaces[0].Commands[c];
+               break;
+            }
+         }
+
+         return availableSubFuncCommands;
       }
 
       public void TriggerEnd(Function func)
       {
-         throw new NotImplementedException();
+         //throw new NotImplementedException();
+      }
+
+      private void buttonStart_Click(object sender, RoutedEventArgs e)
+      {
+         groupContainer_AlwaysActive.ProcessAlwaysActives(true);
+      }
+
+      private void buttonStop_Click(object sender, RoutedEventArgs e)
+      {
+         groupContainer_AlwaysActive.ProcessAlwaysActives(false);
       }
    }
 }

@@ -13,7 +13,7 @@ namespace HalloweenControllerRPi.Device
 
       public Command() { }
 
-      public /*protected*/ Command(string key, char value)
+      public Command(string key, char value)
       {
          this.Key = key;
          this.Value = value;

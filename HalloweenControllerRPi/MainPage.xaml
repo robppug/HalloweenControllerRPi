@@ -76,8 +76,8 @@
             <Border BorderBrush="Black" BorderThickness="2" HorizontalAlignment="Stretch">
                <Grid x:Name="gridAlwaysActives" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                   <Container:GroupContainer x:Name="groupContainer_AlwaysActive" VerticalAlignment="Top" FuncAlwaysActive="True" AllowDrop="True" HorizontalContentAlignment="Stretch" Margin="0,0,72,0" Height="462"/>
-                  <Button x:Name="buttonStart" Content="START" HorizontalAlignment="Right" VerticalAlignment="Top" Width="72"/>
-                  <Button x:Name="buttonStop" Content="STOP" HorizontalAlignment="Right" Margin="1184,32,0,0" VerticalAlignment="Top" Width="72"/>
+                  <Button x:Name="buttonStart" Content="START" HorizontalAlignment="Right" VerticalAlignment="Top" Width="72" Click="buttonStart_Click"/>
+                  <Button x:Name="buttonStop" Content="STOP" HorizontalAlignment="Right" Margin="1184,32,0,0" VerticalAlignment="Top" Width="72" Click="buttonStop_Click"/>
                </Grid>
             </Border>
          </PivotItem>

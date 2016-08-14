@@ -16,7 +16,7 @@ namespace HalloweenControllerRPi.Functions
       List<char> SerializeSequence();
    }
 
-   abstract public class Function : iFunction, IXmlSerializable, ISerializableSequence
+   abstract public class Function : IFunction, IXmlSerializable, ISerializableSequence
    {
       public enum tenTYPE
       {
@@ -35,20 +35,18 @@ namespace HalloweenControllerRPi.Functions
 
       private DispatcherTimer _timerDuration;
       private DispatcherTimer _timerDelay;
-      //private System.Timers.Timer _timerDuration;
-      //private System.Timers.Timer _timerDelay;
-
+ 
       private EventHandler _evOnTrigger;
       private EventHandler _evOnDelayEnd;
       private EventHandler _evOnDurationEnd;
 
       public Type FuncButtonType;
-
+      
       public class ProcessFunctionArgs : EventArgs
       {
-         char _cFunc;
-         char _cFuncIndex;
-         uint _u32FuncValue;
+         char  _cFunc;
+         char  _cFuncIndex;
+         uint  _u32FuncValue;
 
          public ProcessFunctionArgs(char cFunc, char cFuncIndex, uint u32FuncValue)
          {
@@ -58,7 +56,7 @@ namespace HalloweenControllerRPi.Functions
          }
       }
 
-      public Function()
+      public Function() 
       {
          _Data = new List<char>();
       }
@@ -70,17 +68,11 @@ namespace HalloweenControllerRPi.Functions
 
          _timerDuration = new DispatcherTimer();
          _timerDuration.Interval = new TimeSpan(this._Duration_ms * 100);
-         //_timerDuration = new System.Timers.Timer();
          _timerDuration.Tick += ev_TimerTick_Duration;
-         //_timerDuration.Elapsed += ev_TimerTick_Duration;
-         //_timerDuration.AutoReset = false;
 
          _timerDelay = new DispatcherTimer();
          _timerDelay.Interval = new TimeSpan(this.Delay_ms * 100);
-         //_timerDelay = new System.Timers.Timer();
          _timerDelay.Tick += ev_TimerTick_Delay;
-         //_timerDelay.Elapsed += ev_TimerTick_Delay;
-         //_timerDelay.AutoReset = false;
 
          _evOnTrigger += ev_OnTrigger;
       }
@@ -136,7 +128,9 @@ namespace HalloweenControllerRPi.Functions
       void vSetTimerInterval(DispatcherTimer t, uint value)
       {
          if (value > 0)
+         {
             t.Interval = new TimeSpan(value);
+         }
       }
 
       /// <summary>
@@ -191,9 +185,11 @@ namespace HalloweenControllerRPi.Functions
       {
          /* Check if the HOST (base) form has a callback configured */
          if (this._HostApp != null)
+         {
             this._HostApp.TriggerEnd(func);
+         }
       }
-
+      
       /// <summary>
       /// Processes Trigger EVENTs (Serial, Other)
       /// </summary>
@@ -204,7 +200,9 @@ namespace HalloweenControllerRPi.Functions
       virtual public bool boProcessRequest(char cFunc, char cFuncIndex, uint u32FuncValue)
       {
          if (evOnTrigger != null)
+         {
             evOnTrigger.Invoke(this, new ProcessFunctionArgs(cFunc, cFuncIndex, u32FuncValue));
+         }
 
          return true;
       }
@@ -212,7 +210,9 @@ namespace HalloweenControllerRPi.Functions
       public void vStopFunction(char cFunc, char cFuncIndex, uint u32FuncValue)
       {
          if (evOnDurationEnd != null)
+         {
             evOnDurationEnd.Invoke(this, new ProcessFunctionArgs(cFunc, cFuncIndex, u32FuncValue));
+         }
       }
 
       /// <summary>
@@ -300,7 +300,7 @@ namespace HalloweenControllerRPi.Functions
 
       virtual public void ReadXml(System.Xml.XmlReader reader)
       {
-
+         
       }
 
       virtual public void WriteXml(System.Xml.XmlWriter writer)

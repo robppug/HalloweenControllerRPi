@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Xml.Serialization;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -24,7 +25,10 @@ using Windows.UI.Xaml.Navigation;
 
 namespace HalloweenControllerRPi.Container
 {
-   public sealed partial class GroupContainerTriggered : UserControl
+   /// <summary>
+   ///  Class which defines the handling of a TRIGGER GROUP of FUNCTIONS.
+   /// </summary>
+   public sealed partial class GroupContainerTriggered : UserControl, IXmlSerializable
    {
       public uint GroupIndex
       {
@@ -53,6 +57,11 @@ namespace HalloweenControllerRPi.Container
          this.DragEnter += this.Panel_DragEnter;
       }
 
+      /// <summary>
+      /// Function_Button ADD handling (via Drag)
+      /// </summary>
+      /// <param name="sender"></param>
+      /// <param name="e"></param>
       private async void Panel_DragDrop(object sender, DragEventArgs e)
       {
          Control FuncGUI;
@@ -80,13 +89,14 @@ namespace HalloweenControllerRPi.Container
                   /* Check if the dragged Function_Button has a count restriction. */
                   if (onlyOne == true)
                   {
-                     foreach (UIElement c in (sender as GroupContainerTriggered).Container.Children)
+                     foreach (Control c in (sender as GroupContainerTriggered).Container.Children)
                      {
                         if (c is Func_Input_GUI)
                            return;
                      }
                   }
 
+                  //RPUGLIESE - TODO
                   /* If Function Button is not STATIC, remove from sending flow panel (availables). */
                   //if (draggedItem.IsRemoveable == true)
                   //   draggedItem.Dispose();
@@ -126,7 +136,7 @@ namespace HalloweenControllerRPi.Container
                /* Check if the dragged Function_Button has a count restriction. */
                if (onlyOne == true)
                {
-                  foreach (UIElement c in (sender as GroupContainerTriggered).Container.Children)
+                  foreach (Control c in (sender as GroupContainerTriggered).Container.Children)
                   {
                      if (c is Func_Input_GUI)
                      {
@@ -154,7 +164,7 @@ namespace HalloweenControllerRPi.Container
       {
          bool boValidTrigger = false;
 
-         foreach (UIElement f in this.Container.Children)
+         foreach (Control f in Container.Children)
          {
             /* Triggered - Compare triggering INPUT to assigned FUNCTION INPUTS and execute TRIGGER on matching INPUT number */
             if (f is Func_Input_GUI)
@@ -172,7 +182,7 @@ namespace HalloweenControllerRPi.Container
             this.imageTrigger.Source = new BitmapImage(new Uri("ms-appx:///Assets/trigger.png"));
 
             /* Trigger each FUNCTION within the Active Group */
-            foreach (UIElement c in this.Container.Children)
+            foreach (Control c in Container.Children)
             {
                TriggerFunctions(c);
             }
@@ -185,7 +195,7 @@ namespace HalloweenControllerRPi.Container
       /// Processes handling of assigned functions on detection of TRIGGER event.
       /// </summary>
       /// <param name="c">Triggering FUNCTION.</param>
-      private void TriggerFunctions(UIElement c)
+      private void TriggerFunctions(Control c)
       {
          if (c is IFunctionGUI)
          {
@@ -193,8 +203,83 @@ namespace HalloweenControllerRPi.Container
          }
          else
          {
+		      //RPUGLIESE - TODO
             //foreach (UIElement sub in c.Controls)
-            //   TriggerFunctions(sub);
+            //   TriggerFunctions(c);
+         }
+      }
+
+      /// <summary>
+      /// Handling of Trigger End event callback from ending FUNCTION.
+      /// </summary>
+      /// <param name="func"></param>
+      public void TriggerEnd(Function func)
+      {
+         /* Go through all Panel Group controls and check if control of used functions has completed */
+         foreach (Control c in Container.Children)
+         {
+            if (c is IFunctionGUI)
+            {
+               if ((c as IFunctionGUI).Func == func)
+               {
+                  this.imageTrigger.Source = null;
+               }
+            }
+         }
+      }
+
+      public System.Xml.Schema.XmlSchema GetSchema()
+      {
+         throw new NotImplementedException();
+      }
+
+      public void ReadXml(System.Xml.XmlReader reader)
+      {
+         throw new NotImplementedException();
+      }
+
+      public void WriteXml(System.Xml.XmlWriter writer)
+      {
+         foreach (Control c in Container.Children)
+         {
+            if (c is IFunctionGUI)
+            {
+               /* Store the FUNCTION type */
+               writer.WriteStartElement("Function", (c as IFunctionGUI).Func.GetType().ToString());
+
+               if (c is IXmlSerializable)
+                  (c as IXmlSerializable).WriteXml(writer);
+
+               writer.WriteEndElement();
+            }
+         }
+      }
+
+      public void AddFunctionToGroup(Control ctl)
+      {
+         //Function_Button funcButton;
+
+         if (ctl is IFunctionGUI)
+         {
+            /* Create and instance of the Function_Button */
+            //funcButton = (Function_Button)Activator.CreateInstance(  (ctl as IFunctionGUI).Func.FuncButtonType, 
+            //                                                         (ctl as IFunctionGUI).Func.Index, 
+            //                                                         Function.tenTYPE.TYPE_TRIGGER);
+
+            //funcButton.Height = ctl.Height;
+
+            /* Add the Function_Button and FUNCTION_GUI to the group Panel */
+            //Panel.Controls.Add(funcButton);
+
+            Container.Children.Add(ctl);
+
+            //this.Panel.SetFlowBreak(ctl, true);
+
+            //Panel.AutoSize = true;
+         }
+         else
+         {
+            throw new Exception("Only controls of type IFunctionGUI can be added.");
          }
       }
    }

@@ -11,7 +11,6 @@ namespace HalloweenControllerRPi.Function_GUI
    public sealed partial class Func_Input_GUI : UserControl, IXmlSerializable, IFunctionGUI
    {
       private Func_INPUT _Func;
-      private bool _boInitialised = false;
 
       public Function Func
       {
@@ -22,8 +21,6 @@ namespace HalloweenControllerRPi.Function_GUI
       public Func_Input_GUI()
       {
          this.InitializeComponent();
-
-         _boInitialised = true;
       }
 
       public Func_Input_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
