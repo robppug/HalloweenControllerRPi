@@ -269,6 +269,12 @@ namespace HalloweenControllerRPi
          groupContainer_AlwaysActive.ProcessAlwaysActives(false);
       }
 
-
+      private void DragItemsStarting(object sender, DragItemsStartingEventArgs e)
+      {
+         foreach(Function_Button c in e.Items)
+         {
+            c.textBlock_DragStarting(sender, e);
+         }
+      }
    }
 }

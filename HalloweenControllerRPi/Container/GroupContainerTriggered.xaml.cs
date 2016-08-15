@@ -89,7 +89,7 @@ namespace HalloweenControllerRPi.Container
                   /* Check if the dragged Function_Button has a count restriction. */
                   if (onlyOne == true)
                   {
-                     foreach (Control c in (sender as GroupContainerTriggered).Container.Children)
+                     foreach (UIElement c in Container.Children)
                      {
                         if (c is Func_Input_GUI)
                            return;
@@ -125,10 +125,10 @@ namespace HalloweenControllerRPi.Container
       /// <param name="e"></param>
       private async void Panel_DragEnter(object sender, DragEventArgs e)
       {
-         var items = await e.DataView.GetTextAsync("Type");
+         if (e.DataView.Contains("Type"))
+         { 
+            var items = await e.DataView.GetTextAsync("Type");
 
-         if (items != null)
-         {
             if (Type.GetType(items).GetTypeInfo().IsSubclassOf(typeof(Function_Button)))
             {
                bool onlyOne = (bool)await e.DataView.GetDataAsync("OnlyOne");
@@ -136,14 +136,12 @@ namespace HalloweenControllerRPi.Container
                /* Check if the dragged Function_Button has a count restriction. */
                if (onlyOne == true)
                {
-                  foreach (Control c in (sender as GroupContainerTriggered).Container.Children)
+                  foreach (UIElement c in Container.Children)
                   {
                      if (c is Func_Input_GUI)
                      {
-                        e.DragUIOverride.Caption = "Input already assigned...";
-                        e.DragUIOverride.IsCaptionVisible = true;
+                        e.AcceptedOperation = DataPackageOperation.None;
                         return;
-
                      }
                   }
                }
@@ -164,7 +162,7 @@ namespace HalloweenControllerRPi.Container
       {
          bool boValidTrigger = false;
 
-         foreach (Control f in Container.Children)
+         foreach (UIElement f in Container.Children)
          {
             /* Triggered - Compare triggering INPUT to assigned FUNCTION INPUTS and execute TRIGGER on matching INPUT number */
             if (f is Func_Input_GUI)
@@ -182,7 +180,7 @@ namespace HalloweenControllerRPi.Container
             this.imageTrigger.Source = new BitmapImage(new Uri("ms-appx:///Assets/trigger.png"));
 
             /* Trigger each FUNCTION within the Active Group */
-            foreach (Control c in Container.Children)
+            foreach (UIElement c in Container.Children)
             {
                TriggerFunctions(c);
             }
@@ -216,7 +214,7 @@ namespace HalloweenControllerRPi.Container
       public void TriggerEnd(Function func)
       {
          /* Go through all Panel Group controls and check if control of used functions has completed */
-         foreach (Control c in Container.Children)
+         foreach (UIElement c in Container.Children)
          {
             if (c is IFunctionGUI)
             {

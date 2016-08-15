@@ -94,18 +94,13 @@ namespace HalloweenControllerRPi
          //(_funcGUI as IXmlSerializable).WriteXml(writer);
       }
 
-      private void textBlock_DragStarting(UIElement sender, DragStartingEventArgs args)
+      internal void textBlock_DragStarting(object sender, DragItemsStartingEventArgs args)
       {
-         if (sender == this.textBlock)
-         {
-            args.DragUI.SetContentFromDataPackage();
-            args.Data.RequestedOperation = DataPackageOperation.Copy;
-
-            args.Data.SetData("Type", this.GetType().ToString());
-            args.Data.SetData("Index", this.Index);
-            args.Data.SetData("OnlyOne", this.OneOnly);
-            args.Data.SetData("IsRemovable", this.IsRemoveable);
-         }
+         args.Data.RequestedOperation = DataPackageOperation.Copy;
+         args.Data.SetData("Type", this.GetType().ToString());
+         args.Data.SetData("Index", this.Index);
+         args.Data.SetData("OnlyOne", this.OneOnly);
+         args.Data.SetData("IsRemovable", this.IsRemoveable);
       }
    }
 }

@@ -130,9 +130,11 @@ namespace HalloweenControllerRPi.Container
 
             if (items.ToString() != typeof(Function_Button_INPUT).ToString())
             {
-               e.DragUIOverride.Caption = "Add to Always Active Group...";
-               e.DragUIOverride.IsCaptionVisible = true;
                e.AcceptedOperation = DataPackageOperation.Copy;
+            }
+            else
+            {
+               e.AcceptedOperation = DataPackageOperation.None;
             }
          }
       }

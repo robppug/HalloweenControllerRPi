@@ -4,14 +4,21 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="using:HalloweenControllerRPi"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DesignWidth="30"
              d:DesignHeight="120"
-             mc:Ignorable="d" 
-             UseLayoutRounding="True">
+             d:DesignWidth="30"
+             UseLayoutRounding="True"
+             mc:Ignorable="d">
    <Grid Background="LightSlateGray">
-      <TextBlock x:Name="textBlock" Text="FUNCTION" Margin="-45,45,-45,45" TextAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled" FontWeight="Bold" UseLayoutRounding="True" RenderTransformOrigin="0.5,0.5" DragStarting="textBlock_DragStarting" CanDrag="True">
+      <TextBlock x:Name="textBlock"
+                 Margin="-45,45,-45,45"
+                 FontWeight="Bold"
+                 RenderTransformOrigin="0.5,0.5"
+                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                 Text="FUNCTION"
+                 TextAlignment="Center"
+                 UseLayoutRounding="True">
          <TextBlock.RenderTransform>
-            <CompositeTransform Rotation="-90"/>
+            <CompositeTransform Rotation="-90" />
          </TextBlock.RenderTransform>
       </TextBlock>
    </Grid>
