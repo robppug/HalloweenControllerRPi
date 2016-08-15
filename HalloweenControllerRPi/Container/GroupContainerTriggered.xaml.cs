@@ -180,9 +180,10 @@ namespace HalloweenControllerRPi.Container
             this.imageTrigger.Source = new BitmapImage(new Uri("ms-appx:///Assets/trigger.png"));
 
             /* Trigger each FUNCTION within the Active Group */
-            foreach (UIElement c in Container.Children)
+            foreach(UIElement c in Container.Children)
             {
-               TriggerFunctions(c);
+               if(c is IFunctionGUI)
+                  TriggerFunctions(c as IFunctionGUI);
             }
          }
 
@@ -193,18 +194,9 @@ namespace HalloweenControllerRPi.Container
       /// Processes handling of assigned functions on detection of TRIGGER event.
       /// </summary>
       /// <param name="c">Triggering FUNCTION.</param>
-      private void TriggerFunctions(Control c)
+      private void TriggerFunctions(IFunctionGUI c)
       {
-         if (c is IFunctionGUI)
-         {
-            (c as IFunctionGUI).Func.boProcessRequest((char)0, (char)0, (uint)0);
-         }
-         else
-         {
-		      //RPUGLIESE - TODO
-            //foreach (UIElement sub in c.Controls)
-            //   TriggerFunctions(c);
-         }
+         c.Func.boProcessRequest((char)0, (char)0, (uint)0);
       }
 
       /// <summary>
@@ -221,6 +213,7 @@ namespace HalloweenControllerRPi.Container
                if ((c as IFunctionGUI).Func == func)
                {
                   this.imageTrigger.Source = null;
+                  return;
                }
             }
          }

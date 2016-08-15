@@ -67,12 +67,12 @@ namespace HalloweenControllerRPi.Functions
          _enType = entype;
 
          _timerDuration = new DispatcherTimer();
-         _timerDuration.Interval = new TimeSpan(this._Duration_ms * 100);
          _timerDuration.Tick += ev_TimerTick_Duration;
+         this.vSetTimerInterval(_timerDuration, this._Duration_ms);
 
          _timerDelay = new DispatcherTimer();
-         _timerDelay.Interval = new TimeSpan(this.Delay_ms * 100);
          _timerDelay.Tick += ev_TimerTick_Delay;
+         this.vSetTimerInterval(_timerDelay, this._Delay_ms);
 
          _evOnTrigger += ev_OnTrigger;
       }
@@ -129,7 +129,7 @@ namespace HalloweenControllerRPi.Functions
       {
          if (value > 0)
          {
-            t.Interval = new TimeSpan(value);
+            t.Interval = TimeSpan.FromMilliseconds(value);
          }
       }
 

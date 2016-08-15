@@ -114,6 +114,7 @@
     <Compile Include="Device\Controllers\HWSimulatedUI.xaml.cs">
       <DependentUpon>HWSimulatedUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Device\Controllers\HWSimulated.cs" />
     <Compile Include="Device\HWInterface.cs" />
     <Compile Include="Device\IHWInterface.cs" />
     <Compile Include="FileHandler.cs" />

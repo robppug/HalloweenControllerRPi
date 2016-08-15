@@ -180,8 +180,7 @@ namespace HalloweenControllerRPi.Container
             }
             else if(f is GroupContainerTriggered)
             {
-               //RPUGLIESE - TODO
-               //(f as GroupContainerTriggered).TriggerEnd(func);
+               (f as GroupContainerTriggered).TriggerEnd(func);
             }
          }
       }

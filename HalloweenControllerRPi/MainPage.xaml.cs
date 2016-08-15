@@ -1,4 +1,5 @@
-﻿using HalloweenControllerRPi.Device;
+﻿using HalloweenControllerRPi.Container;
+using HalloweenControllerRPi.Device;
 using HalloweenControllerRPi.Device.Controllers;
 using HalloweenControllerRPi.Function_GUI;
 using HalloweenControllerRPi.Functions;
@@ -109,6 +110,11 @@ namespace HalloweenControllerRPi
 
          lHWInterfaces.Add(HWDevice);
 
+         if (HWDevice.GetUIPanel() != null)
+         {
+            HWSimulatedGrid.Items.Add(HWDevice.GetUIPanel());
+         }
+
          //Setup the GPIO, PWM and I2C drivers
          if (LightningProvider.IsLightningEnabled)
          {
@@ -138,15 +144,15 @@ namespace HalloweenControllerRPi
             }
 
             pwmDutySetting = 0.8;
+
+            //Create the Background Task
+            TaskFactory tTaskFactory = new TaskFactory(TaskScheduler.Current);
+
+            sWatch = new Stopwatch();
+            sWatch.Start();
+
+            await tTaskFactory.StartNew(new Action(DoStuff), TaskCreationOptions.PreferFairness);
          }
-
-         //Create the Background Task
-         TaskFactory tTaskFactory = new TaskFactory(TaskScheduler.Current);
-
-         sWatch = new Stopwatch();
-         sWatch.Start();
-
-         await tTaskFactory.StartNew(new Action(DoStuff), TaskCreationOptions.PreferFairness);
       }
       
       private static uint bPWMOutput = 0;
@@ -256,7 +262,10 @@ namespace HalloweenControllerRPi
 
       public void TriggerEnd(Function func)
       {
-         //throw new NotImplementedException();
+         groupContainer_Trigged.TriggerEnd(func);
+
+         /* Go through all Always Actives and check if control of used functions has completed */
+         groupContainer_AlwaysActive.TriggerEnd(func);
       }
 
       private void buttonStart_Click(object sender, RoutedEventArgs e)
@@ -266,6 +275,8 @@ namespace HalloweenControllerRPi
 
       private void buttonStop_Click(object sender, RoutedEventArgs e)
       {
+         TriggerEnd(new Func_INPUT());
+
          groupContainer_AlwaysActive.ProcessAlwaysActives(false);
       }
 
@@ -273,8 +284,9 @@ namespace HalloweenControllerRPi
       {
          foreach(Function_Button c in e.Items)
          {
-            c.textBlock_DragStarting(sender, e);
+            c.OnDragStarting(sender, e);
          }
       }
+
    }
 }

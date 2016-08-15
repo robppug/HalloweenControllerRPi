@@ -94,7 +94,7 @@ namespace HalloweenControllerRPi
          //(_funcGUI as IXmlSerializable).WriteXml(writer);
       }
 
-      internal void textBlock_DragStarting(object sender, DragItemsStartingEventArgs args)
+      internal void OnDragStarting(object sender, DragItemsStartingEventArgs args)
       {
          args.Data.RequestedOperation = DataPackageOperation.Copy;
          args.Data.SetData("Type", this.GetType().ToString());

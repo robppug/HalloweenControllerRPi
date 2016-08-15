@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI.Xaml.Controls;
 
 namespace HalloweenControllerRPi.Device
 {
@@ -101,5 +102,10 @@ namespace HalloweenControllerRPi.Device
       /// <param name="data"></param>
       /// <returns></returns>
       public abstract bool ProcessCommandRecieved(List<char> data);
+
+      public virtual UserControl GetUIPanel()
+      {
+         return null;
+      }
    }
 }

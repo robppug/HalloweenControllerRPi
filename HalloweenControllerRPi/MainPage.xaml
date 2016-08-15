@@ -26,7 +26,7 @@
                    DragItemsStarting="DragItemsStarting"
                    ScrollViewer.VerticalScrollBarVisibility="Disabled" />
       </Border>
-      <Border Width="620"
+      <Border Width="400"
               Height="150"
               Margin="650,42,0,0"
               HorizontalAlignment="Left"
@@ -34,12 +34,26 @@
               BorderBrush="Black"
               BorderThickness="2">
          <GridView x:Name="Available_Statics"
-                   Width="620"
+                   Width="400"
                    Height="150"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    CanDragItems="True"
                    DragItemsStarting="DragItemsStarting"
+                   ScrollViewer.VerticalScrollBarVisibility="Disabled" />
+      </Border>
+      <Border Width="460"
+              Height="150"
+              Margin="1050,42,0,0"
+              HorizontalAlignment="Left"
+              VerticalAlignment="Top"
+              BorderBrush="Black"
+              BorderThickness="2">
+         <GridView x:Name="HWSimulatedGrid"
+                   Width="460"
+                   Height="150"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
                    ScrollViewer.VerticalScrollBarVisibility="Disabled" />
       </Border>
       <Pivot x:Name="pivotContainer"
@@ -81,7 +95,8 @@
                </Grid>
             </Border>
          </PivotItem>
-         <PivotItem Margin="0,0,0,0"
+         <PivotItem x:Name="pivotItemContainerTriggered"
+                    Margin="0,0,0,0"
                     FontSize="10"
                     Header="Triggered">
             <Border BorderBrush="Black" BorderThickness="2">
@@ -111,5 +126,6 @@
             </Border>
          </PivotItem>
       </Pivot>
+      <Button x:Name="buttonLoadSequence" Content="Button" HorizontalAlignment="Left" Height="27" Margin="10,10,0,0" VerticalAlignment="Top" Width="74" Click="buttonLoadSequence_Click"/>
    </Grid>
 </Page>
