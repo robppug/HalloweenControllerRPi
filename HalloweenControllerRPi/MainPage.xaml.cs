@@ -122,8 +122,6 @@ namespace HalloweenControllerRPi
             
             device = i2cTest.GetDevice(i2cSettings);
 
-            textBox_GPIOStatus.Text = "GPIO pin initialized correctly.";
-
             byte[] buffer = new byte[10];
 
             /* Change to NORMAL mode */
@@ -138,6 +136,8 @@ namespace HalloweenControllerRPi
                device.Write(new byte[2] { (byte)(LED0_OFF_L[0] + ((byte)c * 4)), 0x00 });
                device.Write(new byte[2] { (byte)(LED0_OFF_H[0] + ((byte)c * 4)), 0x00 });
             }
+
+            pwmDutySetting = 0.8;
          }
 
          //Create the Background Task
@@ -148,7 +148,7 @@ namespace HalloweenControllerRPi
 
          await tTaskFactory.StartNew(new Action(DoStuff), TaskCreationOptions.PreferFairness);
       }
-
+      
       private static uint bPWMOutput = 0;
 
       private void DoStuff()
@@ -199,14 +199,6 @@ namespace HalloweenControllerRPi
                }
             }
          }
-      }
-
-      private void LedBrightness_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-      {
-         pwmDutySetting = ledBrightness.Value * .01;
-         if (this.ledPercent != null)
-            this.ledPercent.Text = pwmDutySetting.ToString() + "%";
-         pwmToggle = true;
       }
 
       private void pivotContainer_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -276,5 +268,7 @@ namespace HalloweenControllerRPi
       {
          groupContainer_AlwaysActive.ProcessAlwaysActives(false);
       }
+
+
    }
 }

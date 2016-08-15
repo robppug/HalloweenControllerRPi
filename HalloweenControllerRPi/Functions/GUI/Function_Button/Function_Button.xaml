@@ -9,7 +9,7 @@
              mc:Ignorable="d" 
              UseLayoutRounding="True">
    <Grid Background="LightSlateGray">
-      <TextBlock x:Name="textBlock" Text="FUNCTION" Margin="-45,45,-45,45" TextAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled" CanDrag="True" FontWeight="Bold" DragStarting="textBlock_DragStarting" UseLayoutRounding="True" RenderTransformOrigin="0.5,0.5">
+      <TextBlock x:Name="textBlock" Text="FUNCTION" Margin="-45,45,-45,45" TextAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled" FontWeight="Bold" UseLayoutRounding="True" RenderTransformOrigin="0.5,0.5" DragStarting="textBlock_DragStarting" CanDrag="True">
          <TextBlock.RenderTransform>
             <CompositeTransform Rotation="-90"/>
          </TextBlock.RenderTransform>

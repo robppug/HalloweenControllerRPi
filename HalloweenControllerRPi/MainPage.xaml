@@ -9,73 +9,17 @@
       mc:Ignorable="d">
 
    <Grid Margin="0,0,0,10" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-      <GridView x:Name="Available_Board"
-			Width="640"
-			Height="150"
-			Margin="10,42,0,0"
-			HorizontalAlignment="Left"
-			VerticalAlignment="Top"
-         ScrollViewer.VerticalScrollBarVisibility="Disabled"
-			AllowDrop="True"
-			CanDragItems="True" />
-      <Border Width="640"
-			Height="150"
-			Margin="10,42,0,0"
-			HorizontalAlignment="Left"
-			VerticalAlignment="Top"
-			BorderBrush="Black"
-			BorderThickness="2" ScrollViewer.VerticalScrollBarVisibility="Disabled" />
-      <GridView x:Name="Available_Statics"
-			Width="620"
-			Height="150"
-			Margin="650,42,0,0"
-			HorizontalAlignment="Left"
-			VerticalAlignment="Top"
-         ScrollViewer.VerticalScrollBarVisibility="Disabled"
-			AllowDrop="True"
-			CanDragItems="True" />
-      <Border Width="620"
-			Height="150"
-			Margin="650,42,0,0"
-			HorizontalAlignment="Left"
-			VerticalAlignment="Top"
-			BorderBrush="Black"
-			BorderThickness="2" />
-      <TextBox x:Name="textBox_GPIOStatus"
-			Width="1260"
-			Height="22"
-			Margin="10,10,0,0"
-			HorizontalAlignment="Left"
-			VerticalAlignment="Top"
-			Background="Black"
-			BorderBrush="Black"
-			FontSize="16"
-			Foreground="White"
-			Text="Waiting to initialize GPIO..."
-			TextWrapping="Wrap" />
-      <Slider x:Name="ledBrightness"
-			Margin="25,334,0,702"
-			VerticalAlignment="Center"
-			Maximum="100"
-			Minimum="0.1"
-			SmallChange="0.1"
-			ValueChanged="LedBrightness_ValueChanged"
-			Value="50" HorizontalAlignment="Left" Width="1865" />
-      <TextBlock x:Name="ledPercent"
-			Width="142"
-			Margin="25,299,1753,739"
-			HorizontalAlignment="Center"
-			FontSize="26.667"
-			FontWeight="Bold"
-			Foreground="Black"
-			SelectionHighlightColor="{x:Null}">
-			<Run Text="0%" />
-      </TextBlock>
-      <Pivot x:Name="pivotContainer" Margin="10,196,10,0" SelectionChanged="pivotContainer_SelectionChanged" VerticalAlignment="Top" HorizontalAlignment="Stretch" Width="Auto" FontSize="10">
+      <Border Width="640" Height="150" Margin="10,42,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="2" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+         <GridView x:Name="Available_Board" Width="640" Height="150" HorizontalAlignment="Left" VerticalAlignment="Top" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+      </Border>
+      <Border Width="620" Height="150" Margin="650,42,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="2">
+         <GridView x:Name="Available_Statics" Width="620" Height="150" HorizontalAlignment="Left" VerticalAlignment="Top" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+      </Border>
+      <Pivot x:Name="pivotContainer" Margin="10,196,10,0" SelectionChanged="pivotContainer_SelectionChanged" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="Auto" FontSize="10">
          <PivotItem x:Name="pivotItemContainer" Margin="0,0,0,0" Header="Always Active" FontSize="10">
             <Border BorderBrush="Black" BorderThickness="2" HorizontalAlignment="Stretch">
                <Grid x:Name="gridAlwaysActives" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                  <Container:GroupContainer x:Name="groupContainer_AlwaysActive" VerticalAlignment="Top" FuncAlwaysActive="True" AllowDrop="True" HorizontalContentAlignment="Stretch" Margin="0,0,72,0" Height="462"/>
+                  <Container:GroupContainer x:Name="groupContainer_AlwaysActive" VerticalAlignment="Stretch" FuncAlwaysActive="True" AllowDrop="True" HorizontalContentAlignment="Stretch" Margin="0,0,72,0"/>
                   <Button x:Name="buttonStart" Content="START" HorizontalAlignment="Right" VerticalAlignment="Top" Width="72" Click="buttonStart_Click"/>
                   <Button x:Name="buttonStop" Content="STOP" HorizontalAlignment="Right" Margin="1184,32,0,0" VerticalAlignment="Top" Width="72" Click="buttonStop_Click"/>
                </Grid>
@@ -84,7 +28,7 @@
          <PivotItem Margin="0,0,0,0" Header="Triggered" FontSize="10">
             <Border BorderBrush="Black" BorderThickness="2">
                <Grid x:Name="gridTriggered" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                  <Container:GroupContainer x:Name="groupContainer_Trigged" VerticalAlignment="Top" FuncAlwaysActive="False" AllowDrop="True" HorizontalContentAlignment="Stretch" Margin="0,0,72,0" Height="462"/>
+                  <Container:GroupContainer x:Name="groupContainer_Trigged" VerticalAlignment="Stretch" FuncAlwaysActive="False" AllowDrop="True" HorizontalContentAlignment="Stretch" Margin="0,0,72,0"/>
                   <Button x:Name="buttonAdd" Content="ADD" HorizontalAlignment="Right" VerticalAlignment="Top" Width="72" Click="buttonAdd_Click"/>
                   <Button x:Name="buttonTrigger" Content="FIRE" HorizontalAlignment="Right" Margin="1184,32,0,0" VerticalAlignment="Top" Width="72" Click="buttonTrigger_Click"/>
                </Grid>
