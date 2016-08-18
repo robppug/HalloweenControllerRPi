@@ -126,6 +126,7 @@
             </Border>
          </PivotItem>
       </Pivot>
-      <Button x:Name="buttonLoadSequence" Content="Button" HorizontalAlignment="Left" Height="27" Margin="10,10,0,0" VerticalAlignment="Top" Width="74" Click="buttonLoadSequence_Click"/>
+      <Button x:Name="buttonLoadSequence" Content="Load" HorizontalAlignment="Left" Height="27" Margin="10,10,0,0" VerticalAlignment="Top" Width="74" Click="buttonLoadSequence_Click" FontSize="12"/>
+      <Button x:Name="buttonSaveSequence" Content="Save" HorizontalAlignment="Left" Height="27" Margin="89,10,0,0" VerticalAlignment="Top" Width="74" Click="buttonSaveSequence_Click" FontSize="12"/>
    </Grid>
 </Page>

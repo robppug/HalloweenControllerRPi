@@ -28,6 +28,7 @@ namespace HalloweenControllerRPi
    public partial class MainPage : Page, IHostApp
    {
       public List<HWInterface> lHWInterfaces = new List<HWInterface>();
+      public List<GroupContainer> lGroupContainers = new List<GroupContainer>();
 
       private enum tenPWMChannel
       {
@@ -81,6 +82,9 @@ namespace HalloweenControllerRPi
          {
             fb.Height = Available_Board.Height;
          }
+
+         lGroupContainers.Add(groupContainer_AlwaysActive);
+         lGroupContainers.Add(groupContainer_Trigged);
 
          this.Loaded += OnLoaded;
          this.Unloaded += OnUnloaded;

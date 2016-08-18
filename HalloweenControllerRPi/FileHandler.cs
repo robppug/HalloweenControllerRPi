@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Container;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,12 +12,14 @@ using System.Xml.Serialization;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
 
 namespace HalloweenControllerRPi
 {
-   public partial class MainPage
+   public partial class MainPage : IXmlSerializable
    {
       private StorageFile fileToLoad;
+      private StorageFile fileToSave;
 
       #region "XML Loading"
       private async void buttonLoadSequence_Click(object sender, RoutedEventArgs e)
@@ -35,17 +38,10 @@ namespace HalloweenControllerRPi
 
             XDocument xDoc = XDocument.Load(XmlReader.Create(new StreamReader(await fileToLoad.OpenStreamForReadAsync())));
 
-            //foreach (TabPage tab in tabControl_Groups.Controls.OfType<TabPage>())
-            //{
-            //   foreach (Control c in tab.Controls)
-            //   {
-            //      if (c is GroupContainer)
-            //         (c as GroupContainer).ClearAllFunctions();
-            //   }
-            //}
-
-            //DrawingControl.SuspendDrawing(groupContainer_AlwaysActive);
-            //DrawingControl.SuspendDrawing(groupContainer_Trigger);
+            foreach(GroupContainer gc in lGroupContainers)
+            {
+               gc.ClearAllFunctions();
+            }
 
             //pbControl = new ProgressBarControl();
             //pbControl.Title = "Loading XML file...";
@@ -190,76 +186,61 @@ namespace HalloweenControllerRPi
       }
       #endregion
 
-      //#region "XML Saving"
-      //private void saveFileDialog_FileOk(object sender, CancelEventArgs e)
-      //{
-      //   this.Activate();
+      #region "XML Saving"
+      private async void buttonSaveSequence_Click(object sender, RoutedEventArgs e)
+      {
+         FileSavePicker fileDialog = new FileSavePicker();
 
-      //   /* Get the file name */
-      //   string fileName = (sender as FileDialog).FileName;
+         fileDialog.FileTypeChoices.Add("Halloween Controller RPI Sequence", new List<string>() { ".sqn" });
+         fileDialog.SuggestedFileName = "HCtrlRPiSequence";
 
-      //   XmlWriterSettings xmlSettings = new XmlWriterSettings();
+         fileToSave = await fileDialog.PickSaveFileAsync();
 
-      //   xmlSettings.Indent = true;
+         if (fileToSave != null)
+         {
+            XmlWriterSettings xmlSettings = new XmlWriterSettings();
+            Stream savefile = await fileToSave.OpenStreamForWriteAsync();
 
-      //   using (XmlWriter xmlWriter = XmlWriter.Create(fileName, xmlSettings))
-      //   {
-      //      this.WriteXml(xmlWriter);
-      //   }
-      //}
+            xmlSettings.Indent = true;
 
-      ///// <summary>
-      ///// Saves the Sequence to an XML file.
-      ///// </summary>
-      ///// <param name="sender"></param>
-      ///// <param name="e"></param>
-      //private void button_SaveCfg_Click(object sender, EventArgs e)
-      //{
-      //   if (this.loadedFileName != null)
-      //   {
-      //      this.saveFileDialog.FileName = Path.GetFileNameWithoutExtension(this.loadedFileName);
-      //   }
-      //   this.saveFileDialog.ShowDialog();
-      //}
+            using (XmlWriter xmlWriter = XmlWriter.Create(savefile, xmlSettings))
+            {
+               WriteXml(xmlWriter);
+            }
+         }
+      }
 
-      ///// <summary>
-      ///// 
-      ///// </summary>
-      ///// <param name="writer"></param>
-      //public void WriteXml(System.Xml.XmlWriter writer)
-      //{
-      //   writer.WriteStartDocument();
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="writer"></param>
+      public void WriteXml(System.Xml.XmlWriter writer)
+      {
+         writer.WriteStartDocument();
 
-      //   /* Store Version */
-      //   writer.WriteStartElement(this.GetType().ToString());
-      //   writer.WriteAttributeString("Version", "0.4");
+         /* Store Version */
+         writer.WriteStartElement(this.GetType().ToString());
+         writer.WriteAttributeString("Version", "0.5");
 
-      //   /* Iterates through all the tabs in the tab control. */
-      //   foreach (Control tab in tabControl_Groups.Controls)
-      //   {
-      //      TabPage tabPage = (TabPage)tab;
+         /* Iterates through all the GroupConters in the PIVOT control. */
+         foreach (GroupContainer gc in lGroupContainers)
+         {
+            /* Store the GroupContainer NAME */
+            writer.WriteStartElement("GroupContainer", gc.Name);
 
-      //      /* Store the TAB index */
-      //      writer.WriteStartElement("TabPage", tabPage.Text);
+            gc.WriteXml(writer);
 
-      //      /* Iterates through all GroupContainers in the tab page. */
-      //      foreach (Control c in tabPage.Controls)
-      //      {
-      //         if (c is GroupContainer)
-      //            (c as GroupContainer).WriteXml(writer);
-      //      }
+            writer.WriteEndElement();
+         }
 
-      //      writer.WriteEndElement();
-      //   }
+         writer.WriteEndElement();
+         writer.WriteEndDocument();
+      }
+      #endregion
 
-      //   writer.WriteEndElement();
-      //   writer.WriteEndDocument();
-      //}
-      //#endregion
-
-      //public XmlSchema GetSchema()
-      //{
-      //   throw new NotImplementedException();
-      //}
+      public XmlSchema GetSchema()
+      {
+         throw new NotImplementedException();
+      }
    }
 }
