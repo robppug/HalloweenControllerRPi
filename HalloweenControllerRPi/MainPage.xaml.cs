@@ -84,7 +84,7 @@ namespace HalloweenControllerRPi
          }
 
          lGroupContainers.Add(groupContainer_AlwaysActive);
-         lGroupContainers.Add(groupContainer_Trigged);
+         lGroupContainers.Add(groupContainer_Triggered);
 
          this.Loaded += OnLoaded;
          this.Unloaded += OnUnloaded;
@@ -228,14 +228,14 @@ namespace HalloweenControllerRPi
 
       private void buttonAdd_Click(object sender, RoutedEventArgs e)
       {
-         this.groupContainer_Trigged.AddTriggerGroup();
+         this.groupContainer_Triggered.AddTriggerGroup();
       }
 
       private void buttonTrigger_Click(object sender, RoutedEventArgs e)
       {
          CommandEventArgs args = new CommandEventArgs('I', (char)1, (char)1);
 
-         this.groupContainer_Trigged.ProcessTrigger(args.Commamd, args.Par1, args.Par2);
+         this.groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, args.Par2);
       }
 
       public void FireCommand(string cmd)
@@ -266,7 +266,7 @@ namespace HalloweenControllerRPi
 
       public void TriggerEnd(Function func)
       {
-         groupContainer_Trigged.TriggerEnd(func);
+         groupContainer_Triggered.TriggerEnd(func);
 
          /* Go through all Always Actives and check if control of used functions has completed */
          groupContainer_AlwaysActive.TriggerEnd(func);

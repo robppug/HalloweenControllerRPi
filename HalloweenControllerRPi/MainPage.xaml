@@ -103,7 +103,7 @@
                <Grid x:Name="gridTriggered"
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch">
-                  <Container:GroupContainer x:Name="groupContainer_Trigged"
+                  <Container:GroupContainer x:Name="groupContainer_Triggered"
                                             Margin="0,0,72,0"
                                             VerticalAlignment="Stretch"
                                             HorizontalContentAlignment="Stretch"

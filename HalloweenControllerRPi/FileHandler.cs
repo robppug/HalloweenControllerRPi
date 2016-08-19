@@ -1,8 +1,10 @@
 ﻿using HalloweenControllerRPi.Container;
+using HalloweenControllerRPi.Functions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -62,127 +64,110 @@ namespace HalloweenControllerRPi
       public void ReadXml(System.Xml.XmlReader reader)
       {
          //TabPage tabPage = null;
-         //string data = "";
-         //uint groupIdx = 0;
-         //int noOfElements = 1;
+         string data = "";
+         uint groupIdx = 0;
+         int noOfElements = 1;
+         
+         if (reader.ReadToFollowing("HalloweenControllerRPi.MainPage") == true)
+         {
+            data = reader.GetAttribute("Version");
+            //pbControl.Progress = noOfElements++;
 
-         //if (reader.ReadToFollowing("HalloweenController.Form_MAIN") == true)
-         //{
-         //   data = reader.GetAttribute("Version");
-         //   pbControl.Progress = noOfElements++;
+            if (data == "0.5")
+            {
+               string groupType = null;
 
-         //   if (data == "0.4")
-         //   {
-         //      string groupType = null;
+               /* Reload available FUNCTION_BUTTONS */
+               Available_Board.Items.Clear();
 
-         //      /* Reload available FUNCTION_BUTTONS */
-         //      //this.flowLayoutPanel_Available.Controls.Clear();
+               /* Detect connected BOARD */
+               //GetBoardType();
 
-         //      /* Detect connected BOARD */
-         //      //GetBoardType();
+               //Thread.Sleep(1000);
 
-         //      //Thread.Sleep(1000);
+               //Application.DoEvents();
 
-         //      //Application.DoEvents();
+               //Thread.Sleep(1000);
 
-         //      //Thread.Sleep(1000);
+               /* Read and create FUNCTIONS in the order stored in the XML */
+               while (reader.Read())
+               {
+                  if (reader.NodeType == XmlNodeType.Element)
+                  {
+                     //pbControl.Progress = noOfElements++;
 
-         //      /* Read and create FUNCTIONS in the order stored in the XML */
-         //      while (reader.Read())
-         //      {
-         //         if (reader.NodeType == XmlNodeType.Element)
-         //         {
-         //            pbControl.Progress = noOfElements++;
+                     /* Allow the GUI to update */
+                     //Application.DoEvents();
 
-         //            /* Allow the GUI to update */
-         //            Application.DoEvents();
+                     switch (reader.Name)
+                     {
+                        /* Group Container found */
+                        case "GroupContainer":
+                           if (reader.NamespaceURI == "groupContainer_AlwaysActive")
+                           {
+                              groupType = "AlwaysActive";
+                              groupContainer_AlwaysActive.ClearAllFunctions();
+                           }
+                           else if (reader.NamespaceURI == "groupContainer_Triggered")
+                           {
+                              groupType = "Trigger";
+                              groupContainer_Triggered.ClearAllFunctions();
+                           }
+                           break;
 
-         //            switch (reader.Name)
-         //            {
-         //               /* Tab Page found */
-         //               case "TabPage":
-         //                  if (reader.NamespaceURI == "AlwaysActive")
-         //                  {
-         //                     groupType = "AlwaysActive";
-         //                     tabPage = (TabPage)tabControl_Groups.GetControl(0);
-         //                  }
-         //                  else if (reader.NamespaceURI == "Trigger")
-         //                  {
-         //                     groupType = "Trigger";
-         //                     tabPage = (TabPage)tabControl_Groups.GetControl(1);
-         //                  }
+                        /* GROUP Containter/Trigger found */
+                        case "Group":
+                           /* Get Index */
+                           groupIdx = Convert.ToUInt32(reader.GetAttribute("Index"));
 
-         //                  foreach (Control c in tabPage.Controls)
-         //                  {
-         //                     if (c is GroupContainer)
-         //                        (c as GroupContainer).ClearAllFunctions();
-         //                  }
-         //                  break;
+                           if (groupType == "Trigger")
+                           {
+                              groupContainer_Triggered.AddTriggerGroup(groupIdx);
+                           }
+                           break;
 
-         //               /* GROUP Containter/Trigger found */
-         //               case "Group":
-         //                  /* Get Index */
-         //                  groupIdx = Convert.ToUInt32(reader.GetAttribute("Index"));
+                        /* FUNCTION GUI found */
+                        case "Function":
+                           if (reader.MoveToNextAttribute())
+                           {
+                              Control ctl;
 
-         //                  if (groupType == "Trigger")
-         //                  {
-         //                     foreach (Control c in tabPage.Controls)
-         //                     {
-         //                        if (c is GroupContainer)
-         //                           (c as GroupContainer).AddTriggerGroup(groupIdx);
-         //                     }
-         //                  }
-         //                  break;
+                              /* Check NODE - Function Type */
+                              if (reader.Name == "Type")
+                              {
+                                 /* Create and INSTANCE of the function */
+                                 Type cType = Type.GetType(reader.GetAttribute("Type"));
+                                 UInt16 cIndex = Convert.ToUInt16(reader.GetAttribute("Index"));
 
-         //               /* FUNCTION GUI found */
-         //               case "Function":
-         //                  if (reader.MoveToNextAttribute())
-         //                  {
-         //                     Control ctl;
+                                 ctl = (Control)Activator.CreateInstance(cType,
+                                                                         MainPage.HostApp,
+                                                                         cIndex,
+                                                                         ((groupType == "Trigger") ? Function.tenTYPE.TYPE_TRIGGER : Function.tenTYPE.TYPE_CONSTANT));
 
-         //                     /* Check NODE - Function Type */
-         //                     if (reader.Name == "Type")
-         //                     {
-         //                        /* Create and INSTANCE of the function */
-         //                        Type cType = Type.GetType(reader.GetAttribute("Type"));
-         //                        UInt16 cIndex = Convert.ToUInt16(reader.GetAttribute("Index"));
+                                 /* Call FUNCTION instances XML deserialiser */
+                                 (ctl as IXmlSerializable).ReadXml(reader);
 
-         //                        if (cType.BaseType == typeof(Function_Button))
-         //                           ctl = (Control)Activator.CreateInstance(cType,
-         //                                                                    cIndex,
-         //                                                                    ((groupType == "Trigger") ? Function.tenTYPE.TYPE_TRIGGER : Function.tenTYPE.TYPE_CONSTANT));
-         //                        else
-         //                           ctl = (Control)Activator.CreateInstance(cType,
-         //                                                                    this as IHostForm,
-         //                                                                    cIndex,
-         //                                                                    ((groupType == "Trigger") ? Function.tenTYPE.TYPE_TRIGGER : Function.tenTYPE.TYPE_CONSTANT));
+                                 /* Add Function to GROUP */
+                                 if(groupType == "Trigger")
+                                    groupContainer_Triggered.AddFunctionToTriggerGroup(groupIdx, ctl);
+                                 else
+                                    groupContainer_AlwaysActive.AddFunctionToTriggerGroup(groupIdx, ctl);
 
-         //                        /* Call FUNCTION instances XML deserialiser */
-         //                        (ctl as IXmlSerializable).ReadXml(reader);
-
-         //                        /* Add Function to GROUP */
-         //                        foreach (Control c in tabPage.Controls)
-         //                        {
-         //                           if (c is GroupContainer)
-         //                           {
-         //                              (c as GroupContainer).AddFunctionToTriggerGroup(groupIdx, ctl);
-         //                           }
-         //                        }
-         //                     }
-         //                  }
-         //                  break;
-         //            }
-         //         }
-         //      }
+                              }
+                           }
+                           break;
+                     }
+                  }
+               }
 
          //      pbControl.Progress = noOfElements++;
          //      pbControl.Remove();
-         //   }
-         //   else
-         //   {
+            }
+            else
+            {
          //      MessageBox.Show("File version mismatch (" + data + ") found.", "Loading error...");
-         //   }
-         //}
+            }
+         }
       }
       #endregion
 
@@ -207,6 +192,8 @@ namespace HalloweenControllerRPi
             {
                WriteXml(xmlWriter);
             }
+
+            savefile.Dispose();
          }
       }
 

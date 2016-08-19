@@ -28,7 +28,7 @@ namespace HalloweenControllerRPi.Container
    /// <summary>
    ///  Class which defines the handling of a TRIGGER GROUP of FUNCTIONS.
    /// </summary>
-   public sealed partial class GroupContainerTriggered : UserControl, IXmlSerializable
+   public partial class GroupContainerTriggered : UserControl, IXmlSerializable
    {
       public uint GroupIndex
       {
@@ -231,7 +231,7 @@ namespace HalloweenControllerRPi.Container
 
       public void WriteXml(System.Xml.XmlWriter writer)
       {
-         foreach (Control c in Container.Children)
+         foreach (UIElement c in Container.Children)
          {
             if (c is IFunctionGUI)
             {
