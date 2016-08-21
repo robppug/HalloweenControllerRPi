@@ -3,6 +3,8 @@ using HalloweenControllerRPi.Device;
 using HalloweenControllerRPi.Device.Controllers;
 using HalloweenControllerRPi.Function_GUI;
 using HalloweenControllerRPi.Functions;
+using MathNet.Numerics;
+using MathNet.Numerics.Interpolation;
 using Microsoft.IoT.Lightning.Providers;
 using System;
 using System.Collections.Generic;
@@ -52,18 +54,6 @@ namespace HalloweenControllerRPi
 
       static public IHostApp HostApp;
 
-      static private Double pwmDutySetting;
-      static private bool pwmToggle = false;
-      private static I2cDevice device;
-
-      private static byte[] bMODE1 = new byte[1] { 0x00 };
-      private static byte[] bMODE2 = new byte[1] { 0x01 };
-      private static byte[] LED0_ON_L = new byte[1] { 0x06 };
-      private static byte[] LED0_ON_H = new byte[1] { 0x07 };
-      private static byte[] LED0_OFF_L = new byte[1] { 0x08 };
-      private static byte[] LED0_OFF_H = new byte[1] { 0x09 };
-      static public Stopwatch sWatch;
-      static public long TriggerTime;
       public static MainPage Current;
 
       public MainPage()
@@ -74,9 +64,6 @@ namespace HalloweenControllerRPi
 
          this.Available_Statics.Items.Add(new Function_Button_SOUND(4));
 
-         this.Available_Board.Items.Add(new Function_Button_INPUT(1));
-         this.Available_Board.Items.Add(new Function_Button_PWM(2));
-         this.Available_Board.Items.Add(new Function_Button_RELAY(3));
 
          foreach (Function_Button fb in Available_Board.Items)
          {
@@ -103,113 +90,44 @@ namespace HalloweenControllerRPi
 
       private async void OnLoaded(object sender, RoutedEventArgs e)
       {
-         HWInterface HWDevice = new HWSimulated();
-
+         //HWInterface HWDevice = new HWSimulated();
+         HWInterface HWDevice = new HWRaspberryPI2();
+         
          //HWDevice.CommandReceived += this.ev_CommandReceived_SerialPort;
          //HWDevice.VersionInfoUpdated += this.ev_VersionInfoUpdated;
          //HWDevice.FunctionAdded += this.ev_FunctionAdded;
 
-         HWDevice.Connect();
-         HWDevice.DevicePID = 0xAAAA;
-
-         lHWInterfaces.Add(HWDevice);
-
-         if (HWDevice.GetUIPanel() != null)
+         try
          {
-            HWSimulatedGrid.Items.Add(HWDevice.GetUIPanel());
-         }
+            HWDevice.Connect();
 
-         //Setup the GPIO, PWM and I2C drivers
-         if (LightningProvider.IsLightningEnabled)
-         {
-            LowLevelDevicesController.DefaultProvider = LightningProvider.GetAggregateProvider();
+            HWDevice.DevicePID = 0xAAAA;
 
-            I2cConnectionSettings i2cSettings = new I2cConnectionSettings(0x40);
-            i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
-            i2cSettings.SharingMode = I2cSharingMode.Exclusive;
+            lHWInterfaces.Add(HWDevice);
 
-            I2cController i2cTest = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
-            
-            device = i2cTest.GetDevice(i2cSettings);
-
-            byte[] buffer = new byte[10];
-
-            /* Change to NORMAL mode */
-            device.Write(new byte[2] { 0x00, 0x00 });
-
-            await Task.Delay(1);
-
-            foreach (tenPWMChannel c in Enum.GetValues(typeof(tenPWMChannel)))
+            if (HWDevice.GetUIPanel() != null)
             {
-               device.Write(new byte[2] { (byte)(LED0_ON_L[0] + ((byte)c * 4)), 0x00 });
-               device.Write(new byte[2] { (byte)(LED0_ON_H[0] + ((byte)c * 4)), 0x00 });
-               device.Write(new byte[2] { (byte)(LED0_OFF_L[0] + ((byte)c * 4)), 0x00 });
-               device.Write(new byte[2] { (byte)(LED0_OFF_H[0] + ((byte)c * 4)), 0x00 });
+               HWSimulatedGrid.Items.Add(HWDevice.GetUIPanel());
             }
 
-            pwmDutySetting = 0.8;
+            //Populate the available Functions the HWDevice provides.
+            for (uint i = 0; i < HWDevice.Inputs; i++)
+            {
+               this.Available_Board.Items.Add(new Function_Button_INPUT(i));
+            }
+            for (uint i = 0; i < HWDevice.PWMs; i++)
+            {
+               this.Available_Board.Items.Add(new Function_Button_PWM(i));
+            }
+            for (uint i = 0; i < HWDevice.Relays; i++)
+            {
+               this.Available_Board.Items.Add(new Function_Button_RELAY(i));
+            }
 
-            //Create the Background Task
-            TaskFactory tTaskFactory = new TaskFactory(TaskScheduler.Current);
-
-            sWatch = new Stopwatch();
-            sWatch.Start();
-
-            await tTaskFactory.StartNew(new Action(DoStuff), TaskCreationOptions.PreferFairness);
          }
+         catch { }
       }
       
-      private static uint bPWMOutput = 0;
-
-      private void DoStuff()
-      {
-         uint[] xCoords = new uint[5] { 0, 300, 600, 2400, 4096 };
-         uint[] yCoords = new uint[5] { 0, 1000, 2000, 3000, 4096 };
-
-         while (sWatch.IsRunning == true)
-         {
-            TriggerTime = MainPage.sWatch.ElapsedMilliseconds;
-
-            if (TriggerTime >= 10)
-            {
-               //System.Diagnostics.Debug.WriteLine(TriggerTime.ToString());
-
-               sWatch.Restart();
-
-               if (LightningProvider.IsLightningEnabled)
-               {
-                  foreach (tenPWMChannel c in Enum.GetValues(typeof(tenPWMChannel)))
-                  {
-                     uint uMax;
-
-                     bPWMOutput++;
-
-                     if (bPWMOutput > 4096)
-                        bPWMOutput = 0;
-
-                     device.Write(new byte[2] { (byte)(LED0_ON_L[0] + ((byte)c * 4)), 0x00 });
-                     device.Write(new byte[2] { (byte)(LED0_ON_H[0] + ((byte)c * 4)), 0x00 });
-
-                     uMax = bPWMOutput;
-                     switch (c)
-                     {
-                        case tenPWMChannel.enChan1:
-                        case tenPWMChannel.enChan2:
-                        case tenPWMChannel.enChan3:
-                           uMax %= (uint)(4096 * pwmDutySetting);
-                           break;
-
-                        default:
-                           break;
-                     }
-
-                     device.Write(new byte[2] { (byte)(LED0_OFF_L[0] + ((byte)c * 4)), (byte)(uMax & 0xFF) });
-                     device.Write(new byte[2] { (byte)(LED0_OFF_H[0] + ((byte)c * 4)), (byte)((uMax >> 8) & 0xFF) });
-                  }
-               }
-            }
-         }
-      }
 
       private void pivotContainer_SelectionChanged(object sender, SelectionChangedEventArgs e)
       {

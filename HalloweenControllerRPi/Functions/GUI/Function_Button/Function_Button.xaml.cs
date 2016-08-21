@@ -50,9 +50,6 @@ namespace HalloweenControllerRPi
          GUIType = guitype;
 
          textBlock.Text = text;
-         //button_Function.MouseDown += new MouseEventHandler(b_MouseDown);
-         //button_Function.MouseMove += new MouseEventHandler(b_MouseMove);
-         //MouseDown += Function_Button_MouseDown;
          Index = 0;
       }
 
@@ -82,16 +79,12 @@ namespace HalloweenControllerRPi
 
       virtual public void ReadXml(XmlReader reader)
       {
-         /* Load and process the data in the handling XML Reader */
-         //(_funcGUI as IXmlSerializable).ReadXml(reader);
       }
 
       virtual public void WriteXml(XmlWriter writer)
       {
          writer.WriteAttributeString("Type", GetType().ToString());
          writer.WriteAttributeString("Index", this.Index.ToString());
-
-         //(_funcGUI as IXmlSerializable).WriteXml(writer);
       }
 
       internal void OnDragStarting(object sender, DragItemsStartingEventArgs args)

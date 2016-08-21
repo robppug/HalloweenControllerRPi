@@ -54,14 +54,13 @@ namespace HalloweenControllerRPi.Device
       }
 
       public abstract Dictionary<Command, List<Command>> Commands { get; }
+      public abstract uint Inputs { get; }
+      public abstract uint PWMs { get; }
+      public abstract uint Relays { get; }
+
       public abstract string BuildCommand(string func, string subFunc, params string[] data);
       public abstract void DecodeCommand(List<char> fullCmd, out Command function, out Command subFunction, ref char[] data);
       public abstract void FireCommand(string cmd);
-
-      /// <summary>
-      /// Command to request HW Board Type information.
-      /// </summary>
-      public abstract void GetBoardType();
 
       /// <summary>
       /// Connect HW interface device (ie. Serial Port).
@@ -82,6 +81,7 @@ namespace HalloweenControllerRPi.Device
 
       public virtual void EndAsyncEvent(IAsyncResult iar)
       {
+         //RPUGLIESE - TODO
          //var ar = (System.Runtime.Remoting.Messaging.AsyncResult)iar;
          //var invokedMethod = (HostedMessageDelegate)ar.AsyncDelegate;
 

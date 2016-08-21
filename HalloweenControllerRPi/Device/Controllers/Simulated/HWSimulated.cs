@@ -77,7 +77,6 @@ namespace HalloweenControllerRPi.Device.Controllers
          }
       };
       private bool _Connected;
-      private bool _GetBoardType;
 
       /// <summary>
       /// Dictionary containing available Functions and Sub-Functions.
@@ -87,6 +86,30 @@ namespace HalloweenControllerRPi.Device.Controllers
          get
          {
             return _Commands;
+         }
+      }
+
+      public override uint Inputs
+      {
+         get
+         {
+            return 4;
+         }
+      }
+
+      public override uint PWMs
+      {
+         get
+         {
+            return 4;
+         }
+      }
+
+      public override uint Relays
+      {
+         get
+         {
+            return 4;
          }
       }
 
@@ -299,14 +322,6 @@ namespace HalloweenControllerRPi.Device.Controllers
          }
 
       }
-      public override void GetBoardType()
-      {
-         List<char> lGetBoardType = new List<char>();
-
-         lGetBoardType.AddRange("SOME DATA");
-
-         this.ProcessCommandRecieved(lGetBoardType);
-      }
 
       /// <summary>
       /// Handling of Rx SERIAL command interpretation
@@ -347,45 +362,45 @@ namespace HalloweenControllerRPi.Device.Controllers
                case 'A':
                   break;
                case 'C':
-                  if (data.Count >= (5 + 12))
-                  {
-                     string sVersion = "Version: v" + (data[6] - 0x30) + "." + (data[7] - 0x30);
+                  //if (data.Count >= (5 + 12))
+                  //{
+                  //   string sVersion = "Version: v" + (data[6] - 0x30) + "." + (data[7] - 0x30);
 
-                     base.OnVersionInfoUpdated(sVersion);
+                  //   base.OnVersionInfoUpdated(sVersion);
 
-                     if (data[12] == 'I')
-                     {
-                        uint u32InputCnt = (uint)(data[13] - 0x30);
+                  //   if (data[12] == 'I')
+                  //   {
+                  //      uint u32InputCnt = (uint)(data[13] - 0x30);
 
-                        for (uint i = 0; i < u32InputCnt; i++)
-                        {
-                           base.OnFunctionAdded(typeof(Func_INPUT));
-                        }
-                     }
+                  //      for (uint i = 0; i < u32InputCnt; i++)
+                  //      {
+                  //         base.OnFunctionAdded(typeof(Func_INPUT));
+                  //      }
+                  //   }
 
-                     if (data[8] == 'R')
-                     {
-                        uint u32RelayCnt = (uint)(data[9] - 0x30);
+                  //   if (data[8] == 'R')
+                  //   {
+                  //      uint u32RelayCnt = (uint)(data[9] - 0x30);
 
-                        for (uint i = 0; i < u32RelayCnt; i++)
-                        {
-                           base.OnFunctionAdded(typeof(Func_RELAY));
-                        }
-                     }
+                  //      for (uint i = 0; i < u32RelayCnt; i++)
+                  //      {
+                  //         base.OnFunctionAdded(typeof(Func_RELAY));
+                  //      }
+                  //   }
 
-                     if (data[10] == 'P')
-                     {
-                        uint u32RelayCnt = (uint)(data[11] - 0x30);
+                  //   if (data[10] == 'P')
+                  //   {
+                  //      uint u32RelayCnt = (uint)(data[11] - 0x30);
 
-                        for (uint i = 0; i < u32RelayCnt; i++)
-                        {
-                           base.OnFunctionAdded(typeof(Func_PWM));
-                        }
-                     }
+                  //      for (uint i = 0; i < u32RelayCnt; i++)
+                  //      {
+                  //         base.OnFunctionAdded(typeof(Func_PWM));
+                  //      }
+                  //   }
 
-                     data.RemoveRange(0, 5 + 12);
-                     l_Result = true;
-                  }
+                  //   data.RemoveRange(0, 5 + 12);
+                  //   l_Result = true;
+                  //}
                   break;
                default:
                   break;

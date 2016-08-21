@@ -25,7 +25,7 @@ using Windows.UI.Xaml.Shapes;
 
 namespace HalloweenControllerRPi.Device.Controllers
 {
-   public partial class HWSimulatedUI : UserControl
+   public sealed partial class HWSimulatedUI : UserControl
    {
       List<Rectangle> lRelays = new List<Rectangle>();
       List<Rectangle> lPwms = new List<Rectangle>();

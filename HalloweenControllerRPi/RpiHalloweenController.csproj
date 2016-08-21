@@ -111,12 +111,15 @@
     </Compile>
     <Compile Include="Device\Command.cs" />
     <Compile Include="Device\CommandEventArgs.cs" />
-    <Compile Include="Device\Controllers\HWSimulatedUI.xaml.cs">
+    <Compile Include="Device\Controllers\RaspberryPi\HWRaspberryPI2.cs" />
+    <Compile Include="Device\Controllers\Simulated\HWSimulatedUI.xaml.cs">
       <DependentUpon>HWSimulatedUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Device\Controllers\HWSimulated.cs" />
+    <Compile Include="Device\Controllers\Simulated\HWSimulated.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\HWRaspberryPI_PWM.cs" />
     <Compile Include="Device\HWInterface.cs" />
     <Compile Include="Device\IHWInterface.cs" />
+    <Compile Include="Device\ISupportedFunctions.cs" />
     <Compile Include="FileHandler.cs" />
     <Compile Include="Functions\Function.cs" />
     <Compile Include="Functions\Func_INPUT.cs" />
@@ -178,7 +181,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Device\Controllers\HWSimulatedUI.xaml">
+    <Page Include="Device\Controllers\Simulated\HWSimulatedUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

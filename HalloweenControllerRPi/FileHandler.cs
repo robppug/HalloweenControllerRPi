@@ -26,12 +26,7 @@ namespace HalloweenControllerRPi
       #region "XML Loading"
       private async void buttonLoadSequence_Click(object sender, RoutedEventArgs e)
       {
-         FileOpenPicker fileDialog = new FileOpenPicker();
-
-         fileDialog.ViewMode = PickerViewMode.List;
-         fileDialog.FileTypeFilter.Add(".sqn");
-
-         fileToLoad = await fileDialog.PickSingleFileAsync();
+         StorageFile fileToLoad = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync("HWControllerSequence.sqn");
 
          if (fileToLoad != null)
          {
@@ -78,7 +73,7 @@ namespace HalloweenControllerRPi
                string groupType = null;
 
                /* Reload available FUNCTION_BUTTONS */
-               Available_Board.Items.Clear();
+               //Available_Board.Items.Clear();
 
                /* Detect connected BOARD */
                //GetBoardType();
@@ -174,18 +169,13 @@ namespace HalloweenControllerRPi
       #region "XML Saving"
       private async void buttonSaveSequence_Click(object sender, RoutedEventArgs e)
       {
-         FileSavePicker fileDialog = new FileSavePicker();
-
-         fileDialog.FileTypeChoices.Add("Halloween Controller RPI Sequence", new List<string>() { ".sqn" });
-         fileDialog.SuggestedFileName = "HCtrlRPiSequence";
-
-         fileToSave = await fileDialog.PickSaveFileAsync();
-
+         StorageFile fileToSave = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync("HWControllerSequence.sqn", CreationCollisionOption.ReplaceExisting);
+         
          if (fileToSave != null)
          {
             XmlWriterSettings xmlSettings = new XmlWriterSettings();
             Stream savefile = await fileToSave.OpenStreamForWriteAsync();
-
+            
             xmlSettings.Indent = true;
 
             using (XmlWriter xmlWriter = XmlWriter.Create(savefile, xmlSettings))
