@@ -17,7 +17,7 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>RpiHalloweenController_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <PackageCertificateThumbprint>E4964B2BC9CB1862ED496EFBBF0CFDBBD07CC862</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>A65F799A03451A7BDB033A7D9C87ED37B0CF79AA</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -45,7 +45,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\ARM\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <DefineConstants>DEBUG;CODE_ANALYSIS;NETFX_CORE;WINDOWS_UWP;CODE_ANALYSIS</DefineConstants>
     <NoWarn>;2008</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>ARM</PlatformTarget>
@@ -122,9 +122,13 @@
     <Compile Include="Device\ISupportedFunctions.cs" />
     <Compile Include="FileHandler.cs" />
     <Compile Include="Functions\Function.cs" />
+    <Compile Include="Functions\Func_SOUND.cs" />
     <Compile Include="Functions\Func_INPUT.cs" />
     <Compile Include="Functions\Func_Relay.cs" />
     <Compile Include="Functions\Func_PWM.cs" />
+    <Compile Include="Functions\GUI\Func_GUI\Func_Sound_GUI.xaml.cs">
+      <DependentUpon>Func_Sound_GUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Functions\IFunction.cs" />
     <Compile Include="Functions\GUI\Function_Button\Function_Button.xaml.cs">
       <DependentUpon>Function_Button.xaml</DependentUpon>
@@ -188,6 +192,10 @@
     <Page Include="Functions\GUI\Function_Button\Function_Button.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Functions\GUI\Func_GUI\Func_Sound_GUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Functions\GUI\Func_GUI\Func_Relay_GUI.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -26,7 +26,11 @@ namespace HalloweenControllerRPi
       #region "XML Loading"
       private async void buttonLoadSequence_Click(object sender, RoutedEventArgs e)
       {
-         StorageFile fileToLoad = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync("HWControllerSequence.sqn");
+         try
+         {
+            StorageFile fileToLoad = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.GetFileAsync("HWControllerSequence.sqn");
+         }
+         catch { fileToLoad = null; }
 
          if (fileToLoad != null)
          {
@@ -169,7 +173,7 @@ namespace HalloweenControllerRPi
       #region "XML Saving"
       private async void buttonSaveSequence_Click(object sender, RoutedEventArgs e)
       {
-         StorageFile fileToSave = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync("HWControllerSequence.sqn", CreationCollisionOption.ReplaceExisting);
+         StorageFile fileToSave = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFileAsync("HWControllerSequence.sqn", CreationCollisionOption.ReplaceExisting);
          
          if (fileToSave != null)
          {

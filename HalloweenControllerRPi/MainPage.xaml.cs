@@ -16,6 +16,8 @@ using Windows.Devices.Gpio.Provider;
 using Windows.Devices.I2c;
 using Windows.Devices.I2c.Provider;
 using Windows.Devices.Pwm.Provider;
+using Windows.Media.Playback;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -31,26 +33,6 @@ namespace HalloweenControllerRPi
    {
       public List<HWInterface> lHWInterfaces = new List<HWInterface>();
       public List<GroupContainer> lGroupContainers = new List<GroupContainer>();
-
-      private enum tenPWMChannel
-      {
-         enChan1 = 0,
-         enChan2,
-         enChan3,
-         enChan4,
-         enChan5,
-         enChan6,
-         enChan7,
-         enChan8,
-         enChan9,
-         enChan10,
-         enChan11,
-         enChan12,
-         enChan13,
-         enChan14,
-         enChan15,
-         enChan16
-      };
 
       static public IHostApp HostApp;
 
@@ -88,6 +70,8 @@ namespace HalloweenControllerRPi
          }
       }
 
+      MediaElement mEPlayer;
+
       private async void OnLoaded(object sender, RoutedEventArgs e)
       {
          //HWInterface HWDevice = new HWSimulated();
@@ -124,6 +108,16 @@ namespace HalloweenControllerRPi
                this.Available_Board.Items.Add(new Function_Button_RELAY(i));
             }
 
+            StorageFile file = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.GetFileAsync("background.wav");
+
+            mEPlayer = new MediaElement();
+            mEPlayer.RealTimePlayback = true;
+
+            var stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
+
+            mEPlayer.SetSource(stream, file.ContentType);
+
+            mEPlayer.Play();
          }
          catch { }
       }
@@ -192,11 +186,15 @@ namespace HalloweenControllerRPi
 
       private void buttonStart_Click(object sender, RoutedEventArgs e)
       {
+         mEPlayer.Position = new TimeSpan(0);
+         mEPlayer.Play();
          groupContainer_AlwaysActive.ProcessAlwaysActives(true);
       }
 
       private void buttonStop_Click(object sender, RoutedEventArgs e)
       {
+         mEPlayer.Pause();
+
          TriggerEnd(new Func_INPUT());
 
          groupContainer_AlwaysActive.ProcessAlwaysActives(false);

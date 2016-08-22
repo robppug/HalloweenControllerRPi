@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:iot="http://schemas.microsoft.com/appx/manifest/iot/windows10" IgnorableNamespaces="uap mp iot">
-  <Identity Name="0331ba66-45f8-4462-9e5d-347c3af806de" Publisher="CN=MacGyver" Version="1.0.0.0" />
+  <Identity Name="Halloween.Controller.RPi" Publisher="CN=MacGyver" Version="1.0.0.0" />
   <mp:PhoneIdentity PhoneProductId="0331ba66-45f8-4462-9e5d-347c3af806de" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>Halloween Controller RPi</DisplayName>
@@ -27,6 +27,7 @@
   </Applications>
   <Capabilities>
     <Capability Name="internetClient" />
+    <Capability Name="documentsLibrary" />
     <iot:Capability Name="lowLevelDevices" />
     <DeviceCapability Name="109b86ad-f53d-4b76-aa5f-821e2ddf2141" />
   </Capabilities>
