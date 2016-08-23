@@ -5,12 +5,12 @@
              xmlns:local="using:HalloweenControllerRPi"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DesignHeight="120"
-             d:DesignWidth="30"
+             d:DesignWidth="20"
              UseLayoutRounding="True"
              mc:Ignorable="d">
    <Grid Background="LightSlateGray">
       <TextBlock x:Name="textBlock"
-                 Margin="-45,45,-45,45"
+                 Margin="-40,45,-45,45"
                  FontWeight="Bold"
                  RenderTransformOrigin="0.5,0.5"
                  ScrollViewer.VerticalScrollBarVisibility="Disabled"

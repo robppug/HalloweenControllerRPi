@@ -31,28 +31,28 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          _Func = new Func_RELAY(host, entype);
 
-         this._Func.Index = index;
+         _Func.Index = index;
          
-         this.textTitle.Text = "Relay #" + index;
-         this.textTitle.DoubleTapped += TextTitle_DoubleTapped;
-         this._Func.Duration_ms = (uint)slider_Duration.Value;
-         this._Func.Delay_ms = (uint)slider_StartDelay.Value;
+         textTitle.Text = "Relay #" + index;
+         textTitle.DoubleTapped += TextTitle_DoubleTapped;
+         _Func.Duration_ms = (uint)slider_Duration.Value;
+         _Func.Delay_ms = (uint)slider_StartDelay.Value;
 
          /* If function is in an ALWAYS_ACTIVE group, disable pointless controls */
          if (entype == Func_RELAY.tenTYPE.TYPE_CONSTANT)
          {
-            this.slider_Duration.IsEnabled = false;
-            this.slider_StartDelay.IsEnabled = false;
+            slider_Duration.IsEnabled = false;
+            slider_StartDelay.IsEnabled = false;
          }
 
-         this._Func.FuncButtonType = typeof(Function_Button_RELAY);
+         _Func.FuncButtonType = typeof(Function_Button_RELAY);
       }
 
       private void TextTitle_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
       {
          if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
          {
-            this.SetCustomName();
+            SetCustomName();
          }
       }
 

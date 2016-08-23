@@ -24,7 +24,7 @@
                    VerticalAlignment="Top"
                    CanDragItems="True"
                    DragItemsStarting="DragItemsStarting"
-                   ScrollViewer.VerticalScrollBarVisibility="Disabled" />
+                   ScrollViewer.VerticalScrollBarVisibility="Auto" />
       </Border>
       <Border Width="400"
               Height="150"

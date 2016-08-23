@@ -19,21 +19,22 @@ namespace HalloweenControllerRPi.Functions
       private int _SoundDuration_s;
       private uint _Repeats;
       private uint RepeatCount;
-      private bool _Looping;
-
+      private bool? _Looping;
+      public List<StorageFile> lSoundFiles;
       public MediaElement activePlaybackDevice;
-      public EventHandler evOnTimerTick;
+      public IRandomAccessStream sSoundStream;
+      public EventHandler TimerTick;
 
       private DispatcherTimer tickTimer;
 
       #region Parameters
-      public int SoundDuration_s
+      public int SoundDuration_ms
       {
          get { return _SoundDuration_s; }
          set { _SoundDuration_s = value; }
       }
 
-      public bool Loop
+      public bool? Loop
       {
          get { return _Looping; }
          set { _Looping = value; }
@@ -59,14 +60,16 @@ namespace HalloweenControllerRPi.Functions
          activePlaybackDevice = new MediaElement();
          activePlaybackDevice.RealTimePlayback = true;
 
+         lSoundFiles = new List<StorageFile>();
+
          FunctionKeyCommand = new Command("SOUND", 'S');
 
          evOnDelayEnd += new EventHandler(OnTrigger);
          evOnDurationEnd += new EventHandler(OnDurationEnd);
-
+         
          tickTimer = new DispatcherTimer();
          tickTimer.Tick += tickTimer_Elapsed;
-         this.vSetTimerInterval(tickTimer, 1000);
+         vSetTimerInterval(tickTimer, 1000);
       }
 
       void vSetTimerInterval(DispatcherTimer t, uint value)
@@ -79,48 +82,66 @@ namespace HalloweenControllerRPi.Functions
 
       void tickTimer_Elapsed(object sender, object e)
       {
-         if (evOnTimerTick != null)
+         if (TimerTick != null)
          {
-            //evOnTimerTick.Invoke(sender, e);
+            TimerTick.Invoke(sender, EventArgs.Empty);
          }
+
+         tickTimer.Start();
       }
 
-      public void OpenFile(string fileName)
+      public async Task<int> GetAvailableSounds()
       {
-         this.InitSoundDevice(fileName);
+         var files = await ApplicationData.Current.LocalCacheFolder.GetFilesAsync();
+
+         lSoundFiles.Clear();
+         
+         foreach (StorageFile file in files)
+         {
+            if (file.DisplayType.Contains("WAV File") || file.DisplayType.Contains("MP3 File"))
+            {
+               lSoundFiles.Add(file);
+            }
+         }
+
+         return lSoundFiles.Count;
+      }
+
+      public async void OpenFile(int index)
+      {
+         if (activePlaybackDevice != null)
+         {
+            CloseFile();
+
+            sSoundStream = await lSoundFiles[index].OpenAsync(Windows.Storage.FileAccessMode.Read);
+
+            activePlaybackDevice.AutoPlay = false;
+            activePlaybackDevice.SetSource(sSoundStream, lSoundFiles[index].ContentType);
+         }
       }
 
       public void CloseFile()
       {
-         //if (soundStream != null)
+         if (sSoundStream != null)
          {
-            //soundStream.Dispose();
-            //soundStream = null;
-         }
-      }
-
-      public void InitSoundDevice(string fileName)
-      {
-         if (activePlaybackDevice != null)
-         {
-            //StorageFile file = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.GetFileAsync("background.wav");
-
-            /* Create a SOUND stream */
-            //var soundStream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
-
-            //activePlaybackDevice.SetSource(soundStream, file.ContentType);
-         }
-         else
-         {
-            /* ERROR - No channel selected */
+            sSoundStream.Dispose();
+            sSoundStream = null;
          }
       }
 
       public void Play()
       {
-         if (activePlaybackDevice != null && /*soundStream != null &&*/ activePlaybackDevice.CurrentState != MediaElementState.Playing)
+         if (activePlaybackDevice != null && sSoundStream != null && activePlaybackDevice.CurrentState != MediaElementState.Playing)
          {
             activePlaybackDevice.Play();
+
+            SoundDuration_ms = (int)activePlaybackDevice.NaturalDuration.TimeSpan.TotalMilliseconds;
+
+            if (TimerTick != null)
+            {
+               TimerTick.Invoke(this, EventArgs.Empty);
+            }
+            
             tickTimer.Start();
          }
       }
@@ -140,14 +161,10 @@ namespace HalloweenControllerRPi.Functions
             activePlaybackDevice.Stop();
             tickTimer.Stop();
 
-            if (evOnTimerTick != null)
+            if (TimerTick != null)
             {
-               evOnTimerTick.Invoke(this, EventArgs.Empty);
+               TimerTick.Invoke(this, EventArgs.Empty);
             }
-         }
-         if (activePlaybackDevice != null)
-         {
-            activePlaybackDevice.Position = new TimeSpan(0);
          }
       }
 

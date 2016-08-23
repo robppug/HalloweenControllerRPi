@@ -70,8 +70,6 @@ namespace HalloweenControllerRPi
          }
       }
 
-      MediaElement mEPlayer;
-
       private async void OnLoaded(object sender, RoutedEventArgs e)
       {
          //HWInterface HWDevice = new HWSimulated();
@@ -107,17 +105,6 @@ namespace HalloweenControllerRPi
             {
                this.Available_Board.Items.Add(new Function_Button_RELAY(i));
             }
-
-            StorageFile file = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.GetFileAsync("background.wav");
-
-            mEPlayer = new MediaElement();
-            mEPlayer.RealTimePlayback = true;
-
-            var stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
-
-            mEPlayer.SetSource(stream, file.ContentType);
-
-            mEPlayer.Play();
          }
          catch { }
       }
@@ -186,15 +173,11 @@ namespace HalloweenControllerRPi
 
       private void buttonStart_Click(object sender, RoutedEventArgs e)
       {
-         mEPlayer.Position = new TimeSpan(0);
-         mEPlayer.Play();
          groupContainer_AlwaysActive.ProcessAlwaysActives(true);
       }
 
       private void buttonStop_Click(object sender, RoutedEventArgs e)
       {
-         mEPlayer.Pause();
-
          TriggerEnd(new Func_INPUT());
 
          groupContainer_AlwaysActive.ProcessAlwaysActives(false);

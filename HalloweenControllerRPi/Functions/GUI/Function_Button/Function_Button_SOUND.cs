@@ -11,7 +11,7 @@ namespace HalloweenControllerRPi.Function_GUI
    class Function_Button_SOUND : Function_Button
    {
       public Function_Button_SOUND(uint idx)
-         : base(typeof(Func_Input_GUI), "S", Colors.Lavender)
+         : base(typeof(Func_Sound_GUI), "SOUND", Colors.Lavender)
       {
          IsRemoveable = false;
          OneOnly = false;
@@ -20,7 +20,7 @@ namespace HalloweenControllerRPi.Function_GUI
       }
 
       public Function_Button_SOUND(uint idx, Function.tenTYPE enType)
-         : base(typeof(Func_Input_GUI), "S", Colors.Lavender)
+         : base(typeof(Func_Sound_GUI), "SOUND", Colors.Lavender)
       {
          IsRemoveable = false;
          OneOnly = false;
