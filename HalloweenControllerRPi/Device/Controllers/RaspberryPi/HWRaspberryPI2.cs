@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices;
+using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 
 namespace HalloweenControllerRPi.Device.Controllers
@@ -34,13 +35,23 @@ namespace HalloweenControllerRPi.Device.Controllers
          enChan16
       };
 
+
+      public enum tenInputPins
+      {
+         INPUT_PIN_04 = 4,
+         INPUT_PIN_05 = 5,
+         INPUT_PIN_06 = 6
+      };
+
       private static I2cDevice i2cDevice;
       private static I2cController i2cController;
+      private static GpioController gpioController;
       private static I2cConnectionSettings i2cSettings;
       private static Stopwatch sWatch;
       private static long TriggerTime;
 
       private static List<HWRaspberryPI_PWM> lPWMs = new List<HWRaspberryPI_PWM>();
+      private static List<HWRaspberryPI_INPUT> lINPUTs = new List<HWRaspberryPI_INPUT>();
 
       private static byte[] bMODE1 = new byte[1] { 0x00 };
       private static byte[] bMODE2 = new byte[1] { 0x01 };
@@ -52,7 +63,11 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       public HWRaspberryPI2()
       {
-         if (LightningProvider.IsLightningEnabled == false)
+         if (LightningProvider.IsLightningEnabled == true)
+         {
+            gpioController = GpioController.GetDefault();
+         }
+         else
          {
             //throw new Exception("No supported devices found.");
          }
@@ -67,8 +82,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          {  new Command("DATA", 'C'),
             new List<Command>
             {
-               new Command("VERSION", 'S'),
-               new Command("FREERAM", 'F')
+               new Command("VERSION", 'S')
             }
          },
          /* Command : INPUT */
@@ -217,6 +231,12 @@ namespace HalloweenControllerRPi.Device.Controllers
             i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)lPWMs[(int)c].Channel * 4)), 0x00 });
          }
 
+         for (uint i = Inputs; i > 0; i--)
+         {
+            lINPUTs.Add(new HWRaspberryPI_INPUT(i, (int)tenInputPins.INPUT_PIN_04));
+            lINPUTs[(int)i].InputLevelChanged += HWRaspberryPI2_InputLevelChanged;
+         }
+
          //Create the Background Task
          TaskFactory tTaskFactory = new TaskFactory(TaskScheduler.Current);
 
@@ -224,6 +244,11 @@ namespace HalloweenControllerRPi.Device.Controllers
          sWatch.Start();
 
          await tTaskFactory.StartNew(new Action(ControllerTask), TaskCreationOptions.RunContinuationsAsynchronously);
+      }
+
+      private void HWRaspberryPI2_InputLevelChanged(object sender, HWRaspberryPI_INPUT.EventArgsINPUT e)
+      {
+         //this.ProcessCommandRecieved();
       }
 
       public override void Connect()
@@ -253,8 +278,13 @@ namespace HalloweenControllerRPi.Device.Controllers
                //System.Diagnostics.Debug.WriteLine(TriggerTime.ToString());
 
                sWatch.Restart();
+               
+               foreach (HWRaspberryPI_INPUT c in lINPUTs)
+               {
+                  c.Tick();
+               }
 
-               foreach(HWRaspberryPI_PWM c in lPWMs)
+               foreach (HWRaspberryPI_PWM c in lPWMs)
                {
                   if (c.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
                   {

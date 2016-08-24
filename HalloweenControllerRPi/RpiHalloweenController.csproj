@@ -112,6 +112,7 @@
     <Compile Include="Device\Command.cs" />
     <Compile Include="Device\CommandEventArgs.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\HWRaspberryPI2.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\HWRaspberryPI_INPUT.cs" />
     <Compile Include="Device\Controllers\Simulated\HWSimulatedUI.xaml.cs">
       <DependentUpon>HWSimulatedUI.xaml</DependentUpon>
     </Compile>
