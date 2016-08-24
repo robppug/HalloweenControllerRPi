@@ -76,5 +76,6 @@
                  Text="Repeats: 0" />
       <CheckBox x:Name="checkBox_Loop" Content="Loop" HorizontalAlignment="Left" Margin="10,188,0,0" VerticalAlignment="Top" FontSize="14" Checked="checkBox_Loop_Checked" Width="125"/>
       <ProgressBar x:Name="progressBar_Position" HorizontalAlignment="Left" Height="10" Margin="12,225,0,0" VerticalAlignment="Top" Width="218"/>
+      <MediaElement x:Name="mediaElement" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="240" Margin="0,220,0,0" AutoPlay="False" Visibility="Collapsed"/>
    </Grid>
 </UserControl>

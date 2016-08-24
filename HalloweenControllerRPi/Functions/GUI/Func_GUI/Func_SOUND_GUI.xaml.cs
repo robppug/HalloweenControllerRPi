@@ -33,11 +33,23 @@ namespace HalloweenControllerRPi.Function_GUI
 
       public Func_Sound_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
       {
-         _Func = new Func_SOUND(host, entype);
+         _Func = new Func_SOUND(host, entype, mediaElement);
          _Func.Index = index;
 
          //this.textTitle.MouseClick += gb_FunctionName_MouseClick;
          textTitle.Text = "Sound";
+
+         if(entype == Function.tenTYPE.TYPE_CONSTANT)
+         {
+            slider_Duration.IsEnabled = false;
+            slider_StartDelay.IsEnabled = false;
+            slider_Repeats.IsEnabled = false;
+            checkBox_Loop.IsChecked = true;
+            checkBox_Loop.IsEnabled = false;
+            textBlock_Duration.Visibility = Visibility.Collapsed;
+            textBlock_StartDelay.Visibility = Visibility.Collapsed;
+            textBlock_Repeats.Visibility = Visibility.Collapsed;
+         }
 
          _Func.FuncButtonType = typeof(Function_Button_SOUND);
 
@@ -45,7 +57,7 @@ namespace HalloweenControllerRPi.Function_GUI
          
          _Func.TimerTick += UpdatePosition;
       }
-
+      
       private async void GetListofSounds()
       {
          int noOfSounds;
@@ -76,8 +88,6 @@ namespace HalloweenControllerRPi.Function_GUI
       private void UpdatePosition(object sender, EventArgs e)
       {
          progressBar_Position.Maximum = _Func.SoundDuration_ms;
-         textBlock_Duration.Text = "Duration: " + _Func.SoundDuration_ms.ToString() + " (ms)";
-
          progressBar_Position.Value = (int)_Func.activePlaybackDevice.Position.TotalMilliseconds;
       }
 
@@ -103,7 +113,7 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          _Func.Loop = (sender as CheckBox).IsChecked;
 
-         if (_Func.Loop == true)
+         if ((_Func.Loop == true) && (_Func.Type != Function.tenTYPE.TYPE_CONSTANT))
             slider_Repeats.IsEnabled = true;
          else
             slider_Repeats.IsEnabled = false;

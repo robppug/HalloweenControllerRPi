@@ -20,6 +20,7 @@ namespace HalloweenControllerRPi.Functions
       private uint _Repeats;
       private uint RepeatCount;
       private bool? _Looping;
+      private bool _playing;
       public List<StorageFile> lSoundFiles;
       public MediaElement activePlaybackDevice;
       public IRandomAccessStream sSoundStream;
@@ -55,21 +56,21 @@ namespace HalloweenControllerRPi.Functions
 
       public Func_SOUND() { }
 
-      public Func_SOUND(IHostApp host, tenTYPE entype) : base(host, entype)
+      public Func_SOUND(IHostApp host, tenTYPE entype, MediaElement mediaE) : base(host, entype)
       {
-         activePlaybackDevice = new MediaElement();
+         activePlaybackDevice = mediaE;
          activePlaybackDevice.RealTimePlayback = true;
 
          lSoundFiles = new List<StorageFile>();
 
          FunctionKeyCommand = new Command("SOUND", 'S');
 
-         evOnDelayEnd += new EventHandler(OnTrigger);
-         evOnDurationEnd += new EventHandler(OnDurationEnd);
-         
+         evOnDelayEnd += OnTrigger;
+         evOnDurationEnd += OnDurationEnd;
+
          tickTimer = new DispatcherTimer();
          tickTimer.Tick += tickTimer_Elapsed;
-         vSetTimerInterval(tickTimer, 1000);
+         vSetTimerInterval(tickTimer, 200);
       }
 
       void vSetTimerInterval(DispatcherTimer t, uint value)
@@ -95,7 +96,7 @@ namespace HalloweenControllerRPi.Functions
          var files = await ApplicationData.Current.LocalCacheFolder.GetFilesAsync();
 
          lSoundFiles.Clear();
-         
+
          foreach (StorageFile file in files)
          {
             if (file.DisplayType.Contains("WAV File") || file.DisplayType.Contains("MP3 File"))
@@ -131,9 +132,15 @@ namespace HalloweenControllerRPi.Functions
 
       public void Play()
       {
-         if (activePlaybackDevice != null && sSoundStream != null && activePlaybackDevice.CurrentState != MediaElementState.Playing)
+         if (activePlaybackDevice != null && sSoundStream != null && _playing == false)
          {
             activePlaybackDevice.Play();
+            _playing = true;
+
+            if ((this as Function).Type == tenTYPE.TYPE_CONSTANT)
+            {
+               activePlaybackDevice.CurrentStateChanged += ActivePlaybackDevice_CurrentStateChanged;
+            }
 
             SoundDuration_ms = (int)activePlaybackDevice.NaturalDuration.TimeSpan.TotalMilliseconds;
 
@@ -141,16 +148,19 @@ namespace HalloweenControllerRPi.Functions
             {
                TimerTick.Invoke(this, EventArgs.Empty);
             }
-            
+
             tickTimer.Start();
          }
       }
 
-      public void Pause()
+      private void ActivePlaybackDevice_CurrentStateChanged(object sender, RoutedEventArgs e)
       {
-         if (activePlaybackDevice != null)
+         if ((_playing == true) && (activePlaybackDevice.CurrentState != MediaElementState.Playing))
          {
-            activePlaybackDevice.Pause();
+            if (base.evOnDurationEnd != null)
+            {
+               base.evOnDurationEnd.Invoke(this, EventArgs.Empty);
+            }
          }
       }
 
@@ -159,6 +169,8 @@ namespace HalloweenControllerRPi.Functions
          if (activePlaybackDevice != null)
          {
             activePlaybackDevice.Stop();
+            _playing = false;
+
             tickTimer.Stop();
 
             if (TimerTick != null)
@@ -175,23 +187,23 @@ namespace HalloweenControllerRPi.Functions
       /// <param name="e"></param>
       private void OnTrigger(object sender, EventArgs e)
       {
-         if (activePlaybackDevice.CurrentState != MediaElementState.Playing)
+         if ((_playing != true) || ((this as Function).Type == tenTYPE.TYPE_CONSTANT))
          {
             Play();
 
             RepeatCount = _Repeats;
          }
-         else if ((_Looping == true) && (RepeatCount > 0))
+         else if ((_Looping == true) || (RepeatCount > 0))
          {
-            RepeatCount--;
-            Stop();
+            if(RepeatCount > 0)
+               RepeatCount--;
             Play();
          }
       }
 
       private void OnDurationEnd(object sender, EventArgs e)
       {
-         if ((_Looping == true) && (RepeatCount > 0))
+         if ((_Looping == true) || (RepeatCount > 0))
          {
             base.evOnTrigger.Invoke(sender, EventArgs.Empty);
          }

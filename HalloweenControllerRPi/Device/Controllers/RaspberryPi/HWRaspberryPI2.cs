@@ -240,7 +240,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          for (uint i = Inputs; i > 0; i--)
          {
-            lINPUTs.Add(new HWRaspberryPI_INPUT(i, gpioController.OpenPin((int)tenInputPins.INPUT_PIN_04));
+            lINPUTs.Add(new HWRaspberryPI_INPUT(i, gpioController.OpenPin((int)tenInputPins.INPUT_PIN_04)));
             lINPUTs[(int)i].InputLevelChanged += HWRaspberryPI2_InputLevelChanged;
          }
 
