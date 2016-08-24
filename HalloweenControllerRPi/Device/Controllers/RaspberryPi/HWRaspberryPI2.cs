@@ -45,8 +45,10 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       private static I2cDevice i2cDevice;
       private static I2cController i2cController;
-      private static GpioController gpioController;
       private static I2cConnectionSettings i2cSettings;
+
+      private static GpioController gpioController;
+
       private static Stopwatch sWatch;
       private static long TriggerTime;
 
@@ -65,7 +67,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          if (LightningProvider.IsLightningEnabled == true)
          {
-            gpioController = GpioController.GetDefault();
+            GetControllers();
          }
          else
          {
@@ -207,10 +209,15 @@ namespace HalloweenControllerRPi.Device.Controllers
          return fullCommand.ToString();
       }
 
+      private async void GetControllers()
+      {
+         gpioController = await GpioController.GetDefaultAsync();
+
+         i2cController = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
+      }
+
       public async void OnConnect()
       {
-         i2cController = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
-
          i2cDevice = i2cController.GetDevice(i2cSettings);
 
          byte[] buffer = new byte[10];
@@ -233,7 +240,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          for (uint i = Inputs; i > 0; i--)
          {
-            lINPUTs.Add(new HWRaspberryPI_INPUT(i, (int)tenInputPins.INPUT_PIN_04));
+            lINPUTs.Add(new HWRaspberryPI_INPUT(i, gpioController.OpenPin((int)tenInputPins.INPUT_PIN_04));
             lINPUTs[(int)i].InputLevelChanged += HWRaspberryPI2_InputLevelChanged;
          }
 

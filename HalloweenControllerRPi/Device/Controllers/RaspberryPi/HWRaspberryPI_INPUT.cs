@@ -31,13 +31,13 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       public delegate void EventHandlerInput(object sender, EventArgsINPUT e);
       public event EventHandlerInput InputLevelChanged;
 
-      public HWRaspberryPI_INPUT(uint chan, int pin)
+      public HWRaspberryPI_INPUT(uint chan, GpioPin pin)
       {
          _triggerLevel = TriggerLvl.tLow;
 
          Channel = chan;
 
-         _Pin = GpioController.GetDefault().OpenPin(pin);
+         _Pin = pin;
          _LastPin = _Pin;
       }
 
