@@ -36,9 +36,22 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
          _triggerLevel = TriggerLvl.tLow;
 
          Channel = chan;
-         
+
          _Pin = pin;
          _LastPin = _Pin;
+
+         _Pin.ValueChanged += Pin_ValueChanged;
+      }
+
+      private void Pin_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
+      {
+         GpioPinEdge gpEdge = args.Edge;
+
+         if (   ((gpEdge == GpioPinEdge.RisingEdge) && (TriggerLevel == TriggerLvl.tHigh))
+             || ((gpEdge == GpioPinEdge.FallingEdge) && (TriggerLevel == TriggerLvl.tLow)))
+         {
+            InputLevelChanged.Invoke(this, new EventArgsINPUT(TriggerLevel));
+         }
       }
 
       public uint Channel
@@ -61,29 +74,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 
       public void Tick()
       {
-         bool validTrigger = false;
-
-         if (TriggerLevel == TriggerLvl.tHigh)
-         {
-            if ((_LastPin.Read() == GpioPinValue.Low) && (_Pin.Read() == GpioPinValue.High))
-            {
-               validTrigger = true;
-            }
-         }
-         else if (TriggerLevel == TriggerLvl.tLow)
-         {
-            if ((_LastPin.Read() == GpioPinValue.High) && (_Pin.Read() == GpioPinValue.Low))
-            {
-               validTrigger = true;
-            }
-         }
-
-         if ((validTrigger == true) && (InputLevelChanged != null))
-         {
-            InputLevelChanged.Invoke(this, new EventArgsINPUT(TriggerLevel));
-         }
-
-         _LastPin = _Pin;
       }
    }
 }
