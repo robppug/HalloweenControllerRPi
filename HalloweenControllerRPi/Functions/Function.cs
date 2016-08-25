@@ -54,6 +54,14 @@ namespace HalloweenControllerRPi.Functions
             _cFuncIndex = cFuncIndex;
             _u32FuncValue = u32FuncValue;
          }
+
+         public bool UserStopped
+         {
+            get
+            {
+               return (_cFunc == 0 && _cFuncIndex == 0 && _u32FuncValue == 0);
+            }
+         }
       }
 
       public Function() 
