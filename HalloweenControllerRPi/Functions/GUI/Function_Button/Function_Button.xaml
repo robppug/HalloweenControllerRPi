@@ -4,23 +4,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="using:HalloweenControllerRPi"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DesignHeight="120"
-             d:DesignWidth="20"
+             d:DesignHeight="40"
+             d:DesignWidth="40"
              UseLayoutRounding="True"
              mc:Ignorable="d">
-   <Grid Background="LightSlateGray">
-      <TextBlock x:Name="textBlock"
-                 Margin="-40,45,-45,45"
-                 FontWeight="Bold"
-                 RenderTransformOrigin="0.5,0.5"
-                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                 Text="FUNCTION"
-                 TextAlignment="Center"
-                 UseLayoutRounding="True">
-         <TextBlock.RenderTransform>
-            <CompositeTransform Rotation="-90" />
-         </TextBlock.RenderTransform>
-      </TextBlock>
+   <Grid Background="LightSlateGray" MaxWidth="40" MaxHeight="40" MinHeight="40" MinWidth="40">
+      <Image x:Name="image" MaxWidth="40" MaxHeight="40" MinHeight="40" MinWidth="40">
+         <ToolTipService.ToolTip>
+            <TextBlock Text="{Binding ElementName=image, Path=ToolTip}"/>
+         </ToolTipService.ToolTip>
+      </Image>
    </Grid>
 
 </UserControl>

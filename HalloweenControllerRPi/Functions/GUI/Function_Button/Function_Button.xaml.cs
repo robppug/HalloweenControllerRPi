@@ -17,6 +17,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
@@ -33,6 +34,7 @@ namespace HalloweenControllerRPi
       public bool IsRemoveable { get; set; }
       public bool OneOnly { get; set; }
       public uint Index { get; set; }
+      public string ToolTip { get; set; }
 
       public Function_Button()
       {
@@ -49,7 +51,6 @@ namespace HalloweenControllerRPi
       {
          GUIType = guitype;
 
-         textBlock.Text = text;
          Index = 0;
       }
 
@@ -64,12 +65,13 @@ namespace HalloweenControllerRPi
          : this(guitype, text, color)
       {
          Index = index;
-         textBlock.Text = text + Convert.ToString(" #" + index.ToString());
+
+         ToolTip = text + " #" + index.ToString();
       }
 
-      public void SetImage(Image img)
+      public void SetImage(Uri img)
       {
-         //button_Function.Image = img;
+         image.Source = new BitmapImage(img);
       }
 
       public System.Xml.Schema.XmlSchema GetSchema()

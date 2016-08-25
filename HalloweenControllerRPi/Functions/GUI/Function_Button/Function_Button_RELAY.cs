@@ -16,7 +16,7 @@ namespace HalloweenControllerRPi.Function_GUI
          IsRemoveable = true;
          OneOnly = false;
 
-         //SetImage((Image)HalloweenController.Properties.Resources.relay);
+         SetImage(new Uri("ms-appx:///Assets/FunctionButtonRELAY.png"));
       }
 
       public Function_Button_RELAY(uint idx, Function.tenTYPE enType)

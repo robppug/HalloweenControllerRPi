@@ -16,7 +16,7 @@ namespace HalloweenControllerRPi.Function_GUI
          IsRemoveable = false;
          OneOnly = false;
 
-         //SetImage((Image)HalloweenController.Properties.Resources.sound);
+         SetImage(new Uri("ms-appx:///Assets/FunctionButtonSOUND.png"));
       }
 
       public Function_Button_SOUND(uint idx, Function.tenTYPE enType)

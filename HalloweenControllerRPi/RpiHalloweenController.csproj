@@ -160,6 +160,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\blank.png" />
+    <Content Include="Assets\FunctionButtonINPUT.png" />
+    <Content Include="Assets\FunctionButtonPWM.png" />
+    <Content Include="Assets\FunctionButtonRELAY.png" />
+    <Content Include="Assets\FunctionButtonSOUND.png" />
     <Content Include="Assets\input.png" />
     <Content Include="Assets\pwm.png" />
     <Content Include="Assets\relay.png" />

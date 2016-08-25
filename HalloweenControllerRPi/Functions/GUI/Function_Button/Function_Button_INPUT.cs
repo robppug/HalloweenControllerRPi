@@ -1,4 +1,5 @@
 ﻿using HalloweenControllerRPi.Functions;
+using System;
 using Windows.UI;
 
 namespace HalloweenControllerRPi.Function_GUI
@@ -11,7 +12,7 @@ namespace HalloweenControllerRPi.Function_GUI
          IsRemoveable = false;
          OneOnly = true;
 
-         //SetImage((Image)HalloweenController.Properties.Resources.input);
+         SetImage(new Uri("ms-appx:///Assets/FunctionButtonINPUT.png"));
       }
 
       public Function_Button_INPUT(uint idx, Function.tenTYPE enType)

@@ -16,7 +16,7 @@ namespace HalloweenControllerRPi.Function_GUI
          IsRemoveable = true;
          OneOnly = false;
 
-         //SetImage((Image)HalloweenController.Properties.Resources.pwm);
+         SetImage(new Uri("ms-appx:///Assets/FunctionButtonPWM.png"));
       }
 
       public Function_Button_PWM(uint idx, Function.tenTYPE enType)

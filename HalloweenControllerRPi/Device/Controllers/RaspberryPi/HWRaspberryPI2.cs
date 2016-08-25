@@ -235,17 +235,17 @@ namespace HalloweenControllerRPi.Device.Controllers
          await Task.Delay(1);
 
          //Turn OFF all PWM channels
-         foreach (tenPWMChannels c in Enum.GetValues(typeof(tenPWMChannels)))
+         for (uint i = 0; i < PWMs; i++)
          {
-            lPWMs.Add(new HWRaspberryPI_PWM((uint)c));
+            lPWMs.Add(new HWRaspberryPI_PWM((uint)i));
 
-            i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)lPWMs[(int)c].Channel * 4)), 0x00 });
-            i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)lPWMs[(int)c].Channel * 4)), 0x00 });
-            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)lPWMs[(int)c].Channel * 4)), 0x00 });
-            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)lPWMs[(int)c].Channel * 4)), 0x00 });
+            i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
+            i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
+            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
+            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
          }
 
-         for (uint i = Inputs; i > 0; i--)
+         for (uint i = 0; i < Inputs; i++)
          {
             HWRaspberryPI_INPUT piInput;
             GpioPin pin = gpioController.OpenPin((int)tenInputPins.INPUT_PIN_04);
@@ -263,7 +263,7 @@ namespace HalloweenControllerRPi.Device.Controllers
             lINPUTs.Add(piInput);
          }
 
-         for (uint i = Relays; i > 0; i--)
+         for (uint i = 0; i < Relays; i++)
          {
             HWRaspberryPI_RELAY piRelay;
             GpioPin pin = gpioController.OpenPin((int)tenOutputPins.OUTPUT_PIN_07);
