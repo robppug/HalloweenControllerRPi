@@ -43,6 +43,12 @@ namespace HalloweenControllerRPi.Device.Controllers
          INPUT_PIN_06 = 6
       };
 
+      public enum tenOutputPins
+      {
+         OUTPUT_PIN_07 = 7,
+         OUTPUT_PIN_08 = 8,
+         OUTPUT_PIN_09 = 9
+      };
       private static I2cDevice i2cDevice;
       private static I2cController i2cController;
       private static I2cConnectionSettings i2cSettings;
@@ -54,6 +60,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       private static List<HWRaspberryPI_PWM> lPWMs = new List<HWRaspberryPI_PWM>();
       private static List<HWRaspberryPI_INPUT> lINPUTs = new List<HWRaspberryPI_INPUT>();
+      private static List<HWRaspberryPI_RELAY> lRELAYs = new List<HWRaspberryPI_RELAY>();
 
       private static byte[] bMODE1 = new byte[1] { 0x00 };
       private static byte[] bMODE2 = new byte[1] { 0x01 };
@@ -240,8 +247,37 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          for (uint i = Inputs; i > 0; i--)
          {
-            lINPUTs.Add(new HWRaspberryPI_INPUT(i, gpioController.OpenPin((int)tenInputPins.INPUT_PIN_04)));
-            lINPUTs[(int)i].InputLevelChanged += HWRaspberryPI2_InputLevelChanged;
+            HWRaspberryPI_INPUT piInput;
+            GpioPin pin = gpioController.OpenPin((int)tenInputPins.INPUT_PIN_04);
+            GpioPinDriveMode gpioDriveMode;
+
+            gpioDriveMode = GpioPinDriveMode.InputPullDown;
+            if (pin.IsDriveModeSupported(gpioDriveMode) == true)
+            {
+               pin.SetDriveMode(gpioDriveMode);
+            }
+
+            piInput = new HWRaspberryPI_INPUT(i, pin);
+            piInput.InputLevelChanged += HWRaspberryPI2_InputLevelChanged;
+
+            lINPUTs.Add(piInput);
+         }
+
+         for (uint i = Relays; i > 0; i--)
+         {
+            HWRaspberryPI_RELAY piRelay;
+            GpioPin pin = gpioController.OpenPin((int)tenOutputPins.OUTPUT_PIN_07);
+            GpioPinDriveMode gpioDriveMode;
+
+            gpioDriveMode = GpioPinDriveMode.OutputOpenSourcePullDown;
+            if (pin.IsDriveModeSupported(gpioDriveMode) == true)
+            {
+               pin.SetDriveMode(gpioDriveMode);
+            }
+
+            piRelay = new HWRaspberryPI_RELAY(i, pin);
+
+            lRELAYs.Add(piRelay);
          }
 
          //Create the Background Task

@@ -9,6 +9,12 @@ namespace HalloweenControllerRPi.Functions
 {
    public class Func_RELAY : Function
    {
+      public enum OutputLevel
+      {
+         tLow = 0,
+         tHigh = 1
+      };
+
       public Func_RELAY() { }
 
       public Func_RELAY(IHostApp host, tenTYPE entype)

@@ -4,36 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Gpio;
-using static HalloweenControllerRPi.Functions.Func_INPUT;
+using static HalloweenControllerRPi.Functions.Func_RELAY;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 {
-   class HWRaspberryPI_INPUT
+   class HWRaspberryPI_RELAY
    {
-      public class EventArgsINPUT : EventArgs
-      {
-         private TriggerLvl _trgLvl;
-
-         public EventArgsINPUT(TriggerLvl trgLvl)
-         {
-            _trgLvl = trgLvl;
-         }
-
-         public TriggerLvl TriggerLevel { get { return _trgLvl; } }
-      }
-
       private uint _channelIdx;
-      private TriggerLvl _triggerLevel;
-      private TimeSpan _debTime;
+      private OutputLevel _outputLevel;
       private GpioPin _Pin;
       private GpioPin _LastPin;
 
-      public delegate void EventHandlerInput(object sender, EventArgsINPUT e);
-      public event EventHandlerInput InputLevelChanged;
-
-      public HWRaspberryPI_INPUT(uint chan, GpioPin pin)
+      public HWRaspberryPI_RELAY(uint chan, GpioPin pin)
       {
-         _triggerLevel = TriggerLvl.tLow;
+         _outputLevel = OutputLevel.tLow;
 
          Channel = chan;
          
@@ -47,10 +31,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
          get { return _channelIdx; }
       }
 
-      public TriggerLvl TriggerLevel
+      public OutputLevel OutputLevel
       {
-         get { return _triggerLevel; }
-         set { _triggerLevel = value; }
+         get { return _outputLevel; }
+         set { _outputLevel = value; }
       }
 
       public GpioPinValue CurrentPinLevel
@@ -63,24 +47,19 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       {
          bool validTrigger = false;
 
-         if (TriggerLevel == TriggerLvl.tHigh)
+         if (OutputLevel == OutputLevel.tHigh)
          {
             if ((_LastPin.Read() == GpioPinValue.Low) && (_Pin.Read() == GpioPinValue.High))
             {
                validTrigger = true;
             }
          }
-         else if (TriggerLevel == TriggerLvl.tLow)
+         else if (OutputLevel == OutputLevel.tLow)
          {
             if ((_LastPin.Read() == GpioPinValue.High) && (_Pin.Read() == GpioPinValue.Low))
             {
                validTrigger = true;
             }
-         }
-
-         if ((validTrigger == true) && (InputLevelChanged != null))
-         {
-            InputLevelChanged.Invoke(this, new EventArgsINPUT(TriggerLevel));
          }
 
          _LastPin = _Pin;
