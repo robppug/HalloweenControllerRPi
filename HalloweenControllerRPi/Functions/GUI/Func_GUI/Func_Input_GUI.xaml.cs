@@ -2,6 +2,7 @@
 using System;
 using System.Xml.Serialization;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
@@ -11,16 +12,19 @@ namespace HalloweenControllerRPi.Function_GUI
    public sealed partial class Func_Input_GUI : UserControl, IXmlSerializable, IFunctionGUI
    {
       private Func_INPUT _Func;
+      private bool _boInitialised = false;
 
       public Function Func
       {
          get { return this._Func; }
          set { this._Func = (value as Func_INPUT); }
       }
-
+      
       public Func_Input_GUI()
       {
          this.InitializeComponent();
+
+         _boInitialised = true;
       }
 
       public Func_Input_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
@@ -45,10 +49,19 @@ namespace HalloweenControllerRPi.Function_GUI
          }
       }
 
+      private void slider_Debounce_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+      {
+         if (_boInitialised == true)
+         {
+            this._Func.Duration_ms = (uint)(sender as Slider).Value;
+            this.textDebounce.Text = "Debounce Time: " + this._Func.DebounceTime_ms.ToString() + " (ms)";
+         }
+      }
+
       #region XML Handling
       private void comboBox_TrigEdge_SelectionChanged(object sender, SelectionChangedEventArgs e)
       {
-         this._Func.triggerLevel = (Func_INPUT.TriggerLvl)(sender as ComboBox).SelectedIndex;
+         this._Func.TriggerLevel = (Func_INPUT.tenTriggerLvl)(sender as ComboBox).SelectedIndex;
       }
 
       public void ReadXml(System.Xml.XmlReader reader)
@@ -57,7 +70,7 @@ namespace HalloweenControllerRPi.Function_GUI
 
          this._Func.ReadXml(reader);
 
-         this.comboBox_TrigEdge.SelectedIndex = (int)this._Func.triggerLevel;
+         this.comboBox_TrigEdge.SelectedIndex = (int)this._Func.TriggerLevel;
       }
 
       public System.Xml.Schema.XmlSchema GetSchema()

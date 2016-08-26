@@ -9,11 +9,7 @@
              UseLayoutRounding="True"
              mc:Ignorable="d">
    <Grid Background="LightSlateGray" MaxWidth="40" MaxHeight="40" MinHeight="40" MinWidth="40">
-      <Image x:Name="image" MaxWidth="40" MaxHeight="40" MinHeight="40" MinWidth="40">
-         <ToolTipService.ToolTip>
-            <TextBlock Text="{Binding ElementName=image, Path=ToolTip}"/>
-         </ToolTipService.ToolTip>
-      </Image>
+      <Image x:Name="image" MaxWidth="40" MaxHeight="40" MinHeight="40" MinWidth="40"> </Image>
    </Grid>
 
 </UserControl>

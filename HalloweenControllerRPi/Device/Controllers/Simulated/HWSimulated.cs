@@ -229,7 +229,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          _Connected = false;
       }
 
-      public override void FireCommand(string cmd)
+      public override void TransmitCommand(string cmd)
       {
          Command function;
          Command subFunction;
@@ -327,8 +327,8 @@ namespace HalloweenControllerRPi.Device.Controllers
       /// Handling of Rx SERIAL command interpretation
       /// </summary>
       /// <param name="data"></param>
-      /// <returns></returns>
-      public override bool ProcessCommandRecieved(List<char> data)
+      /// <returns>True if COMMAND was successfully handled</returns>
+      public override bool ReceivedCommand(List<char> data)
       {
          bool l_Result = false;
          Command function;
@@ -351,7 +351,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                      data.RemoveRange(0, 8);
 
                      //Packet received, allow active groups to process.
-                     FireCommandReceived(function.Value, cInputIdx, cInputLevel);
+                     TriggerCommandReceived(function.Value, cInputIdx, cInputLevel);
                      l_Result = true;
                   }
                   break;

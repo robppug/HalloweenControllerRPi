@@ -44,13 +44,7 @@ namespace HalloweenControllerRPi
 
          HostApp = this;
 
-         this.Available_Statics.Items.Add(new Function_Button_SOUND(4));
-
-
-         foreach (Function_Button fb in Available_Board.Items)
-         {
-            fb.Height = Available_Board.Height;
-         }
+         this.Available_Statics.Items.Add(new Function_Button_SOUND(1));
 
          lGroupContainers.Add(groupContainer_AlwaysActive);
          lGroupContainers.Add(groupContainer_Triggered);
@@ -70,12 +64,12 @@ namespace HalloweenControllerRPi
          }
       }
 
-      private async void OnLoaded(object sender, RoutedEventArgs e)
+      private void OnLoaded(object sender, RoutedEventArgs e)
       {
          //HWInterface HWDevice = new HWSimulated();
          HWInterface HWDevice = new HWRaspberryPI2();
          
-         //HWDevice.CommandReceived += this.ev_CommandReceived_SerialPort;
+         HWDevice.CommandReceived += HWDevice_CommandReceived;
          //HWDevice.VersionInfoUpdated += this.ev_VersionInfoUpdated;
          //HWDevice.FunctionAdded += this.ev_FunctionAdded;
 
@@ -108,38 +102,25 @@ namespace HalloweenControllerRPi
          }
          catch { }
       }
-      
 
-      private void pivotContainer_SelectionChanged(object sender, SelectionChangedEventArgs e)
+      /// <summary>
+      /// COMMAND received from HW Device that needs processing.
+      /// </summary>
+      /// <param name="sender"></param>
+      /// <param name="args"></param>
+      private void HWDevice_CommandReceived(object sender, CommandEventArgs args)
       {
-         Pivot pItem = (sender as Pivot);
-
-         switch(pItem.SelectedIndex)
-         {
-            case 0:
-               break;
-            case 1:
-               break;
-            default:
-               break;
-         }
+         /* HW Device has received a COMMAND that needs processing */
+         groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, (uint)args.Par2);
       }
 
-      private void buttonAdd_Click(object sender, RoutedEventArgs e)
+      /// <summary>
+      /// Transmit the COMMAND received to the HW Device/s.
+      /// </summary>
+      /// <param name="cmd"></param>
+      public void TransmitCommandToDevice(string cmd)
       {
-         this.groupContainer_Triggered.AddTriggerGroup();
-      }
-
-      private void buttonTrigger_Click(object sender, RoutedEventArgs e)
-      {
-         CommandEventArgs args = new CommandEventArgs('I', (char)1, (char)1);
-
-         this.groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, args.Par2);
-      }
-
-      public void FireCommand(string cmd)
-      {
-         lHWInterfaces[0].FireCommand(cmd);
+         lHWInterfaces[0].TransmitCommand(cmd);
       }
 
       public string BuildCommand(string function, string subFunc, params string[] data)
@@ -171,6 +152,19 @@ namespace HalloweenControllerRPi
          groupContainer_AlwaysActive.TriggerEnd(func);
       }
 
+      #region /* UI HANDLING */
+      private void buttonAdd_Click(object sender, RoutedEventArgs e)
+      {
+         this.groupContainer_Triggered.AddTriggerGroup();
+      }
+
+      private void buttonTrigger_Click(object sender, RoutedEventArgs e)
+      {
+         CommandEventArgs args = new CommandEventArgs('I', (char)1, (char)1);
+
+         this.groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, args.Par2);
+      }
+
       private void buttonStart_Click(object sender, RoutedEventArgs e)
       {
          groupContainer_AlwaysActive.ProcessAlwaysActives(true);
@@ -190,6 +184,6 @@ namespace HalloweenControllerRPi
             c.OnDragStarting(sender, e);
          }
       }
-
+      #endregion
    }
 }

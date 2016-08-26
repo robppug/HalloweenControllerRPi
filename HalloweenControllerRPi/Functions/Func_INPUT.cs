@@ -9,14 +9,42 @@ namespace HalloweenControllerRPi.Functions
 {
    public class Func_INPUT : Function
    {
-      public enum TriggerLvl
+      public enum tenTriggerLvl
       {
          tLow = 0,
          tHigh = 1
       };
-      public TriggerLvl triggerLevel;
 
-      public Func_INPUT() { }
+      private uint _debounceTime_ms;
+      private tenTriggerLvl _triggerLevel;
+
+      public tenTriggerLvl TriggerLevel
+      {
+         get { return _triggerLevel; }
+         set { _triggerLevel = value; }
+      }
+
+      public uint DebounceTime_ms
+      {
+         get { return _debounceTime_ms; }
+         set
+         {
+            List<string> data = new List<string>();
+
+            _debounceTime_ms = value;
+
+            data.Add(Index.ToString());
+            data.Add(_debounceTime_ms.ToString());
+
+            /* Notify the HW to configure its input debouncing time */
+            this.SendCommand("DEBTIME", data.ToArray());
+         }
+      }
+      
+      public Func_INPUT()
+      {
+
+      }
 
       public Func_INPUT(IHostApp host, tenTYPE entype)
          : base(host, entype)
@@ -28,37 +56,35 @@ namespace HalloweenControllerRPi.Functions
 
       private void OnTrigger(object sender, EventArgs e)
       {
-         //throw new NotImplementedException();
+         throw new NotImplementedException();
       }
 
       public override bool boCheckTriggerConditions(uint u32value)
       {
-         return (u32value == (uint)triggerLevel);
+         return (u32value == (uint)_triggerLevel);
       }
 
       public override void WriteXml(System.Xml.XmlWriter writer)
       {
          base.WriteXml(writer);
 
-         writer.WriteAttributeString("TriggerLevel", triggerLevel.GetHashCode().ToString());
+         writer.WriteAttributeString("TriggerLevel", _triggerLevel.GetHashCode().ToString());
+         writer.WriteAttributeString("DebounceTime", _debounceTime_ms.GetHashCode().ToString());
       }
       public override void ReadXml(System.Xml.XmlReader reader)
       {
          base.ReadXml(reader);
 
+         //RPUGLIESE - Is this needed??  Check it!
          if (reader.GetAttribute("TriggerLevel") != null)
          {
-            this.triggerLevel = (TriggerLvl)Convert.ToUInt16(reader.GetAttribute("TriggerLevel"));
+            this._triggerLevel = (tenTriggerLvl)Convert.ToUInt16(reader.GetAttribute("TriggerLevel"));
          }
-      }
 
-      public override List<char> SerializeSequence()
-      {
-         /* Create the serialised data:   
-          *    "I (type) (index) (triglvl)"   */
-         this.Data.AddRange("I" + ' ' + (char)((int)this.Type + 0x30) + ' ' + (char)(this.Index + 0x30) + ' ' + (char)((int)triggerLevel + 0x30));
-
-         return this.Data;
+         if (reader.GetAttribute("DebounceTime") != null)
+         {
+            this._debounceTime_ms = Convert.ToUInt16(reader.GetAttribute("DebounceTime"));
+         }
       }
 
       public override bool boProcessRequest(char cFunc, char cFuncIndex, uint u32FuncValue)

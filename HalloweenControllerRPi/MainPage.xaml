@@ -61,8 +61,7 @@
              Margin="10,196,10,0"
              HorizontalAlignment="Stretch"
              VerticalAlignment="Stretch"
-             FontSize="10"
-             SelectionChanged="pivotContainer_SelectionChanged">
+             FontSize="10">
          <PivotItem x:Name="pivotItemContainer"
                     Margin="0,0,0,0"
                     FontSize="10"

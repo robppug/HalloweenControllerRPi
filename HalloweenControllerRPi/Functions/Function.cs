@@ -6,17 +6,7 @@ using Windows.UI.Xaml;
 
 namespace HalloweenControllerRPi.Functions
 {
-   /// <summary>
-   /// Provides required functionality to 'serialize' information for transmission.
-   /// </summary>
-   interface ISerializableSequence
-   {
-      List<char> Data { get; set; }
-
-      List<char> SerializeSequence();
-   }
-
-   abstract public class Function : IFunction, IXmlSerializable, ISerializableSequence
+   abstract public class Function : IFunction, IXmlSerializable
    {
       public enum tenTYPE
       {
@@ -180,7 +170,7 @@ namespace HalloweenControllerRPi.Functions
                data = this._HostApp.BuildCommand(this.FunctionKeyCommand.Key, commandKey, lData);
 
                /* TX the command */
-               this._HostApp.FireCommand(data);
+               this._HostApp.TransmitCommandToDevice(data);
             }
             else
             {
@@ -203,32 +193,32 @@ namespace HalloweenControllerRPi.Functions
       /// </summary>
       /// <param name="cFunc"></param>
       /// <param name="cFuncIndex"></param>
-      /// <param name="u32FuncValue"></param>
+      /// <param name="value"></param>
       /// <returns></returns>
-      virtual public bool boProcessRequest(char cFunc, char cFuncIndex, uint u32FuncValue)
+      virtual public bool boProcessRequest(char cFunc, char cFuncIndex, uint value)
       {
          if (evOnTrigger != null)
          {
-            evOnTrigger.Invoke(this, new ProcessFunctionArgs(cFunc, cFuncIndex, u32FuncValue));
+            evOnTrigger.Invoke(this, new ProcessFunctionArgs(cFunc, cFuncIndex, value));
          }
 
          return true;
       }
 
-      public void vStopFunction(char cFunc, char cFuncIndex, uint u32FuncValue)
+      public void vStopFunction(char cFunc, char cFuncIndex, uint value)
       {
          if (evOnDurationEnd != null)
          {
-            evOnDurationEnd.Invoke(this, new ProcessFunctionArgs(cFunc, cFuncIndex, u32FuncValue));
+            evOnDurationEnd.Invoke(this, new ProcessFunctionArgs(cFunc, cFuncIndex, value));
          }
       }
 
       /// <summary>
       /// Handles checking for Trigger conditions.
       /// </summary>
-      /// <param name="u32FuncValue"></param>
+      /// <param name="value"></param>
       /// <returns></returns>
-      virtual public bool boCheckTriggerConditions(uint u32FuncValue)
+      virtual public bool boCheckTriggerConditions(uint value)
       {
          return true;
       }
@@ -315,7 +305,5 @@ namespace HalloweenControllerRPi.Functions
       {
          writer.WriteAttributeString("Index", this.Index.ToString());
       }
-
-      abstract public List<char> SerializeSequence();
    }
 }

@@ -13,5 +13,7 @@
       <TextBlock x:Name="textTitle" TextWrapping="Wrap" Text="Input (#)" Foreground="Black" Margin="5,0,0,0"/>
       <ComboBox x:Name="comboBox_TrigEdge" HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="Auto" Margin="5,26,5,0" Height="29" FontSize="12" SelectionChanged="comboBox_TrigEdge_SelectionChanged"/>
       <TextBlock x:Name="textTriggerEdge" TextWrapping="Wrap" Text="Trigger Edge" Foreground="Black" Margin="60,55,0,0" FontSize="10"/>
+      <Slider x:Name="slider_Debounce" VerticalAlignment="Top" Margin="5,60,5,0" Value="50" Maximum="200" Minimum="10" TickFrequency="10" ValueChanged="slider_Debounce_ValueChanged"/>
+      <TextBlock x:Name="textDebounce" TextWrapping="Wrap" Text="Debounce Time: 50 (ms)" Foreground="Black" Margin="60,80,0,0" FontSize="10"/>
    </Grid>
 </UserControl>

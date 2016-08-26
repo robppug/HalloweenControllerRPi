@@ -19,10 +19,6 @@ namespace HalloweenControllerRPi.Device
          this.Value = value;
       }
 
-      public void SendCommand(uint command)
-      {
-      }
-
       public override string ToString()
       {
          return this.Key;

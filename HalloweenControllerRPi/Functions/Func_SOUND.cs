@@ -227,10 +227,5 @@ namespace HalloweenControllerRPi.Functions
          writer.WriteAttributeString("Repeats", Repeats.ToString());
          writer.WriteAttributeString("Volume", (activePlaybackDevice != null ? activePlaybackDevice.Volume.ToString() : "1"));
       }
-
-      public override List<char> SerializeSequence()
-      {
-         return null;
-      }
    }
 }

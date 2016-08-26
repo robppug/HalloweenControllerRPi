@@ -9,13 +9,15 @@ namespace HalloweenControllerRPi.Functions
 {
    public class Func_RELAY : Function
    {
-      public enum OutputLevel
+      public enum tenOutputLevel
       {
          tLow = 0,
          tHigh = 1
       };
 
-      public Func_RELAY() { }
+      public Func_RELAY()
+      {
+      }
 
       public Func_RELAY(IHostApp host, tenTYPE entype)
          : base(host, entype)
@@ -36,7 +38,7 @@ namespace HalloweenControllerRPi.Functions
          List<string> lData = new List<string>();
 
          lData.Add(Index.ToString());
-         lData.Add("1");
+         lData.Add(tenOutputLevel.tHigh.ToString());
 
          this.SendCommand("SET", lData.ToArray());
       }
@@ -57,16 +59,6 @@ namespace HalloweenControllerRPi.Functions
 
          writer.WriteAttributeString("Duration", Duration_ms.ToString());
          writer.WriteAttributeString("Delay", Delay_ms.ToString());
-      }
-
-      public override List<char> SerializeSequence()
-      {
-
-         /* Create the serialised data:   
-          *    "R (type) (index) (duration) (delay)" */
-         this.Data.AddRange("R" + ' ' + (char)((int)this.Type + 0x30) + ' ' + (char)(this.Index + 0x30) + ' ' + Duration_ms.ToString() + ' ' + Delay_ms.ToString());
-
-         return this.Data;
       }
    }
 }

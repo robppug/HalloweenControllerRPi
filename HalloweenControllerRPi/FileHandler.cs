@@ -23,12 +23,12 @@ namespace HalloweenControllerRPi
       private StorageFile fileToLoad;
       private StorageFile fileToSave;
 
-      #region "XML Loading"
+      #region /* XML Loading */
       private async void buttonLoadSequence_Click(object sender, RoutedEventArgs e)
       {
          try
          {
-            StorageFile fileToLoad = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.GetFileAsync("HWControllerSequence.sqn");
+            fileToLoad = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.GetFileAsync("HWControllerSequence.sqn");
          }
          catch { fileToLoad = null; }
 
@@ -65,7 +65,7 @@ namespace HalloweenControllerRPi
          //TabPage tabPage = null;
          string data = "";
          uint groupIdx = 0;
-         int noOfElements = 1;
+         //int noOfElements = 1;
          
          if (reader.ReadToFollowing("HalloweenControllerRPi.MainPage") == true)
          {
@@ -94,9 +94,6 @@ namespace HalloweenControllerRPi
                   if (reader.NodeType == XmlNodeType.Element)
                   {
                      //pbControl.Progress = noOfElements++;
-
-                     /* Allow the GUI to update */
-                     //Application.DoEvents();
 
                      switch (reader.Name)
                      {
@@ -151,7 +148,6 @@ namespace HalloweenControllerRPi
                                     groupContainer_Triggered.AddFunctionToTriggerGroup(groupIdx, ctl);
                                  else
                                     groupContainer_AlwaysActive.AddFunctionToTriggerGroup(groupIdx, ctl);
-
                               }
                            }
                            break;
@@ -170,10 +166,10 @@ namespace HalloweenControllerRPi
       }
       #endregion
 
-      #region "XML Saving"
+      #region /* XML Saving */
       private async void buttonSaveSequence_Click(object sender, RoutedEventArgs e)
       {
-         StorageFile fileToSave = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFileAsync("HWControllerSequence.sqn", CreationCollisionOption.ReplaceExisting);
+         fileToSave = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFileAsync("HWControllerSequence.sqn", CreationCollisionOption.ReplaceExisting);
          
          if (fileToSave != null)
          {

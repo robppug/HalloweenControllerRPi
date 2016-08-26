@@ -128,14 +128,5 @@ namespace HalloweenControllerRPi.Functions
          writer.WriteAttributeString("UpdateRate", UpdateRate.ToString());
          writer.WriteAttributeString("Function", ((int)Function).ToString());
       }
-
-      public override List<char> SerializeSequence()
-      {
-         /* Create the serialised data:   
-          *    "T (type) (index) (duration) (delay) (maxlevel) (update rate) (function)" */
-         this.Data.AddRange("T" + ' ' + (char)((int)this.Type + 0x30) + ' ' + (char)(this.Index + 0x30) + ' ' + Duration_ms.ToString() + ' ' + Delay_ms.ToString() + ' ' + MaxLevel.ToString() + ' ' + UpdateRate.ToString() + ' ' + (char)((uint)_Function + 0x30));
-
-         return this.Data;
-      }
    }
 }

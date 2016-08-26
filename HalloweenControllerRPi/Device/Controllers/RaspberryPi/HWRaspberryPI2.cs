@@ -10,11 +10,13 @@ using System.Threading.Tasks;
 using Windows.Devices;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
+using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.HWRaspberryPI_INPUT;
 
 namespace HalloweenControllerRPi.Device.Controllers
 {
    class HWRaspberryPI2 : HWInterface
    {
+      #region /* ENUMS */
       private enum tenPWMChannels
       {
          enChan1 = 0,
@@ -34,8 +36,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          enChan15,
          enChan16
       };
-
-
+      
       public enum tenInputPins
       {
          INPUT_PIN_04 = 4,
@@ -49,6 +50,9 @@ namespace HalloweenControllerRPi.Device.Controllers
          OUTPUT_PIN_08 = 8,
          OUTPUT_PIN_09 = 9
       };
+      #endregion
+
+      #region /* PRIVATE */
       private static I2cDevice i2cDevice;
       private static I2cController i2cController;
       private static I2cConnectionSettings i2cSettings;
@@ -61,6 +65,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       private static List<HWRaspberryPI_PWM> lPWMs = new List<HWRaspberryPI_PWM>();
       private static List<HWRaspberryPI_INPUT> lINPUTs = new List<HWRaspberryPI_INPUT>();
       private static List<HWRaspberryPI_RELAY> lRELAYs = new List<HWRaspberryPI_RELAY>();
+      private static List<IFunctionHandler> lAllFunctions = new List<IFunctionHandler>();
 
       private static byte[] bMODE1 = new byte[1] { 0x00 };
       private static byte[] bMODE2 = new byte[1] { 0x01 };
@@ -68,8 +73,9 @@ namespace HalloweenControllerRPi.Device.Controllers
       private static byte[] LED_ON_H = new byte[1] { 0x07 };
       private static byte[] LED_OFF_L = new byte[1] { 0x08 };
       private static byte[] LED_OFF_H = new byte[1] { 0x09 };
+      #endregion
 
-
+      #region /* CONSTRUCTORS */
       public HWRaspberryPI2()
       {
          if (LightningProvider.IsLightningEnabled == true)
@@ -81,7 +87,9 @@ namespace HalloweenControllerRPi.Device.Controllers
             //throw new Exception("No supported devices found.");
          }
       }
+      #endregion
 
+      #region /* COMMAND LIST & HANDLING */
       /// <summary>
       /// Dictionary containing a list of all supported COMMANDS and SUB-COMMANDS.
       /// </summary>
@@ -98,7 +106,8 @@ namespace HalloweenControllerRPi.Device.Controllers
          {  new Command("INPUT", 'I'),
             new List<Command>
             {
-               new Command("GET", 'G')
+               new Command("GET", 'G'),
+               new Command("DEBTIME", 'D')
             }
          },
          /* Command : RELAY */
@@ -127,35 +136,9 @@ namespace HalloweenControllerRPi.Device.Controllers
       /// </summary>
       public override Dictionary<Command, List<Command>> Commands
       {
-         get
-         {
-            return _Commands;
-         }
+         get{ return _Commands; }
       }
 
-      public override uint Inputs
-      {
-         get
-         {
-            return 4;
-         }
-      }
-
-      public override uint PWMs
-      {
-         get
-         {
-            return (uint)(tenPWMChannels.enChan16 + 1);
-         }
-      }
-
-      public override uint Relays
-      {
-         get
-         {
-            return 4;
-         }
-      }
 
       private Command GetSubFunctionCommand(Command function, string subFunc)
       {
@@ -216,133 +199,6 @@ namespace HalloweenControllerRPi.Device.Controllers
          return fullCommand.ToString();
       }
 
-      private async void GetControllers()
-      {
-         gpioController = await GpioController.GetDefaultAsync();
-
-         i2cController = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
-      }
-
-      public async void OnConnect()
-      {
-         i2cDevice = i2cController.GetDevice(i2cSettings);
-
-         byte[] buffer = new byte[10];
-
-         /* Change to NORMAL mode */
-         i2cDevice.Write(new byte[2] { 0x00, 0x00 });
-
-         await Task.Delay(1);
-
-         //Turn OFF all PWM channels
-         for (uint i = 0; i < PWMs; i++)
-         {
-            lPWMs.Add(new HWRaspberryPI_PWM((uint)i));
-
-            i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
-            i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
-            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
-            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
-         }
-
-         for (uint i = 0; i < Inputs; i++)
-         {
-            HWRaspberryPI_INPUT piInput;
-            GpioPin pin = gpioController.OpenPin((int)tenInputPins.INPUT_PIN_04);
-            GpioPinDriveMode gpioDriveMode;
-
-            gpioDriveMode = GpioPinDriveMode.InputPullDown;
-            if (pin.IsDriveModeSupported(gpioDriveMode) == true)
-            {
-               pin.SetDriveMode(gpioDriveMode);
-            }
-
-            piInput = new HWRaspberryPI_INPUT(i, pin);
-            piInput.InputLevelChanged += HWRaspberryPI2_InputLevelChanged;
-
-            lINPUTs.Add(piInput);
-         }
-
-         for (uint i = 0; i < Relays; i++)
-         {
-            HWRaspberryPI_RELAY piRelay;
-            GpioPin pin = gpioController.OpenPin((int)tenOutputPins.OUTPUT_PIN_07);
-            GpioPinDriveMode gpioDriveMode;
-
-            gpioDriveMode = GpioPinDriveMode.OutputOpenSourcePullDown;
-            if (pin.IsDriveModeSupported(gpioDriveMode) == true)
-            {
-               pin.SetDriveMode(gpioDriveMode);
-            }
-
-            piRelay = new HWRaspberryPI_RELAY(i, pin);
-
-            lRELAYs.Add(piRelay);
-         }
-
-         //Create the Background Task
-         TaskFactory tTaskFactory = new TaskFactory(TaskScheduler.Current);
-
-         sWatch = new Stopwatch();
-         sWatch.Start();
-
-         await tTaskFactory.StartNew(new Action(ControllerTask), TaskCreationOptions.RunContinuationsAsynchronously);
-      }
-
-      private void HWRaspberryPI2_InputLevelChanged(object sender, HWRaspberryPI_INPUT.EventArgsINPUT e)
-      {
-         //this.ProcessCommandRecieved();
-      }
-
-      public override void Connect()
-      {
-         //Setup the GPIO, PWM and I2C drivers
-         if (LightningProvider.IsLightningEnabled)
-         {
-            LowLevelDevicesController.DefaultProvider = LightningProvider.GetAggregateProvider();
-
-            //Setup the I2C bus for access to the PWM channels
-            i2cSettings = new I2cConnectionSettings(0x40);
-            i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
-            i2cSettings.SharingMode = I2cSharingMode.Exclusive;
-
-            OnConnect();
-         }
-      }
-
-      private void ControllerTask()
-      {
-         while (sWatch.IsRunning == true)
-         {
-            TriggerTime = sWatch.ElapsedMilliseconds;
-
-            if (TriggerTime >= 1)
-            {
-               //System.Diagnostics.Debug.WriteLine(TriggerTime.ToString());
-
-               sWatch.Restart();
-               
-               foreach (HWRaspberryPI_INPUT c in lINPUTs)
-               {
-                  c.Tick();
-               }
-
-               foreach (HWRaspberryPI_PWM c in lPWMs)
-               {
-                  if (c.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
-                  {
-                     //Call the PWM channels 'tick' function
-                     c.Tick();
-
-                     i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)c.Channel * 4)), 0x00 });
-                     i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)c.Channel * 4)), 0x00 });
-                     i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)c.Channel * 4)), (byte)(c.Level & 0xFF) });
-                     i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)c.Channel * 4)), (byte)((c.Level >> 8) & 0xFF) });
-                  }
-               }
-            }
-         }
-      }
 
       /// <summary>
       /// Processed RX'ed commands and decodes the byte array, returning the Function, Sub-Function and Data (if any).
@@ -377,99 +233,295 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          fullCmd.CopyTo(5, data, 0, fullCmd.Count - 5);
       }
+      #endregion
 
+      #region /* AVAILABLE FUNCTIONS */
+      public override uint Inputs
+      {
+         get
+         {
+            return 4;
+         }
+      }
+
+      public override uint PWMs
+      {
+         get
+         {
+            return (uint)(tenPWMChannels.enChan16 + 1);
+         }
+      }
+
+      public override uint Relays
+      {
+         get
+         {
+            return 4;
+         }
+      }
+      #endregion
+
+      private async void GetControllers()
+      {
+         gpioController = await GpioController.GetDefaultAsync();
+
+         i2cController = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
+      }
+
+      private async void OnConnect()
+      {
+         i2cDevice = i2cController.GetDevice(i2cSettings);
+
+         byte[] buffer = new byte[10];
+
+         /* Change to NORMAL mode */
+         i2cDevice.Write(new byte[2] { 0x00, 0x00 });
+
+         await Task.Delay(1);
+
+         /* Initialise PWM channels */
+         for (uint i = 0; i < PWMs; i++)
+         {
+            lPWMs.Add(new HWRaspberryPI_PWM((uint)i));
+
+            i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
+            i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
+            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
+            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
+         }
+
+         /* Initialise INPUT channels */
+         for (uint i = 0; i < Inputs; i++)
+         {
+            HWRaspberryPI_INPUT piInput;
+            GpioPin pin = gpioController.OpenPin((int)tenInputPins.INPUT_PIN_04);
+            GpioPinDriveMode gpioDriveMode;
+
+            gpioDriveMode = GpioPinDriveMode.InputPullDown;
+            if (pin.IsDriveModeSupported(gpioDriveMode) == true)
+            {
+               pin.SetDriveMode(gpioDriveMode);
+            }
+
+            piInput = new HWRaspberryPI_INPUT(i, pin);
+            piInput.InputLevelChanged += HWRaspberryPI2_InputLevelChanged;
+
+            lINPUTs.Add(piInput);
+         }
+
+         /* Initialise RELAY channels */
+         for (uint i = 0; i < Relays; i++)
+         {
+            HWRaspberryPI_RELAY piRelay;
+            GpioPin pin = gpioController.OpenPin((int)tenOutputPins.OUTPUT_PIN_07);
+            GpioPinDriveMode gpioDriveMode;
+
+            gpioDriveMode = GpioPinDriveMode.OutputOpenSourcePullDown;
+            if (pin.IsDriveModeSupported(gpioDriveMode) == true)
+            {
+               pin.SetDriveMode(gpioDriveMode);
+            }
+
+            piRelay = new HWRaspberryPI_RELAY(i, pin);
+
+            lRELAYs.Add(piRelay);
+         }
+
+         lAllFunctions.AddRange(lINPUTs);
+         lAllFunctions.AddRange(lPWMs);
+         lAllFunctions.AddRange(lRELAYs);
+
+         /* Create the Background Task handle */
+         TaskFactory tTaskFactory = new TaskFactory(TaskScheduler.Current);
+
+         sWatch = new Stopwatch();
+         sWatch.Start();
+
+         await tTaskFactory.StartNew(new Action(ControllerTask), TaskCreationOptions.RunContinuationsAsynchronously);
+      }
+
+
+      public override void Connect()
+      {
+         /* Initialise any drivers (ie. I2C) */
+         if (LightningProvider.IsLightningEnabled)
+         {
+            LowLevelDevicesController.DefaultProvider = LightningProvider.GetAggregateProvider();
+
+            /* Setup the I2C bus for access to the PWM channels */
+            i2cSettings = new I2cConnectionSettings(0x40);
+            i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
+            i2cSettings.SharingMode = I2cSharingMode.Exclusive;
+
+            OnConnect();
+         }
+      }
+
+      private void ControllerTask()
+      {
+         while (sWatch.IsRunning == true)
+         {
+            TriggerTime = sWatch.ElapsedMilliseconds;
+
+            if (TriggerTime >= 1)
+            {
+               //System.Diagnostics.Debug.WriteLine(TriggerTime.ToString());
+
+               sWatch.Restart();
+               
+               foreach (IFunctionHandler c in lAllFunctions)
+               {
+                  if ((c as IProcessTick) != null)
+                  {
+                     (c as IProcessTick).Tick();
+
+                     if ((c as HWRaspberryPI_PWM) != null)
+                     {
+                        HWRaspberryPI_PWM pwm = (c as HWRaspberryPI_PWM);
+
+                        if (pwm.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
+                        {
+                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)pwm.Channel * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)pwm.Channel * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Channel * 4)), (byte)(pwm.Level & 0xFF) });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Channel * 4)), (byte)((pwm.Level >> 8) & 0xFF) });
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+
+      private void HWRaspberryPI2_InputLevelChanged(object sender, EventArgsINPUT e)
+      {
+         TriggerCommandReceived('I', Convert.ToChar(e.Index), Convert.ToChar((uint)e.TriggerLevel));
+      }
 
       public override void Disconnect()
       {
          throw new NotImplementedException();
       }
 
-      public override void FireCommand(string cmd)
+      public override void TransmitCommand(string cmd)
       {
          Command function;
          Command subFunction;
          char[] decodedData = new char[20];
-         uint index;
+         uint channel;
          uint value = 0;
 
+         /* Decode the received COMMAND */
          DecodeCommand(cmd.ToList<char>(), out function, out subFunction, ref decodedData);
 
-         switch (function.Value)
+         /* Check if the received COMMAND is supported */
+         if (this.GetFunctionCommand(function.Value.ToString()) != null)
          {
-            case 'I': //INPUT
-               break;
-            case 'R': //RELAY
-               index = UInt32.Parse(decodedData[0].ToString());
+            /* The the CHANNEL of the request */
+            channel = UInt32.Parse(decodedData[0].ToString());
 
-               switch (subFunction.Value)
-               {
-                  case 'S':
-                     new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
-
-                     for (uint i = 0; i < Inputs; i++)
+            switch (function.Value)
+            {
+               #region /* INPUT HANDLING */
+               case 'I': 
+                  foreach (HWRaspberryPI_INPUT c in lINPUTs)
+                  {
+                     if (channel == c.Channel)
                      {
-                        //if(index == lRelays.Channel)
+                        /* Remove the Function and Channel from the string */
+                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+
+                        switch (subFunction.Value)
                         {
-                           value = UInt32.Parse(decodedData[0].ToString());
+                           case 'D':
+                              c.DebounceTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
+                              break;
+                           default:
+                              break;
                         }
                      }
-                     break;
-                  case 'G':
-                     break;
-                  default:
-                     break;
-               }
-               break;
-            case 'T': //PWM
-               index = UInt32.Parse(decodedData[0].ToString());
-
-               foreach(HWRaspberryPI_PWM c in lPWMs)
-               {
-                  if(index == c.Channel)
-                  {
-                     //Remove the Function and Index from the string
-                     new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
-
-                     switch (subFunction.Value)
-                     {
-                        case 'S':
-                           c.Level = UInt32.Parse(new string(decodedData));
-                           break;
-                        case 'G':
-                           break;
-                        case 'F':
-                           c.Function = (Func_PWM.tenFUNCTION)UInt32.Parse(new string(decodedData));
-                           break;
-                        case 'M':
-                           c.MaxLevel = UInt32.Parse(new string(decodedData));
-                           break;
-                        case 'R':
-                           c.UpdateCount = UInt32.Parse(new string(decodedData));
-                           break;
-                        default:
-                           break;
-                     }
-
-                     c.Tick();
-                     return;
                   }
-               }
-               
-               break;
-            case 'A': //ADC
-               break;
-            case 'C':
-               break;
-            default:
-               break;
+                  break;
+               #endregion
+
+               #region /* RELAY HANDLING */
+               case 'R': 
+                  foreach (HWRaspberryPI_PWM c in lPWMs)
+                  {
+                     if (channel == c.Channel)
+                     {
+                        switch (subFunction.Value)
+                        {
+                           case 'S':
+                              UInt32.Parse(new string(decodedData));
+                              new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+
+                              for (uint i = 0; i < Inputs; i++)
+                              {
+                                 //if(index == lRelays.Channel)
+                                 {
+                                    value = UInt32.Parse(decodedData[0].ToString());
+                                 }
+                              }
+                              break;
+                           case 'G':
+                              break;
+                           default:
+                              break;
+                        }
+                     }
+                  }
+                  break;
+               #endregion
+
+               #region /* PWM HANDLING */
+               case 'T':
+                  foreach (HWRaspberryPI_PWM c in lPWMs)
+                  {
+                     if (channel == c.Channel)
+                     {
+                        /* Remove the Function and Channel from the string */
+                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+
+                        switch (subFunction.Value)
+                        {
+                           case 'S':
+                              c.Level = UInt32.Parse(new string(decodedData));
+                              break;
+                           case 'G':
+                              break;
+                           case 'F':
+                              c.Function = (Func_PWM.tenFUNCTION)UInt32.Parse(new string(decodedData));
+                              break;
+                           case 'M':
+                              c.MaxLevel = UInt32.Parse(new string(decodedData));
+                              break;
+                           case 'R':
+                              c.UpdateCount = UInt32.Parse(new string(decodedData));
+                              break;
+                           default:
+                              break;
+                        }
+
+                        c.Tick();
+                        return;
+                     }
+                  }
+                  break;
+               #endregion
+
+               case 'A': /* ADC */
+                  break;
+               case 'C':
+                  break;
+               default:
+                  break;
+            }
          }
-
-      }
-
-
-      public override bool ProcessCommandRecieved(List<char> data)
-      {
-         throw new NotImplementedException();
+         else
+         {
+            /* COMMAND not supported */
+         }
       }
    }
 }

@@ -29,7 +29,7 @@ namespace HalloweenControllerRPi.Device
       public const char commandTerminator = '\n';
       #endregion
 
-      protected virtual void OnCommandRecieved(CommandEventArgs args)
+      protected virtual void OnCommandReceived(CommandEventArgs args)
       {
          if (CommandReceived != null)
          {
@@ -60,7 +60,12 @@ namespace HalloweenControllerRPi.Device
 
       public abstract string BuildCommand(string func, string subFunc, params string[] data);
       public abstract void DecodeCommand(List<char> fullCmd, out Command function, out Command subFunction, ref char[] data);
-      public abstract void FireCommand(string cmd);
+
+      /// <summary>
+      /// Command has been requested that needs processing (eg. TX Serial)
+      /// </summary>
+      /// <param name="cmd"></param>
+      public abstract void TransmitCommand(string cmd);
 
       /// <summary>
       /// Connect HW interface device (ie. Serial Port).
@@ -72,7 +77,7 @@ namespace HalloweenControllerRPi.Device
       /// </summary>
       public abstract void Disconnect();
 
-      public virtual void FireCommandReceived(char cmd, char par1, char par2)
+      public virtual void TriggerCommandReceived(char cmd, char par1, char par2)
       {
          /* Execute TRIGGER command */
          if (this.CommandReceived != null)
@@ -97,11 +102,14 @@ namespace HalloweenControllerRPi.Device
 
       }
       /// <summary>
-      /// Handling of Rx SERIAL command interpretation
+      /// Command has been received that needs processing (eg. RX Serial)
       /// </summary>
       /// <param name="data"></param>
-      /// <returns></returns>
-      public abstract bool ProcessCommandRecieved(List<char> data);
+      /// <returns>True if COMMAND was successfully handled</returns>
+      public virtual bool ReceivedCommand(List<char> data)
+      {
+         return false;
+      }
 
       public virtual UserControl GetUIPanel()
       {

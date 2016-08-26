@@ -1,15 +1,11 @@
 ﻿using MathNet.Numerics;
 using MathNet.Numerics.Interpolation;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static HalloweenControllerRPi.Functions.Func_PWM;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 {
-   class HWRaspberryPI_PWM
+   class HWRaspberryPI_PWM : IFunctionHandler, IProcessTick
    {
       private IInterpolation curve = Interpolate.Common(new double[] { 0, 512, 1024, 1536, 2048, 2560, 3072, 3584, 4095 },
                                                         new double[] { 0, 100, 250,  400,  1200, 2000, 3000, 4000, 4095 } );
@@ -37,7 +33,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 
       public uint Channel
       {
-         private set { _channelIdx = value;  }
+         set { _channelIdx = value;  }
          get { return _channelIdx; }
       }
 

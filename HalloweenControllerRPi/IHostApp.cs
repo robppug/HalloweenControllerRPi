@@ -17,10 +17,10 @@ namespace HalloweenControllerRPi
    public interface IHostApp
    {
       /// <summary>
-      /// Write a command on the serial port
+      /// Transmit the COMMAND to the HW Device
       /// </summary>
       /// <param name="cmd"></param>
-      void FireCommand(string cmd);
+      void TransmitCommandToDevice(string cmd);
 
       /// <summary>
       /// Builds a command based on the information provided.
@@ -43,10 +43,5 @@ namespace HalloweenControllerRPi
       /// </summary>
       /// <param name="func"></param>
       void TriggerEnd(Function func);
-
-      /// <summary>
-      /// When a command is received on the bus
-      /// </summary>
-      //event HostedMessageDelegate CommandReceived;
    }
 }
