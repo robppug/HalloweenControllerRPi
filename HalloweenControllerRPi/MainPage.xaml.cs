@@ -86,7 +86,7 @@ namespace HalloweenControllerRPi
                HWSimulatedGrid.Items.Add(HWDevice.GetUIPanel());
             }
 
-            //Populate the available Functions the HWDevice provides.
+            /* Populate the available Functions the HWDevice provides. */
             for (uint i = 0; i < HWDevice.Inputs; i++)
             {
                this.Available_Board.Items.Add(new Function_Button_INPUT(i + 1));
@@ -115,7 +115,7 @@ namespace HalloweenControllerRPi
       }
 
       /// <summary>
-      /// Transmit the COMMAND received to the HW Device/s.
+      /// Transmit the COMMAND received from the UI to the HW Device/s.
       /// </summary>
       /// <param name="cmd"></param>
       public void TransmitCommandToDevice(string cmd)

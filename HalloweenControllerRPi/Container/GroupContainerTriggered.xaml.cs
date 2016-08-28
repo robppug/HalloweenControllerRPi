@@ -183,11 +183,12 @@ namespace HalloweenControllerRPi.Container
             /* Trigger each FUNCTION within the Active Group */
             foreach(UIElement c in Container.Children)
             {
-               if(c is IFunctionGUI)
+               if (c is IFunctionGUI)
+               {
                   TriggerFunctions(c as IFunctionGUI);
+               }
             }
          }
-
          return false;
       }
 
@@ -249,25 +250,9 @@ namespace HalloweenControllerRPi.Container
 
       public void AddFunctionToGroup(Control ctl)
       {
-         //Function_Button funcButton;
-
          if (ctl is IFunctionGUI)
          {
-            /* Create and instance of the Function_Button */
-            //funcButton = (Function_Button)Activator.CreateInstance(  (ctl as IFunctionGUI).Func.FuncButtonType, 
-            //                                                         (ctl as IFunctionGUI).Func.Index, 
-            //                                                         Function.tenTYPE.TYPE_TRIGGER);
-
-            //funcButton.Height = ctl.Height;
-
-            /* Add the Function_Button and FUNCTION_GUI to the group Panel */
-            //Panel.Controls.Add(funcButton);
-
             Container.Children.Add(ctl);
-
-            //this.Panel.SetFlowBreak(ctl, true);
-
-            //Panel.AutoSize = true;
          }
          else
          {

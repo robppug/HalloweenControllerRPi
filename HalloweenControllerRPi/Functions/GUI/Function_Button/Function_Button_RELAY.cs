@@ -17,13 +17,5 @@ namespace HalloweenControllerRPi.Function_GUI
          IsRemoveable = true;
          OneOnly = false;
       }
-
-      public Function_Button_RELAY(uint idx, Function.tenTYPE enType)
-         : base(typeof(Func_Relay_GUI), "RELAY", idx, Colors.Red)
-      {
-
-         IsRemoveable = true;
-         OneOnly = false;
-      }
    }
 }

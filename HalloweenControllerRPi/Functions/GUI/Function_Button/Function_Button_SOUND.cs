@@ -15,14 +15,6 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          IsRemoveable = false;
          OneOnly = false;
-
-      }
-
-      public Function_Button_SOUND(uint idx, Function.tenTYPE enType)
-         : base(typeof(Func_Sound_GUI), "SOUND", Colors.Lavender)
-      {
-         IsRemoveable = false;
-         OneOnly = false;
       }
    }
 }
