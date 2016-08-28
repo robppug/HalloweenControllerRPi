@@ -35,6 +35,7 @@ namespace HalloweenControllerRPi
       public bool OneOnly { get; set; }
       public uint Index { get; set; }
       public string ToolTip { get; set; }
+      public Brush FillColour { get; set; }
 
       public Function_Button()
       {
@@ -67,11 +68,11 @@ namespace HalloweenControllerRPi
          Index = index;
 
          ToolTip = text + " #" + index.ToString();
-      }
+         FillColour = new SolidColorBrush(color);
 
-      public void SetImage(Uri img)
-      {
-         image.Source = new BitmapImage(img);
+         /* Set BINDING of objects */
+         buttonText.DataContext = this;
+         rectBackground.DataContext = this;
       }
 
       public System.Xml.Schema.XmlSchema GetSchema()

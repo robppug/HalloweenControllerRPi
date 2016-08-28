@@ -81,7 +81,10 @@ namespace HalloweenControllerRPi.Device
       {
          /* Execute TRIGGER command */
          if (this.CommandReceived != null)
-            this.CommandReceived.BeginInvoke(this, new CommandEventArgs(cmd, par1, par2), EndAsyncEvent, null);
+         {
+            this.CommandReceived.Invoke(this, new CommandEventArgs(cmd, par1, par2));
+            //this.CommandReceived.BeginInvoke(this, new CommandEventArgs(cmd, par1, par2), EndAsyncEvent, null);
+         }
       }
 
       public virtual void EndAsyncEvent(IAsyncResult iar)

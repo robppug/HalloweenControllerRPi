@@ -5,11 +5,12 @@
              xmlns:local="using:HalloweenControllerRPi"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DesignHeight="40"
-             d:DesignWidth="40"
+             d:DesignWidth="80"
              UseLayoutRounding="True"
              mc:Ignorable="d">
-   <Grid Background="LightSlateGray" MaxWidth="40" MaxHeight="40" MinHeight="40" MinWidth="40">
-      <Image x:Name="image" MaxWidth="40" MaxHeight="40" MinHeight="40" MinWidth="40"> </Image>
+   <Grid Background="Transparent" MaxWidth="80" MaxHeight="40" MinHeight="40" MinWidth="80">
+      <Rectangle x:Name="rectBackground" Fill="{Binding FillColour, UpdateSourceTrigger=PropertyChanged}" Width="80" Height="40" Stroke="Black" StrokeThickness="2" RadiusX="5" RadiusY="5" />
+      <TextBlock x:Name="buttonText" Text="{Binding ToolTip, UpdateSourceTrigger=PropertyChanged}" Width="80" Height="25" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" FontSize="15"/>
    </Grid>
 
 </UserControl>

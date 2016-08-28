@@ -29,6 +29,7 @@ namespace HalloweenControllerRPi.Device.Controllers
    {
       List<Rectangle> lRelays = new List<Rectangle>();
       List<Rectangle> lPwms = new List<Rectangle>();
+      public event EventHandler OnInputTrigger;
 
       static public Stopwatch sWatch;
       static public long TriggerTime;
@@ -75,6 +76,8 @@ namespace HalloweenControllerRPi.Device.Controllers
                      switch((Func_PWM.tenFUNCTION)value)
                      {
                         case Func_PWM.tenFUNCTION.FUNC_OFF:
+                           lPwms[(int)index].Fill = new SolidColorBrush(Colors.Red);
+                           lPwms[(int)index].Opacity = 1;
                            break;
                         case Func_PWM.tenFUNCTION.FUNC_CONSTANT:
                            break;
@@ -105,9 +108,16 @@ namespace HalloweenControllerRPi.Device.Controllers
          }
       }
 
+      private void FireInputTrigger(object index)
+      {
+         if (OnInputTrigger != null)
+         {
+            OnInputTrigger(index, EventArgs.Empty);
+         }
+      }
       private void buttonInput_Click(object sender, RoutedEventArgs e)
       {
-
+         FireInputTrigger((sender as Button).Tag);
       }
    }
 }

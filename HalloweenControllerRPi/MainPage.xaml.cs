@@ -66,8 +66,8 @@ namespace HalloweenControllerRPi
 
       private void OnLoaded(object sender, RoutedEventArgs e)
       {
-         //HWInterface HWDevice = new HWSimulated();
-         HWInterface HWDevice = new HWRaspberryPI2();
+         HWInterface HWDevice = new HWSimulated();
+         //HWInterface HWDevice = new HWRaspberryPI2();
          
          HWDevice.CommandReceived += HWDevice_CommandReceived;
          //HWDevice.VersionInfoUpdated += this.ev_VersionInfoUpdated;
@@ -89,15 +89,15 @@ namespace HalloweenControllerRPi
             //Populate the available Functions the HWDevice provides.
             for (uint i = 0; i < HWDevice.Inputs; i++)
             {
-               this.Available_Board.Items.Add(new Function_Button_INPUT(i));
+               this.Available_Board.Items.Add(new Function_Button_INPUT(i + 1));
             }
             for (uint i = 0; i < HWDevice.PWMs; i++)
             {
-               this.Available_Board.Items.Add(new Function_Button_PWM(i));
+               this.Available_Board.Items.Add(new Function_Button_PWM(i + 1));
             }
             for (uint i = 0; i < HWDevice.Relays; i++)
             {
-               this.Available_Board.Items.Add(new Function_Button_RELAY(i));
+               this.Available_Board.Items.Add(new Function_Button_RELAY(i + 1));
             }
          }
          catch { }
@@ -111,7 +111,7 @@ namespace HalloweenControllerRPi
       private void HWDevice_CommandReceived(object sender, CommandEventArgs args)
       {
          /* HW Device has received a COMMAND that needs processing */
-         groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, (uint)args.Par2);
+         groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, UInt32.Parse(args.Par2.ToString()));
       }
 
       /// <summary>
@@ -160,9 +160,9 @@ namespace HalloweenControllerRPi
 
       private void buttonTrigger_Click(object sender, RoutedEventArgs e)
       {
-         CommandEventArgs args = new CommandEventArgs('I', (char)1, (char)1);
+         CommandEventArgs args = new CommandEventArgs('I', '1', '1');
 
-         this.groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, args.Par2);
+         this.groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, UInt32.Parse(args.Par2.ToString()));
       }
 
       private void buttonStart_Click(object sender, RoutedEventArgs e)

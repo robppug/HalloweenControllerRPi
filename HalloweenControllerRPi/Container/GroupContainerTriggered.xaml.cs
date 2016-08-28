@@ -167,7 +167,8 @@ namespace HalloweenControllerRPi.Container
             /* Triggered - Compare triggering INPUT to assigned FUNCTION INPUTS and execute TRIGGER on matching INPUT number */
             if (f is Func_Input_GUI)
             {
-               if (((f as Func_Input_GUI).Func.Index == cFuncIndex) && (f as Func_Input_GUI).Func.boCheckTriggerConditions(u32FuncValue))
+               Func_Input_GUI inputGUI = (f as Func_Input_GUI);
+               if ((inputGUI.Func.Index == UInt32.Parse(cFuncIndex.ToString())) && inputGUI.Func.boCheckTriggerConditions(u32FuncValue))
                {
                   boValidTrigger = true;
                   break;

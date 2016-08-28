@@ -38,7 +38,7 @@ namespace HalloweenControllerRPi.Functions
          List<string> lData = new List<string>();
 
          lData.Add(Index.ToString());
-         lData.Add(tenOutputLevel.tHigh.ToString());
+         lData.Add(((uint)tenOutputLevel.tHigh).ToString());
 
          this.SendCommand("SET", lData.ToArray());
       }
@@ -48,7 +48,7 @@ namespace HalloweenControllerRPi.Functions
          List<string> lData = new List<string>();
 
          lData.Add(Index.ToString());
-         lData.Add("0");
+         lData.Add(((uint)tenOutputLevel.tLow).ToString());
 
          this.SendCommand("SET", lData.ToArray());
       }

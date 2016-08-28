@@ -53,7 +53,7 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          if (_boInitialised == true)
          {
-            this._Func.Duration_ms = (uint)(sender as Slider).Value;
+            this._Func.DebounceTime_ms = (uint)(sender as Slider).Value;
             this.textDebounce.Text = "Debounce Time: " + this._Func.DebounceTime_ms.ToString() + " (ms)";
          }
       }
@@ -90,6 +90,12 @@ namespace HalloweenControllerRPi.Function_GUI
       public void SetCustomName()
       {
          //new PopupTextBox().SetCustomName(gb_FunctionName);
+      }
+
+      private void UserControl_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+      {
+         //this._Func.TriggerLevel = (Func_INPUT.tenTriggerLvl)(sender as ComboBox).SelectedIndex;
+         //this._Func.DebounceTime_ms = (uint)(sender as Slider).Value;
       }
    }
 }

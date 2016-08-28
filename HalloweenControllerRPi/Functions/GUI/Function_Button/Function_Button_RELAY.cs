@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI;
+using Windows.UI.Xaml.Media;
 
 namespace HalloweenControllerRPi.Function_GUI
 {
@@ -15,8 +16,6 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          IsRemoveable = true;
          OneOnly = false;
-
-         SetImage(new Uri("ms-appx:///Assets/FunctionButtonRELAY.png"));
       }
 
       public Function_Button_RELAY(uint idx, Function.tenTYPE enType)

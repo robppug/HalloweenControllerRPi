@@ -18,22 +18,12 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          UIPanel = new HWSimulatedUI();
 
-         this.CommandReceived += HWSimulated_CommandReceived;
-         this.Connected += HWSimulated_Connected;
+         UIPanel.OnInputTrigger += UIPanel_OnInputTrigger;
       }
 
-      private void HWSimulated_Connected(object sender, EventArgs e)
+      private void UIPanel_OnInputTrigger(object sender, EventArgs e)
       {
-         throw new NotImplementedException();
-      }
-
-      private void HWSimulated_CommandReceived(object sender, CommandEventArgs args)
-      {
-         switch (args.Commamd)
-         {
-            default:
-               break;
-         }
+         TriggerCommandReceived('I', Convert.ToChar(sender), '1');
       }
 
       /// <summary>
@@ -53,7 +43,8 @@ namespace HalloweenControllerRPi.Device.Controllers
          {  new Command("INPUT", 'I'),
             new List<Command>
             {
-               new Command("GET", 'G')
+               new Command("GET", 'G'),
+               new Command("DEBTIME", 'D')
             }
          },
          /* Command : RELAY */
