@@ -168,7 +168,7 @@ namespace HalloweenControllerRPi.Container
             if (f is Func_Input_GUI)
             {
                Func_Input_GUI inputGUI = (f as Func_Input_GUI);
-               if ((inputGUI.Func.Index == UInt32.Parse(cFuncIndex.ToString())) && inputGUI.Func.boCheckTriggerConditions(u32FuncValue))
+               if ((inputGUI.Func.Index == (uint)cFuncIndex) && inputGUI.Func.boCheckTriggerConditions(u32FuncValue))
                {
                   boValidTrigger = true;
                   break;

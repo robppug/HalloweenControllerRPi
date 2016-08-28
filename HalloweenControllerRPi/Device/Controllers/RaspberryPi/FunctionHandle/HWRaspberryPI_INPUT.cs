@@ -22,7 +22,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       }
 
       private uint _channelIdx;
-      private tenTriggerLvl _triggerLevel;
       private TimeSpan _debTime;
       private GpioPin _Pin;
 
@@ -31,8 +30,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 
       public HWRaspberryPI_INPUT(uint chan, GpioPin pin)
       {
-         _triggerLevel = tenTriggerLvl.tLow;
-
          Channel = chan;
 
          _Pin = pin;
@@ -44,12 +41,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       {
          set { _channelIdx = value;  }
          get { return _channelIdx; }
-      }
-
-      public tenTriggerLvl TriggerLevel
-      {
-         get { return _triggerLevel; }
-         set { _triggerLevel = value; }
       }
 
       public GpioPinValue CurrentPinLevel
@@ -68,11 +59,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       {
          GpioPinEdge gpEdge = args.Edge;
 
-         if (((gpEdge == GpioPinEdge.RisingEdge) && (TriggerLevel == tenTriggerLvl.tHigh))
-             || ((gpEdge == GpioPinEdge.FallingEdge) && (TriggerLevel == tenTriggerLvl.tLow)))
-         {
-            InputLevelChanged.Invoke(this, new EventArgsINPUT(TriggerLevel, Channel));
-         }
+         InputLevelChanged.Invoke(this, new EventArgsINPUT((gpEdge == GpioPinEdge.RisingEdge ? tenTriggerLvl.tHigh : tenTriggerLvl.tLow), Channel));
       }
    }
 }

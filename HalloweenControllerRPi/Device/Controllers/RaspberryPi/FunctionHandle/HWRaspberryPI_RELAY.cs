@@ -1,9 +1,10 @@
-﻿using Windows.Devices.Gpio;
+﻿using System;
+using Windows.Devices.Gpio;
 using static HalloweenControllerRPi.Functions.Func_RELAY;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 {
-   class HWRaspberryPI_RELAY : IFunctionHandler
+   class HWRaspberryPI_RELAY : IFunctionHandler, IProcessTick
    {
       private uint _channelIdx;
       private tenOutputLevel _outputLevel;
@@ -34,6 +35,18 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       {
          get { return _Pin.Read(); }
          set { _Pin.Write(value); }
+      }
+
+      public void Tick()
+      {
+         if (OutputLevel == tenOutputLevel.tHigh)
+         {
+            CurrentPinLevel = GpioPinValue.High;
+         }
+         else
+         {
+            CurrentPinLevel = GpioPinValue.Low;
+         }
       }
    }
 }

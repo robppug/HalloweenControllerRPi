@@ -15,7 +15,13 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          IsRemoveable = true;
          OneOnly = false;
+      }
 
+      public Function_Button_PWM(uint idx, Function.tenTYPE enType)
+         : base(typeof(Func_PWM_GUI), "PWM", idx, Colors.Orange)
+      {
+         IsRemoveable = true;
+         OneOnly = false;
       }
    }
 }

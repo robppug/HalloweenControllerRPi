@@ -11,6 +11,7 @@ using Windows.Devices;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.HWRaspberryPI_INPUT;
+using static HalloweenControllerRPi.Functions.Func_RELAY;
 
 namespace HalloweenControllerRPi.Device.Controllers
 {
@@ -80,6 +81,8 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          if (LightningProvider.IsLightningEnabled == true)
          {
+            LowLevelDevicesController.DefaultProvider = LightningProvider.GetAggregateProvider();
+
             GetControllers();
          }
          else
@@ -240,7 +243,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return 4;
+            return 1;
          }
       }
 
@@ -256,14 +259,14 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return 4;
+            return 1;
          }
       }
       #endregion
 
       private async void GetControllers()
       {
-         gpioController = await GpioController.GetDefaultAsync();
+         gpioController = (await GpioController.GetControllersAsync(LightningGpioProvider.GetGpioProvider()))[0];
 
          i2cController = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
       }
@@ -282,7 +285,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          /* Initialise PWM channels */
          for (uint i = 0; i < PWMs; i++)
          {
-            lPWMs.Add(new HWRaspberryPI_PWM((uint)i));
+            lPWMs.Add(new HWRaspberryPI_PWM(i));
 
             i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
             i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
@@ -295,18 +298,22 @@ namespace HalloweenControllerRPi.Device.Controllers
          {
             HWRaspberryPI_INPUT piInput;
             GpioPin pin = gpioController.OpenPin((int)tenInputPins.INPUT_PIN_04);
-            GpioPinDriveMode gpioDriveMode;
 
-            gpioDriveMode = GpioPinDriveMode.InputPullDown;
-            if (pin.IsDriveModeSupported(gpioDriveMode) == true)
+            if (pin != null)
             {
-               pin.SetDriveMode(gpioDriveMode);
+               GpioPinDriveMode gpioDriveMode;
+
+               gpioDriveMode = GpioPinDriveMode.InputPullUp;
+               if (pin.IsDriveModeSupported(gpioDriveMode) == true)
+               {
+                  pin.SetDriveMode(gpioDriveMode);
+               }
+
+               piInput = new HWRaspberryPI_INPUT(i, pin);
+               piInput.InputLevelChanged += HWRaspberryPI2_InputLevelChanged;
+
+               lINPUTs.Add(piInput);
             }
-
-            piInput = new HWRaspberryPI_INPUT(i, pin);
-            piInput.InputLevelChanged += HWRaspberryPI2_InputLevelChanged;
-
-            lINPUTs.Add(piInput);
          }
 
          /* Initialise RELAY channels */
@@ -314,17 +321,22 @@ namespace HalloweenControllerRPi.Device.Controllers
          {
             HWRaspberryPI_RELAY piRelay;
             GpioPin pin = gpioController.OpenPin((int)tenOutputPins.OUTPUT_PIN_07);
-            GpioPinDriveMode gpioDriveMode;
 
-            gpioDriveMode = GpioPinDriveMode.OutputOpenSourcePullDown;
-            if (pin.IsDriveModeSupported(gpioDriveMode) == true)
+            if (pin != null)
             {
-               pin.SetDriveMode(gpioDriveMode);
+               GpioPinDriveMode gpioDriveMode;
+
+               gpioDriveMode = GpioPinDriveMode.Output;
+               if (pin.IsDriveModeSupported(gpioDriveMode) == true)
+               {
+                  pin.Write(GpioPinValue.Low);
+                  pin.SetDriveMode(gpioDriveMode);
+               }
+
+               piRelay = new HWRaspberryPI_RELAY(i, pin);
+
+               lRELAYs.Add(piRelay);
             }
-
-            piRelay = new HWRaspberryPI_RELAY(i, pin);
-
-            lRELAYs.Add(piRelay);
          }
 
          lAllFunctions.AddRange(lINPUTs);
@@ -395,7 +407,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       private void HWRaspberryPI2_InputLevelChanged(object sender, EventArgsINPUT e)
       {
-         TriggerCommandReceived('I', Convert.ToChar(e.Index), Convert.ToChar((uint)e.TriggerLevel));
+         TriggerCommandReceived('I', Convert.ToChar(e.Index + 1), (char)e.TriggerLevel);
       }
 
       public override void Disconnect()
@@ -415,7 +427,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          DecodeCommand(cmd.ToList<char>(), out function, out subFunction, ref decodedData);
 
          /* Check if the received COMMAND is supported */
-         if (this.GetFunctionCommand(function.Value.ToString()) != null)
+         if (this.GetFunctionCommand(function.Key) != null)
          {
             /* The the CHANNEL of the request */
             channel = UInt32.Parse(decodedData[0].ToString());
@@ -426,7 +438,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                case 'I': 
                   foreach (HWRaspberryPI_INPUT c in lINPUTs)
                   {
-                     if (channel == c.Channel)
+                     if (channel == c.Channel + 1)
                      {
                         /* Remove the Function and Channel from the string */
                         new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
@@ -446,23 +458,17 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                #region /* RELAY HANDLING */
                case 'R': 
-                  foreach (HWRaspberryPI_PWM c in lPWMs)
+                  foreach (HWRaspberryPI_RELAY c in lRELAYs)
                   {
-                     if (channel == c.Channel)
+                     if (channel == c.Channel + 1)
                      {
+                        /* Remove the Function and Channel from the string */
+                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+
                         switch (subFunction.Value)
                         {
                            case 'S':
-                              UInt32.Parse(new string(decodedData));
-                              new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
-
-                              for (uint i = 0; i < Inputs; i++)
-                              {
-                                 //if(index == lRelays.Channel)
-                                 {
-                                    value = UInt32.Parse(decodedData[0].ToString());
-                                 }
-                              }
+                              c.OutputLevel = (tenOutputLevel)UInt32.Parse(new string(decodedData));
                               break;
                            case 'G':
                               break;
@@ -478,7 +484,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                case 'T':
                   foreach (HWRaspberryPI_PWM c in lPWMs)
                   {
-                     if (channel == c.Channel)
+                     if (channel == c.Channel + 1)
                      {
                         /* Remove the Function and Channel from the string */
                         new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);

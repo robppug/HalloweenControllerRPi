@@ -12,5 +12,12 @@ namespace HalloweenControllerRPi.Function_GUI
          IsRemoveable = false;
          OneOnly = true;
       }
+
+      public Function_Button_INPUT(uint idx, Function.tenTYPE enType)
+         : base(typeof(Func_Input_GUI), "INPUT", idx, Colors.Green)
+      {
+         IsRemoveable = false;
+         OneOnly = true;
+      }
    }
 }

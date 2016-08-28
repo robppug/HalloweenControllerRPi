@@ -66,8 +66,8 @@ namespace HalloweenControllerRPi
 
       private void OnLoaded(object sender, RoutedEventArgs e)
       {
-         HWInterface HWDevice = new HWSimulated();
-         //HWInterface HWDevice = new HWRaspberryPI2();
+         //HWInterface HWDevice = new HWSimulated();
+         HWInterface HWDevice = new HWRaspberryPI2();
          
          HWDevice.CommandReceived += HWDevice_CommandReceived;
          //HWDevice.VersionInfoUpdated += this.ev_VersionInfoUpdated;
@@ -111,7 +111,7 @@ namespace HalloweenControllerRPi
       private void HWDevice_CommandReceived(object sender, CommandEventArgs args)
       {
          /* HW Device has received a COMMAND that needs processing */
-         groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, UInt32.Parse(args.Par2.ToString()));
+         groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, (uint)args.Par2);
       }
 
       /// <summary>
@@ -162,7 +162,7 @@ namespace HalloweenControllerRPi
       {
          CommandEventArgs args = new CommandEventArgs('I', '1', '1');
 
-         this.groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, UInt32.Parse(args.Par2.ToString()));
+         this.groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, (uint)args.Par2);
       }
 
       private void buttonStart_Click(object sender, RoutedEventArgs e)

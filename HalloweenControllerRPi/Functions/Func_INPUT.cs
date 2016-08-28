@@ -56,7 +56,7 @@ namespace HalloweenControllerRPi.Functions
 
       private void OnTrigger(object sender, EventArgs e)
       {
-         throw new NotImplementedException();
+         //throw new NotImplementedException();
       }
 
       public override bool boCheckTriggerConditions(uint u32value)
