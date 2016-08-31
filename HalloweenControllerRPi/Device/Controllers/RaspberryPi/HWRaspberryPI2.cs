@@ -437,7 +437,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          if (this.GetFunctionCommand(function.Key) != null)
          {
             /* The the CHANNEL of the request */
-            channel = UInt32.Parse(decodedData[0].ToString());
+            channel = UInt32.Parse(new string(decodedData).Substring(0, 2));
 
             switch (function.Value)
             {

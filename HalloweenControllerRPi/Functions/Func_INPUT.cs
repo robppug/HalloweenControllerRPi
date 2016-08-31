@@ -33,7 +33,7 @@ namespace HalloweenControllerRPi.Functions
 
             _debounceTime_ms = value;
 
-            data.Add(Index.ToString());
+            data.Add(Index.ToString("00"));
             data.Add(_debounceTime_ms.ToString());
 
             /* Notify the HW to configure its input debouncing time */

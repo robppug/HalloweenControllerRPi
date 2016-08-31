@@ -303,7 +303,7 @@ namespace HalloweenControllerRPi.Functions
 
       virtual public void WriteXml(System.Xml.XmlWriter writer)
       {
-         writer.WriteAttributeString("Index", this.Index.ToString());
+         writer.WriteAttributeString("Index", this.Index.ToString("00"));
       }
    }
 }

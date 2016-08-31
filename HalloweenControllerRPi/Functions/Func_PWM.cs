@@ -65,7 +65,7 @@ namespace HalloweenControllerRPi.Functions
       {
          List<string> data = new List<string>();
 
-         data.Add(Index.ToString());
+         data.Add(Index.ToString("00"));
          if (base.Type == tenTYPE.TYPE_TRIGGER)
          {
             if (this._Function == tenFUNCTION.FUNC_OFF)
@@ -97,21 +97,21 @@ namespace HalloweenControllerRPi.Functions
 
          if (this._Function != tenFUNCTION.FUNC_OFF)
          {
-            data.Add(Index.ToString());
+            data.Add(Index.ToString("00"));
             data.Add(MaxLevel.ToString());
 
             this.SendCommand("MAXLEVEL", data.ToArray());
 
             data.Clear();
 
-            data.Add(Index.ToString());
+            data.Add(Index.ToString("00"));
             data.Add(UpdateRate.ToString());
 
             this.SendCommand("RATE", data.ToArray());
 
             data.Clear();
 
-            data.Add(Index.ToString());
+            data.Add(Index.ToString("00"));
             data.Add(((uint)_Function).ToString());
 
             this.SendCommand("FUNCTION", data.ToArray());

@@ -67,7 +67,7 @@ namespace HalloweenControllerRPi
       {
          Index = index;
 
-         ToolTip = text + " #" + index.ToString();
+         ToolTip = text + " #" + index.ToString("00");
          FillColour = new SolidColorBrush(color);
 
          /* Set BINDING of objects */
@@ -87,7 +87,7 @@ namespace HalloweenControllerRPi
       virtual public void WriteXml(XmlWriter writer)
       {
          writer.WriteAttributeString("Type", GetType().ToString());
-         writer.WriteAttributeString("Index", this.Index.ToString());
+         writer.WriteAttributeString("Index", this.Index.ToString("00"));
       }
 
       internal void OnDragStarting(object sender, DragItemsStartingEventArgs args)
