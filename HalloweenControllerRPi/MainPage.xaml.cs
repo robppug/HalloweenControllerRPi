@@ -146,8 +146,6 @@ namespace HalloweenControllerRPi
 
       public void TriggerEnd(Function func)
       {
-         groupContainer_Triggered.TriggerEnd(func);
-
          /* Go through all Always Actives and check if control of used functions has completed */
          groupContainer_AlwaysActive.TriggerEnd(func);
       }

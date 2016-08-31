@@ -168,20 +168,21 @@ namespace HalloweenControllerRPi.Container
 
       public void TriggerEnd(Function func)
       {
-         /* Go through all Panel Group controls and check if control of used functions has completed */
+         /* Go through all Always Actives and check if control of used functions has completed */
          foreach (Control f in Container.Children)
          {
             if (f is IFunctionGUI)
             {
-               if ((f as IFunctionGUI).Func.GetType() == func.GetType())
+               if(   ((f as IFunctionGUI).Func.GetType() == func.GetType())
+                  && ((f as IFunctionGUI).Func.Index == func.Index))
                {
                   TriggerFunctions(f, true);
                }
             }
-            else if(f is GroupContainerTriggered)
-            {
-               (f as GroupContainerTriggered).TriggerEnd(func);
-            }
+            //else if (f is GroupContainerTriggered)
+            //{
+            //   (f as GroupContainerTriggered).TriggerEnd(func);
+            //}
          }
       }
 

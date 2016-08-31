@@ -205,21 +205,21 @@ namespace HalloweenControllerRPi.Container
       /// Handling of Trigger End event callback from ending FUNCTION.
       /// </summary>
       /// <param name="func"></param>
-      public void TriggerEnd(Function func)
-      {
-         /* Go through all Panel Group controls and check if control of used functions has completed */
-         foreach (UIElement c in Container.Children)
-         {
-            if (c is IFunctionGUI)
-            {
-               if ((c as IFunctionGUI).Func == func)
-               {
-                  this.imageTrigger.Source = null;
-                  return;
-               }
-            }
-         }
-      }
+      //public void TriggerEnd(Function func)
+      //{
+      //   /* Go through all Panel Group controls and check if control of used functions has completed */
+      //   foreach (UIElement c in Container.Children)
+      //   {
+      //      if (c is IFunctionGUI)
+      //      {
+      //         if ((c as IFunctionGUI).Func == func)
+      //         {
+      //            this.imageTrigger.Source = null;
+      //            return;
+      //         }
+      //      }
+      //   }
+      //}
 
       public System.Xml.Schema.XmlSchema GetSchema()
       {

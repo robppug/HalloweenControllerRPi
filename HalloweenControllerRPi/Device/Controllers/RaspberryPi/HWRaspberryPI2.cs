@@ -398,6 +398,13 @@ namespace HalloweenControllerRPi.Device.Controllers
                            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Channel * 4)), (byte)(pwm.Level & 0xFF) });
                            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Channel * 4)), (byte)((pwm.Level >> 8) & 0xFF) });
                         }
+                        else
+                        {
+                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)pwm.Channel * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)pwm.Channel * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Channel * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Channel * 4)), 0x00 });
+                        }
                      }
                   }
                }
