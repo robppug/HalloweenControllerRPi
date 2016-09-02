@@ -71,21 +71,6 @@ namespace HalloweenControllerRPi.Functions
          writer.WriteAttributeString("TriggerLevel", _triggerLevel.GetHashCode().ToString());
          writer.WriteAttributeString("DebounceTime", _debounceTime_ms.GetHashCode().ToString());
       }
-      public override void ReadXml(System.Xml.XmlReader reader)
-      {
-         base.ReadXml(reader);
-
-         //RPUGLIESE - Is this needed??  Check it!
-         if (reader.GetAttribute("TriggerLevel") != null)
-         {
-            this._triggerLevel = (tenTriggerLvl)Convert.ToUInt16(reader.GetAttribute("TriggerLevel"));
-         }
-
-         if (reader.GetAttribute("DebounceTime") != null)
-         {
-            this._debounceTime_ms = Convert.ToUInt16(reader.GetAttribute("DebounceTime"));
-         }
-      }
 
       public override bool boProcessRequest(char cFunc, char cFuncIndex, uint u32FuncValue)
       {

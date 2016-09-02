@@ -14,10 +14,10 @@
       <Rectangle x:Name="Relay_2" Fill="Red" HorizontalAlignment="Left" Height="40" Margin="60,0,0,0" Stroke="Black" VerticalAlignment="Top" Width="40"/>
       <Rectangle x:Name="Relay_3" Fill="Red" HorizontalAlignment="Left" Height="40" Margin="120,0,0,0" Stroke="Black" VerticalAlignment="Top" Width="40"/>
       <Rectangle x:Name="Relay_4" Fill="Red" HorizontalAlignment="Left" Height="40" Margin="180,0,0,0" Stroke="Black" VerticalAlignment="Top" Width="40"/>
-      <Button x:Name="buttonInput_1" Content="Input #1" HorizontalAlignment="Left" Margin="240,0,0,0" VerticalAlignment="Top" Click="buttonInput_Click" Tag="1"/>
-      <Button x:Name="buttonInput_2" Content="Input #2" HorizontalAlignment="Left" Margin="240,60,0,0" VerticalAlignment="Top" Click="buttonInput_Click" Tag="2"/>
-      <Button x:Name="buttonInput_3" Content="Input #3" HorizontalAlignment="Left" Margin="340,0,0,0" VerticalAlignment="Top" Click="buttonInput_Click" Tag="3"/>
-      <Button x:Name="buttonInput_4" Content="Input #4" HorizontalAlignment="Left" Margin="340,60,0,0" VerticalAlignment="Top" Click="buttonInput_Click" Tag="4"/>
+      <Button x:Name="buttonInput_1" Content="Input #01" HorizontalAlignment="Left" Margin="240,0,0,0" VerticalAlignment="Top" Click="buttonInput_Click" Tag="01"/>
+      <Button x:Name="buttonInput_2" Content="Input #02" HorizontalAlignment="Left" Margin="240,60,0,0" VerticalAlignment="Top" Click="buttonInput_Click" Tag="02"/>
+      <Button x:Name="buttonInput_3" Content="Input #03" HorizontalAlignment="Left" Margin="330,0,0,0" VerticalAlignment="Top" Click="buttonInput_Click" Tag="03"/>
+      <Button x:Name="buttonInput_4" Content="Input #04" HorizontalAlignment="Left" Margin="330,60,0,0" VerticalAlignment="Top" Click="buttonInput_Click" Tag="04"/>
       <Rectangle x:FieldModifier="public" x:Name="PWM_1" Fill="Red" HorizontalAlignment="Left" Height="40" Margin="0,60,0,0" Stroke="Black" VerticalAlignment="Top" Width="40"/>
       <Rectangle x:Name="PWM_2" Fill="Red" HorizontalAlignment="Left" Height="40" Margin="60,60,0,0" Stroke="Black" VerticalAlignment="Top" Width="40"/>
       <Rectangle x:Name="PWM_3" Fill="Red" HorizontalAlignment="Left" Height="40" Margin="120,60,0,0" Stroke="Black" VerticalAlignment="Top" Width="40"/>

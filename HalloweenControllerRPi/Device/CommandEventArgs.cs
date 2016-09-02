@@ -14,23 +14,23 @@ namespace HalloweenControllerRPi.Device
          private set;
       }
 
-      public char Par1
+      public uint Index
       {
          get;
          private set;
       }
 
-      public char Par2
+      public uint Value
       {
          get;
          private set;
       }
 
-      public CommandEventArgs(char cmd, char par1, char par2)
+      public CommandEventArgs(char cmd, uint par1, uint par2)
       {
          this.Commamd = cmd;
-         this.Par1 = par1;
-         this.Par2 = par2;
+         this.Index = par1;
+         this.Value = par2;
       }
    }
 }

@@ -158,7 +158,7 @@ namespace HalloweenControllerRPi.Container
       /// <param name="cFuncIndex"></param>
       /// <param name="u32FuncValue"></param>
       /// <returns></returns>
-      public bool boProcessRequest(char cFunc, char cFuncIndex, uint u32FuncValue)
+      public bool boProcessRequest(char func, uint index, uint value)
       {
          bool boValidTrigger = false;
 
@@ -168,7 +168,7 @@ namespace HalloweenControllerRPi.Container
             if (f is Func_Input_GUI)
             {
                Func_Input_GUI inputGUI = (f as Func_Input_GUI);
-               if ((inputGUI.Func.Index == (uint)cFuncIndex) && inputGUI.Func.boCheckTriggerConditions(u32FuncValue))
+               if ((inputGUI.Func.Index == index) && inputGUI.Func.boCheckTriggerConditions(value))
                {
                   boValidTrigger = true;
                   break;
@@ -202,24 +202,24 @@ namespace HalloweenControllerRPi.Container
       }
 
       /// <summary>
-      /// Handling of Trigger End event callback from ending FUNCTION.
+      /// Handling of Trigger End event to check if all Triggered function have completed.
       /// </summary>
-      /// <param name="func"></param>
-      //public void TriggerEnd(Function func)
-      //{
-      //   /* Go through all Panel Group controls and check if control of used functions has completed */
-      //   foreach (UIElement c in Container.Children)
-      //   {
-      //      if (c is IFunctionGUI)
-      //      {
-      //         if ((c as IFunctionGUI).Func == func)
-      //         {
-      //            this.imageTrigger.Source = null;
-      //            return;
-      //         }
-      //      }
-      //   }
-      //}
+      public void CheckTriggerEnd()
+      {
+         /* Go through all Panel Group controls and check if control of used functions has completed */
+         foreach (UIElement c in Container.Children)
+         {
+            if (c is IFunctionGUI)
+            {
+               if ((c as IFunctionGUI).Func.TriggerActive == true)
+               {
+                  return;
+               }
+            }
+         }
+
+         this.imageTrigger.Source = null;
+      }
 
       public System.Xml.Schema.XmlSchema GetSchema()
       {

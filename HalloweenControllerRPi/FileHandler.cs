@@ -23,12 +23,14 @@ namespace HalloweenControllerRPi
       private StorageFile fileToLoad;
       private StorageFile fileToSave;
 
+      public object DriveInfo { get; private set; }
+
       #region /* XML Loading */
       private async void buttonLoadSequence_Click(object sender, RoutedEventArgs e)
       {
          try
          {
-            fileToLoad = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.GetFileAsync("HWControllerSequence.sqn");
+            fileToLoad = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync("HWControllerSequence.sqn");
          }
          catch { fileToLoad = null; }
 
@@ -169,7 +171,8 @@ namespace HalloweenControllerRPi
       #region /* XML Saving */
       private async void buttonSaveSequence_Click(object sender, RoutedEventArgs e)
       {
-         fileToSave = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFileAsync("HWControllerSequence.sqn", CreationCollisionOption.ReplaceExisting);
+
+         fileToSave = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync("HWControllerSequence.sqn", CreationCollisionOption.ReplaceExisting);
          
          if (fileToSave != null)
          {

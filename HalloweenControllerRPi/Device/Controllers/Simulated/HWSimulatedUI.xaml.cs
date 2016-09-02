@@ -50,7 +50,12 @@ namespace HalloweenControllerRPi.Device.Controllers
       }
 
       public void Update(Command function, Command subFunction, uint index, uint value)
-      {
+      { 
+         if(index > 0)
+         {
+            index--;
+         }
+
          switch (function.Value)
          {
             case 'R':

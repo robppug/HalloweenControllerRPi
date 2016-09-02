@@ -77,33 +77,15 @@ namespace HalloweenControllerRPi.Device
       /// </summary>
       public abstract void Disconnect();
 
-      public virtual void TriggerCommandReceived(char cmd, char par1, char par2)
+      public virtual void TriggerCommandReceived(CommandEventArgs args)
       {
          /* Execute TRIGGER command */
          if (this.CommandReceived != null)
          {
-            this.CommandReceived.Invoke(this, new CommandEventArgs(cmd, par1, par2));
-            //this.CommandReceived.BeginInvoke(this, new CommandEventArgs(cmd, par1, par2), EndAsyncEvent, null);
+            this.CommandReceived.Invoke(this, args);
          }
       }
 
-      public virtual void EndAsyncEvent(IAsyncResult iar)
-      {
-         //RPUGLIESE - TODO
-         //var ar = (System.Runtime.Remoting.Messaging.AsyncResult)iar;
-         //var invokedMethod = (HostedMessageDelegate)ar.AsyncDelegate;
-
-         try
-         {
-            //invokedMethod.EndInvoke(iar);
-         }
-         catch
-         {
-            // Handle any exceptions that were thrown by the invoked method
-            //Console.WriteLine("An event listener went kaboom!");
-         }
-
-      }
       /// <summary>
       /// Command has been received that needs processing (eg. RX Serial)
       /// </summary>

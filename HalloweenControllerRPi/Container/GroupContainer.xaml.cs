@@ -1,4 +1,5 @@
-﻿using HalloweenControllerRPi.Function_GUI;
+﻿using HalloweenControllerRPi.Device;
+using HalloweenControllerRPi.Function_GUI;
 using HalloweenControllerRPi.Functions;
 using System;
 using System.Collections.Generic;
@@ -166,6 +167,14 @@ namespace HalloweenControllerRPi.Container
          }
       }
 
+      public void CheckTriggerEnd()
+      {
+         foreach (GroupContainerTriggered gt in this.Container.Children)
+         {
+            gt.CheckTriggerEnd();
+         }
+      }
+
       public void TriggerEnd(Function func)
       {
          /* Go through all Always Actives and check if control of used functions has completed */
@@ -212,11 +221,11 @@ namespace HalloweenControllerRPi.Container
       /// <param name="cFunc"></param>
       /// <param name="cIndex"></param>
       /// <param name="u32Value"></param>
-      public void ProcessTrigger(char cFunc, char cIndex, uint u32Value)
+      public void ProcessTrigger(CommandEventArgs args)
       {
          foreach (GroupContainerTriggered gt in this.Container.Children)
          {
-            gt.boProcessRequest(cFunc, cIndex, u32Value);
+            gt.boProcessRequest(args.Commamd, args.Index, args.Value);
          }
       }
 

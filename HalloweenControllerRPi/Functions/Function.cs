@@ -19,6 +19,7 @@ namespace HalloweenControllerRPi.Functions
       private uint _Duration_ms;
       private uint _Delay_ms;
       private uint _Index;
+      private bool _TriggerActive;
       private tenTYPE _enType;
       private List<char> _Data;
       private Command _FunctionKeyCommand;
@@ -57,6 +58,7 @@ namespace HalloweenControllerRPi.Functions
       public Function() 
       {
          _Data = new List<char>();
+         _TriggerActive = false;
       }
 
       public Function(IHostApp host, tenTYPE entype) : this()
@@ -121,6 +123,12 @@ namespace HalloweenControllerRPi.Functions
          get { return _FunctionKeyCommand; }
          set { _FunctionKeyCommand = value; }
       }
+
+      public bool TriggerActive
+      {
+         get { return _TriggerActive; }
+         set { _TriggerActive = value; }
+      }
       #endregion
 
       void vSetTimerInterval(DispatcherTimer t, uint value)
@@ -182,6 +190,8 @@ namespace HalloweenControllerRPi.Functions
       protected void FireTriggerEnd(Function func)
       {
          /* Check if the HOST (base) form has a callback configured */
+         TriggerActive = false;
+
          if (this._HostApp != null)
          {
             this._HostApp.TriggerEnd(func);
@@ -233,6 +243,8 @@ namespace HalloweenControllerRPi.Functions
       {
          if (_enType == tenTYPE.TYPE_TRIGGER)
          {
+            TriggerActive = true;
+
             if (Delay_ms > 0)
             {
                vSetTimerInterval(_timerDelay, _Delay_ms);

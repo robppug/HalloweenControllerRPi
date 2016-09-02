@@ -54,7 +54,7 @@ namespace HalloweenControllerRPi.Function_GUI
          if (_boInitialised == true)
          {
             this._Func.DebounceTime_ms = (uint)(sender as Slider).Value;
-            this.textDebounce.Text = "Debounce Time: " + this._Func.DebounceTime_ms.ToString() + " (ms)";
+            this.textBlock_Debounce.Text = "Debounce Time: " + this._Func.DebounceTime_ms.ToString() + " (ms)";
          }
       }
 
@@ -66,11 +66,18 @@ namespace HalloweenControllerRPi.Function_GUI
 
       public void ReadXml(System.Xml.XmlReader reader)
       {
-         this.textTitle.Text = reader.GetAttribute("CustomName");
+         this._Func.TriggerLevel = (Func_INPUT.tenTriggerLvl)Convert.ToUInt16(reader.GetAttribute("TriggerLevel"));
+         this._Func.DebounceTime_ms = Convert.ToUInt16(reader.GetAttribute("DebounceTime"));
+         //this.textTitle.Text = reader.GetAttribute("CustomName");
 
-         this._Func.ReadXml(reader);
+         this.textBlock_Debounce.Text = "Debounce Time: " + this._Func.DebounceTime_ms.ToString() + " (ms)";
 
-         this.comboBox_TrigEdge.SelectedIndex = (int)this._Func.TriggerLevel;
+         /* Ignore MIN/MAX limits. */
+         try
+         {
+            this.comboBox_TrigEdge.SelectedIndex = (int)this._Func.TriggerLevel;
+         }
+         catch { }
       }
 
       public System.Xml.Schema.XmlSchema GetSchema()

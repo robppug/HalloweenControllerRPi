@@ -40,16 +40,18 @@ namespace HalloweenControllerRPi.Device.Controllers
       
       public enum tenInputPins
       {
-         INPUT_PIN_04 = 4,
-         INPUT_PIN_05 = 5,
-         INPUT_PIN_06 = 6
+         INPUT_PIN_12 = 12,
+         INPUT_PIN_16 = 16,
+         INPUT_PIN_20 = 20,
+         INPUT_PIN_21 = 21
       };
 
       public enum tenOutputPins
       {
-         OUTPUT_PIN_07 = 7,
-         OUTPUT_PIN_08 = 8,
-         OUTPUT_PIN_09 = 9
+         OUTPUT_PIN_06 = 6,
+         OUTPUT_PIN_13 = 13,
+         OUTPUT_PIN_19 = 19,
+         OUTPUT_PIN_26 = 26
       };
       #endregion
 
@@ -76,6 +78,45 @@ namespace HalloweenControllerRPi.Device.Controllers
       private static byte[] LED_OFF_H = new byte[1] { 0x09 };
       #endregion
 
+      #region /* HW MAPPING */
+      public class InputMap
+      {
+         public uint Index;
+         public tenInputPins Pin;
+
+         public InputMap(uint i, tenInputPins pin)
+         {
+            Index = i;
+            Pin = pin;
+         }
+      };
+      public class OutputMap
+      {
+         public uint Index;
+         public tenOutputPins Pin;
+
+         public OutputMap(uint i, tenOutputPins pin)
+         {
+            Index = i;
+            Pin = pin;
+         }
+      };
+      private static List<InputMap> lInputMap = new List<InputMap>()
+      {
+         new InputMap(1, tenInputPins.INPUT_PIN_12),
+         new InputMap(2, tenInputPins.INPUT_PIN_16),
+         new InputMap(3, tenInputPins.INPUT_PIN_20),
+         new InputMap(4, tenInputPins.INPUT_PIN_21)
+      };
+
+      private static List<OutputMap> lOutputMap = new List<OutputMap>()
+      {
+         new OutputMap(1, tenOutputPins.OUTPUT_PIN_06),
+         new OutputMap(2, tenOutputPins.OUTPUT_PIN_13),
+         new OutputMap(3, tenOutputPins.OUTPUT_PIN_19),
+         new OutputMap(4, tenOutputPins.OUTPUT_PIN_26)
+      };
+      #endregion
       #region /* CONSTRUCTORS */
       public HWRaspberryPI2()
       {
@@ -243,7 +284,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return 1;
+            return (uint)lInputMap.Count;
          }
       }
 
@@ -259,7 +300,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return 1;
+            return (uint)lOutputMap.Count;
          }
       }
       #endregion
@@ -297,7 +338,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          for (uint i = 0; i < Inputs; i++)
          {
             HWRaspberryPI_INPUT piInput;
-            GpioPin pin = gpioController.OpenPin((int)tenInputPins.INPUT_PIN_04);
+            GpioPin pin = gpioController.OpenPin((int)lInputMap[(int)i].Pin);
 
             if (pin != null)
             {
@@ -320,7 +361,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          for (uint i = 0; i < Relays; i++)
          {
             HWRaspberryPI_RELAY piRelay;
-            GpioPin pin = gpioController.OpenPin((int)tenOutputPins.OUTPUT_PIN_07);
+            GpioPin pin = gpioController.OpenPin((int)lOutputMap[(int)i].Pin);
 
             if (pin != null)
             {
@@ -414,7 +455,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       private void HWRaspberryPI2_InputLevelChanged(object sender, EventArgsINPUT e)
       {
-         TriggerCommandReceived('I', Convert.ToChar(e.Index + 1), (char)e.TriggerLevel);
+         TriggerCommandReceived(new CommandEventArgs('I', e.Index + 1, (uint)e.TriggerLevel));
       }
 
       public override void Disconnect()
@@ -428,7 +469,6 @@ namespace HalloweenControllerRPi.Device.Controllers
          Command subFunction;
          char[] decodedData = new char[20];
          uint channel;
-         uint value = 0;
 
          /* Decode the received COMMAND */
          DecodeCommand(cmd.ToList<char>(), out function, out subFunction, ref decodedData);

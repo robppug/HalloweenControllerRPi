@@ -66,9 +66,17 @@ namespace HalloweenControllerRPi
 
       private void OnLoaded(object sender, RoutedEventArgs e)
       {
-         //HWInterface HWDevice = new HWSimulated();
-         HWInterface HWDevice = new HWRaspberryPI2();
-         
+         HWInterface HWDevice;
+
+         if (LightningProvider.IsLightningEnabled == true)
+         {
+            HWDevice = new HWRaspberryPI2();
+         }
+         else
+         { 
+            HWDevice = new HWSimulated();
+         }
+
          HWDevice.CommandReceived += HWDevice_CommandReceived;
          //HWDevice.VersionInfoUpdated += this.ev_VersionInfoUpdated;
          //HWDevice.FunctionAdded += this.ev_FunctionAdded;
@@ -111,7 +119,7 @@ namespace HalloweenControllerRPi
       private void HWDevice_CommandReceived(object sender, CommandEventArgs args)
       {
          /* HW Device has received a COMMAND that needs processing */
-         groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, (uint)args.Par2);
+         groupContainer_Triggered.ProcessTrigger(args);
       }
 
       /// <summary>
@@ -148,6 +156,8 @@ namespace HalloweenControllerRPi
       {
          /* Go through all Always Actives and check if control of used functions has completed */
          groupContainer_AlwaysActive.TriggerEnd(func);
+
+         groupContainer_Triggered.CheckTriggerEnd();
       }
 
       #region /* UI HANDLING */
@@ -158,9 +168,7 @@ namespace HalloweenControllerRPi
 
       private void buttonTrigger_Click(object sender, RoutedEventArgs e)
       {
-         CommandEventArgs args = new CommandEventArgs('I', '1', '1');
-
-         this.groupContainer_Triggered.ProcessTrigger(args.Commamd, args.Par1, (uint)args.Par2);
+         this.groupContainer_Triggered.ProcessTrigger(new CommandEventArgs('I', 1, 1));
       }
 
       private void buttonStart_Click(object sender, RoutedEventArgs e)

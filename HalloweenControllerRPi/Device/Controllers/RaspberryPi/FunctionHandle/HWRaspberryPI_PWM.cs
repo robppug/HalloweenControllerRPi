@@ -7,8 +7,8 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 {
    class HWRaspberryPI_PWM : IFunctionHandler, IProcessTick
    {
-      private IInterpolation curve = Interpolate.Common(new double[] { 0, 512, 1024, 1536, 2048, 2560, 3072, 3584, 4095 },
-                                                        new double[] { 0, 100, 250,  400,  1200, 2000, 3000, 4000, 4095 } );
+      private IInterpolation curve = Interpolate.Common(new double[] { 0, 455, 910, 1365, 1820, 2275, 2730, 3185, 3640, 4095 },  /* 4095 / 9 points  */
+                                                        new double[] { 0, 51,  202, 455,  809,  1264, 1820, 2477, 3236, 4095 }); /* y = x * x / 4095 */
       private tenFUNCTION _enFunction;
       private uint _channelIdx;
       private uint _maxLevel;
@@ -16,6 +16,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       private uint _func_value;
       private uint updateTick;
       private bool toggle;
+      private uint _functionLevel;
 
       public const uint PWMResolution = 4095;
 
@@ -79,31 +80,31 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
          switch (Function)
          {
             case tenFUNCTION.FUNC_OFF:
-               Level = 0;
+               _functionLevel = 0;
                break;
             case tenFUNCTION.FUNC_CONSTANT:
-               Level = MaxLevel;
+               _functionLevel = MaxLevel;
                break;
             case tenFUNCTION.FUNC_SWEEP_UP:
                if (boUpdateTick() == true)
                {
-                  value = (Level + 16);
-                  Level = (value >= MaxLevel ? 0 : value);
+                  value = (_functionLevel + 16);
+                  _functionLevel = (value >= MaxLevel ? 0 : value);
                }
                break;
             case tenFUNCTION.FUNC_SWEEP_DOWN:
                if (boUpdateTick() == true)
                {
-                  value = (Level - 16);
-                  Level = (value <= 16 ? MaxLevel : 0);
+                  value = (_functionLevel - 16);
+                  _functionLevel = (value <= 16 ? MaxLevel : value);
                }
                break;
             case tenFUNCTION.FUNC_SIGNWAVE:
                if (boUpdateTick() == true)
                {
-                  Level = (Level + (uint)(toggle ? -16 : 16));
+                  _functionLevel = (_functionLevel + (uint)(toggle ? -16 : 16));
 
-                  if ((toggle == true && Level <= 16) || (toggle == false && Level >= MaxLevel))
+                  if ((toggle == true && _functionLevel <= 16) || (toggle == false && _functionLevel >= MaxLevel))
                      toggle = (toggle ? false : true);
                }
                break;
@@ -113,10 +114,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
                   uint count;
 
                   count = (uint)(new Random().Next((int)PWMResolution));
-                  if (count < (MaxLevel - (MaxLevel / 10)))
-                     Level = 0;
+                  if (count > (MaxLevel / 9))
+                     _functionLevel = count;
                   else
-                     Level = count;
+                     _functionLevel = 0;
                }
                break;
             case tenFUNCTION.FUNC_FLICKER_ON:
@@ -125,26 +126,26 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
                   uint count;
 
                   count = (uint)(new Random().Next((int)PWMResolution));
-                  if (count > (MaxLevel / 9))
-                     Level = count;
+                  if (count < (MaxLevel - (MaxLevel / 9)))
+                     _functionLevel = 0;
                   else
-                     Level = 0;
+                     _functionLevel = count;
                }
                break;
             case tenFUNCTION.FUNC_RANDOM:
                if (boUpdateTick() == true)
                {
                   value = (uint)(new Random().Next((int)PWMResolution));
-                  Level = (value > MaxLevel ? MaxLevel : value);
+                  _functionLevel = (value > MaxLevel ? MaxLevel : value);
                }
                break;
             case tenFUNCTION.FUNC_STROBE:
                if (boUpdateTick() == true)
                {
-                  if (Level != 200)
-                     Level = 200;
+                  if (_functionLevel != 200)
+                     _functionLevel = 200;
                   else
-                     Level = MaxLevel;
+                     _functionLevel = MaxLevel;
                }
                break;
 
@@ -152,7 +153,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
                break;
          }
 
-         Level = (uint)curve.Interpolate(Level);
+         Level = (uint)curve.Interpolate(_functionLevel);
       }
    }
 }

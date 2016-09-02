@@ -23,7 +23,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       private void UIPanel_OnInputTrigger(object sender, EventArgs e)
       {
-         TriggerCommandReceived('I', Convert.ToChar(sender), '1');
+         TriggerCommandReceived(new CommandEventArgs('I', UInt32.Parse((sender as string)), 1));
       }
 
       /// <summary>
@@ -230,13 +230,13 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          DecodeCommand(cmd.ToList<char>(), out function, out subFunction, ref decodedData);
 
+         index = UInt32.Parse(new string(decodedData).Substring(0, 2));
+
          switch (function.Value)
          {
             case 'I': //INPUT
                break;
             case 'R': //RELAY
-               index = UInt32.Parse(decodedData[0].ToString());
-
                switch (subFunction.Value)
                {
                   case 'S':
@@ -253,8 +253,6 @@ namespace HalloweenControllerRPi.Device.Controllers
                UIPanel.Update(function, subFunction, index, value);
                break;
             case 'T': //PWM
-               index = UInt32.Parse(decodedData[0].ToString());
-
                //Remove the Function and Index from the string
                new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
 
@@ -342,7 +340,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                      data.RemoveRange(0, 8);
 
                      //Packet received, allow active groups to process.
-                     TriggerCommandReceived(function.Value, cInputIdx, cInputLevel);
+                     TriggerCommandReceived(new CommandEventArgs(function.Value, cInputIdx, cInputLevel));
                      l_Result = true;
                   }
                   break;
