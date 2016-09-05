@@ -117,6 +117,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          new OutputMap(4, tenOutputPins.OUTPUT_PIN_26)
       };
       #endregion
+
       #region /* CONSTRUCTORS */
       public HWRaspberryPI2()
       {
@@ -169,6 +170,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                new Command("GET", 'G'),
                new Command("SET", 'S'),
                new Command("FUNCTION", 'F'),
+               new Command("MINLEVEL", 'N'),
                new Command("MAXLEVEL", 'M'),
                new Command("RATE", 'R')
             }
@@ -545,6 +547,9 @@ namespace HalloweenControllerRPi.Device.Controllers
                               break;
                            case 'F':
                               c.Function = (Func_PWM.tenFUNCTION)UInt32.Parse(new string(decodedData));
+                              break;
+                           case 'N':
+                              c.MinLevel = UInt32.Parse(new string(decodedData));
                               break;
                            case 'M':
                               c.MaxLevel = UInt32.Parse(new string(decodedData));

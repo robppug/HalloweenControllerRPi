@@ -23,9 +23,16 @@ namespace HalloweenControllerRPi.Functions
          FUNC_NO_OF_FUNCTIONS
       };
 
+      private uint _MinLevel;
       private uint _MaxLevel;
       private uint _UpdateRate;
       private tenFUNCTION _Function;
+
+      public uint MinLevel
+      {
+         get { return _MinLevel; }
+         set { _MinLevel = value; }
+      }
 
       public uint MaxLevel
       {
@@ -98,6 +105,13 @@ namespace HalloweenControllerRPi.Functions
          if (this._Function != tenFUNCTION.FUNC_OFF)
          {
             data.Add(Index.ToString("00"));
+            data.Add(MinLevel.ToString());
+
+            this.SendCommand("MINLEVEL", data.ToArray());
+
+            data.Clear();
+
+            data.Add(Index.ToString("00"));
             data.Add(MaxLevel.ToString());
 
             this.SendCommand("MAXLEVEL", data.ToArray());
@@ -124,6 +138,7 @@ namespace HalloweenControllerRPi.Functions
 
          writer.WriteAttributeString("Duration", Duration_ms.ToString());
          writer.WriteAttributeString("Delay", Delay_ms.ToString());
+         writer.WriteAttributeString("MinLevel", MinLevel.ToString());
          writer.WriteAttributeString("MaxLevel", MaxLevel.ToString());
          writer.WriteAttributeString("UpdateRate", UpdateRate.ToString());
          writer.WriteAttributeString("Function", ((int)Function).ToString());
