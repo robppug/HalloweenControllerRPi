@@ -15,7 +15,6 @@ namespace HalloweenControllerRPi.Function_GUI
    {
       private Func_PWM _Func;
       private bool _boInitialised = false;
-      private uint _minLevel = 0;
 
       public uint MaxLevel
       {
@@ -24,8 +23,8 @@ namespace HalloweenControllerRPi.Function_GUI
       }
       public uint MinLevel
       {
-         get { textBlock_MinLevel.Text = "Min Level: " + _minLevel.ToString() + " %"; return _minLevel; }
-         set { _minLevel = value; textBlock_MinLevel.Text = "Min Level: " + value.ToString() + " %"; }
+         get { textBlock_MinLevel.Text = "Min Level: " + _Func.MinLevel.ToString() + " %"; return _Func.MinLevel; }
+         set { _Func.MinLevel = value; textBlock_MinLevel.Text = "Min Level: " + value.ToString() + " %"; }
       }
 
       public Function Func
