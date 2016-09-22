@@ -1,6 +1,8 @@
-﻿using HalloweenControllerRPi.Functions;
+﻿using HalloweenControllerRPi.Controls;
+using HalloweenControllerRPi.Functions;
 using System;
 using System.Xml.Serialization;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
@@ -13,7 +15,18 @@ namespace HalloweenControllerRPi.Function_GUI
    {
       private Func_PWM _Func;
       private bool _boInitialised = false;
-      
+
+      public uint MaxLevel
+      {
+         get { textBlock_MaxLevel.Text = "Max Level: " + _Func.MaxLevel.ToString() + " %"; return _Func.MaxLevel; }
+         set { _Func.MaxLevel = value; textBlock_MaxLevel.Text = "Max Level: " + value.ToString() + " %"; }
+      }
+      public uint MinLevel
+      {
+         get { textBlock_MinLevel.Text = "Min Level: " + _Func.MinLevel.ToString() + " %"; return _Func.MinLevel; }
+         set { _Func.MinLevel = value; textBlock_MinLevel.Text = "Min Level: " + value.ToString() + " %"; }
+      }
+
       public Function Func
       {
          get { return this._Func; }
@@ -25,18 +38,23 @@ namespace HalloweenControllerRPi.Function_GUI
          this.InitializeComponent();
 
          _boInitialised = true;
+
+         textBlock_MaxLevel.DataContext = this;
       }
 
       public Func_PWM_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
       {
          _Func = new Func_PWM(host, entype);
 
+         this.MaxLevel = 100;
+         this.MinLevel = 0;
+
          this._Func.Index = index;
          
          this.textTitle.Text = "PWM #" + index;
          this.textTitle.DoubleTapped += TextTitle_DoubleTapped;
          this._Func.Duration_ms = (uint)slider_Duration.Value;
-         this._Func.Delay_ms = (uint)slider_MaxLevel.Value;
+         this._Func.Delay_ms = (uint)slider_MaxLevel.RangeMax;
 
          /* Populate the comboBox list with available PWM Functions */
          foreach (Func_PWM.tenFUNCTION f in Enum.GetValues(typeof(Func_PWM.tenFUNCTION)))
@@ -76,7 +94,7 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          if (_boInitialised == true)
          {
-            this._Func.MaxLevel = (uint)(sender as Slider).Value;
+            
             this.textBlock_MaxLevel.Text = "Max Level: " + this._Func.MaxLevel.ToString() + " (%)";
          }
       }
@@ -127,7 +145,7 @@ namespace HalloweenControllerRPi.Function_GUI
          {
             this.slider_Duration.Value = (int)this._Func.Duration_ms;
             this.slider_StartDelay.Value = (int)this._Func.Delay_ms;
-            this.slider_MaxLevel.Value = (int)this._Func.MaxLevel;
+            this.slider_MaxLevel.RangeMax = (int)this._Func.MaxLevel;
             this.slider_UpdateRate.Value = (int)this._Func.UpdateRate;
             this.comboBox_Functions.SelectedIndex = (int)this._Func.Function;
          }

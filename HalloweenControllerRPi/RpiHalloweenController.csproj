@@ -109,6 +109,9 @@
     <Compile Include="Container\GroupContainerTriggered.xaml.cs">
       <DependentUpon>GroupContainerTriggered.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\RangeSlider.xaml.cs">
+      <DependentUpon>RangeSlider.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Device\Command.cs" />
     <Compile Include="Device\CommandEventArgs.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\FunctionHandle\IFunctionHandler.cs" />
@@ -186,6 +189,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Container\GroupContainerTriggered.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\RangeSlider.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
