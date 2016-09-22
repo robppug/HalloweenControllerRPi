@@ -41,11 +41,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       {
          if (OutputLevel == tenOutputLevel.tHigh)
          {
-            CurrentPinLevel = GpioPinValue.High;
+            CurrentPinLevel = GpioPinValue.Low;
          }
          else
          {
-            CurrentPinLevel = GpioPinValue.Low;
+            CurrentPinLevel = GpioPinValue.High;
          }
       }
    }

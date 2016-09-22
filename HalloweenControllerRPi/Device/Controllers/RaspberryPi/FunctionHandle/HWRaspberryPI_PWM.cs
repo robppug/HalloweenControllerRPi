@@ -95,14 +95,29 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
             case tenFUNCTION.FUNC_SWEEP_DOWN:
                if (boUpdateTick() == true)
                {
-                  value = (_functionLevel - 16);
+                  if (_functionLevel < 16)
+                  {
+                     value = 0;
+                  }
+                  else
+                  {
+                     value = (_functionLevel - 16);
+                  }
+
                   _functionLevel = (value <= 16 ? MaxLevel : value);
                }
                break;
             case tenFUNCTION.FUNC_SIGNWAVE:
                if (boUpdateTick() == true)
                {
-                  _functionLevel = (_functionLevel + (uint)(toggle ? -16 : 16));
+                  if(toggle && (_functionLevel < 16))
+                  {
+                     _functionLevel = 0;
+                  }
+                  else
+                  {
+                     _functionLevel = (_functionLevel + (uint)(toggle ? -16 : 16));
+                  }
 
                   if ((toggle == true && _functionLevel <= 16) || (toggle == false && _functionLevel >= MaxLevel))
                      toggle = (toggle ? false : true);

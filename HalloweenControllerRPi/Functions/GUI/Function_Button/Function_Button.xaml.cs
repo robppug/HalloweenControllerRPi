@@ -70,6 +70,11 @@ namespace HalloweenControllerRPi
          ToolTip = text + " #" + index.ToString("00");
          FillColour = new SolidColorBrush(color);
 
+         this.Loaded += Function_Button_Loaded;
+      }
+
+      private void Function_Button_Loaded(object sender, RoutedEventArgs e)
+      {
          /* Set BINDING of objects */
          buttonText.DataContext = this;
          rectBackground.DataContext = this;

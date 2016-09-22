@@ -17,9 +17,9 @@ namespace HalloweenControllerRPi.Functions
    {
       private string _fileSound;
       private int _SoundDuration_s;
-      private uint _Repeats;
+      private uint _Repeats = 0;
       private uint RepeatCount;
-      private bool? _Looping;
+      private bool? _Looping = false;
       public List<StorageFile> lSoundFiles;
       public MediaElement activePlaybackDevice;
       public IRandomAccessStream sSoundStream;
@@ -93,7 +93,7 @@ namespace HalloweenControllerRPi.Functions
 
       public async Task<int> GetAvailableSounds()
       {
-         var files = await ApplicationData.Current.LocalCacheFolder.GetFilesAsync();
+         var files = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFilesAsync();
 
          lSoundFiles.Clear();
 

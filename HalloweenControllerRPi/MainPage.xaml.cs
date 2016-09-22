@@ -44,8 +44,6 @@ namespace HalloweenControllerRPi
 
          HostApp = this;
 
-         this.Available_Statics.Items.Add(new Function_Button_SOUND(1));
-
          lGroupContainers.Add(groupContainer_AlwaysActive);
          lGroupContainers.Add(groupContainer_Triggered);
 
@@ -95,6 +93,8 @@ namespace HalloweenControllerRPi
             }
 
             /* Populate the available Functions the HWDevice provides. */
+            this.Available_Statics.Items.Add(new Function_Button_SOUND(1));
+
             for (uint i = 0; i < HWDevice.Inputs; i++)
             {
                this.Available_Board.Items.Add(new Function_Button_INPUT(i + 1));

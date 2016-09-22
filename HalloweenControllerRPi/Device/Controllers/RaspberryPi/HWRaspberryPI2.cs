@@ -42,16 +42,18 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          INPUT_PIN_12 = 12,
          INPUT_PIN_16 = 16,
+         INPUT_PIN_19 = 19,
          INPUT_PIN_20 = 20,
-         INPUT_PIN_21 = 21
+         INPUT_PIN_21 = 21,
+         INPUT_PIN_26 = 26
       };
 
       public enum tenOutputPins
       {
-         OUTPUT_PIN_06 = 6,
-         OUTPUT_PIN_13 = 13,
-         OUTPUT_PIN_19 = 19,
-         OUTPUT_PIN_26 = 26
+         OUTPUT_PIN_18 = 18,
+         OUTPUT_PIN_23 = 23,
+         OUTPUT_PIN_24 = 24,
+         OUTPUT_PIN_25 = 25
       };
       #endregion
 
@@ -106,15 +108,17 @@ namespace HalloweenControllerRPi.Device.Controllers
          new InputMap(1, tenInputPins.INPUT_PIN_12),
          new InputMap(2, tenInputPins.INPUT_PIN_16),
          new InputMap(3, tenInputPins.INPUT_PIN_20),
-         new InputMap(4, tenInputPins.INPUT_PIN_21)
+         new InputMap(4, tenInputPins.INPUT_PIN_21),
+         new InputMap(5, tenInputPins.INPUT_PIN_19),
+         new InputMap(6, tenInputPins.INPUT_PIN_26)
       };
 
       private static List<OutputMap> lOutputMap = new List<OutputMap>()
       {
-         new OutputMap(1, tenOutputPins.OUTPUT_PIN_06),
-         new OutputMap(2, tenOutputPins.OUTPUT_PIN_13),
-         new OutputMap(3, tenOutputPins.OUTPUT_PIN_19),
-         new OutputMap(4, tenOutputPins.OUTPUT_PIN_26)
+         new OutputMap(1, tenOutputPins.OUTPUT_PIN_18),
+         new OutputMap(2, tenOutputPins.OUTPUT_PIN_23),
+         new OutputMap(3, tenOutputPins.OUTPUT_PIN_24),
+         new OutputMap(4, tenOutputPins.OUTPUT_PIN_25)
       };
       #endregion
       #region /* CONSTRUCTORS */
@@ -370,7 +374,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                gpioDriveMode = GpioPinDriveMode.Output;
                if (pin.IsDriveModeSupported(gpioDriveMode) == true)
                {
-                  pin.Write(GpioPinValue.Low);
+                  pin.Write(GpioPinValue.High);
                   pin.SetDriveMode(gpioDriveMode);
                }
 

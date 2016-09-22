@@ -147,17 +147,12 @@ namespace HalloweenControllerRPi.Function_GUI
          _Func.Delay_ms = Convert.ToUInt16(reader.GetAttribute("Delay"));
          _Func.Duration_ms = Convert.ToUInt16(reader.GetAttribute("Duration"));
          _Func.Repeats = Convert.ToUInt16(reader.GetAttribute("Repeats"));
+         _Func.activePlaybackDevice.Volume = Convert.ToSingle(reader.GetAttribute("Volume"));
          checkBox_Loop.IsChecked = Convert.ToBoolean(reader.GetAttribute("Loop"));
          textTitle.Text = reader.GetAttribute("CustomName");
          checkBox_Loop_Checked(checkBox_Loop, null);
 
-         //_Func.activePlaybackDevice = reader.GetAttribute("ActivePBDevice");
-         //if (this._Func.activePlaybackDevice != null)
-         //{
-         //   this._Func.activePlaybackDevice.Volume = Convert.ToSingle(reader.GetAttribute("Volume"));
-         //   this.label_Volume.Text = "Volume: " + (this._Func.activePlaybackDevice.Volume / 100f).ToString() + " (%)";
-         //}
-
+         textBlock_Volume.Text = "Volume: " + (_Func.activePlaybackDevice.Volume * 100f).ToString() + " (%)";
          textBlock_StartDelay.Text = "Start Delay: " + _Func.Delay_ms.ToString() + " (ms)";
          textBlock_Duration.Text = "Duration: " + _Func.Duration_ms.ToString() + " (ms)";
          textBlock_Repeats.Text = "Repeats: " + _Func.Repeats.ToString();
