@@ -156,7 +156,8 @@ namespace HalloweenControllerRPi.Device.Controllers
             new List<Command>
             {
                new Command("GET", 'G'),
-               new Command("DEBTIME", 'D')
+               new Command("DEBTIME", 'D'),
+               new Command("POSTDEBTIME", 'P')
             }
          },
          /* Command : RELAY */
@@ -500,6 +501,9 @@ namespace HalloweenControllerRPi.Device.Controllers
                         {
                            case 'D':
                               c.DebounceTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
+                              break;
+                           case 'P':
+                              c.PostTriggerTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
                               break;
                            default:
                               break;

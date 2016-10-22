@@ -107,9 +107,12 @@ namespace HalloweenControllerRPi
             {
                this.Available_Board.Items.Add(new Function_Button_RELAY(i + 1));
             }
+
+            loadSettingsFile();
          }
          catch { }
       }
+
 
       /// <summary>
       /// COMMAND received from HW Device that needs processing.
@@ -190,6 +193,8 @@ namespace HalloweenControllerRPi
             c.OnDragStarting(sender, e);
          }
       }
+
       #endregion
+
    }
 }
