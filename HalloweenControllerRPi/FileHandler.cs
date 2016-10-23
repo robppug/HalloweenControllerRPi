@@ -60,19 +60,13 @@ namespace HalloweenControllerRPi
             {
                if (xmlReader.GetAttribute("Version") == "0.5")
                {
-                  while (xmlReader.Read())
+                  if (xmlReader.ReadToFollowing("Settings") == true)
                   {
-                     if (xmlReader.NodeType == XmlNodeType.Element)
-                     {
-                        if (xmlReader.Name == "Settings")
-                        {
-                           this.checkBox_LoadOnStart.IsChecked = (bool)(xmlReader.GetAttribute("LoadOnStart") == "True" ? true : false);
+                     this.checkBox_LoadOnStart.IsChecked = (bool)(xmlReader.GetAttribute("LoadOnStart") == "True" ? true : false);
 
-                           if (this.checkBox_LoadOnStart.IsChecked == true)
-                           {
-                              this.buttonLoadSequence_Click(this, null);
-                           }
-                        }
+                     if (this.checkBox_LoadOnStart.IsChecked == true)
+                     {
+                        this.buttonLoadSequence_Click(this, null);
                      }
                   }
                }

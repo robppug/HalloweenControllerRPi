@@ -27,6 +27,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       private TimeSpan _postTriggerTime;
       private GpioPin _Pin;
       private DispatcherTimer _reenableTimer;
+      private bool _waitForRetrigger;
 
       public delegate void EventHandlerInput(object sender, EventArgsINPUT e);
       public event EventHandlerInput InputLevelChanged;
@@ -45,6 +46,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
          _reenableTimer = new DispatcherTimer();
          _reenableTimer.Tick += _reenableTimer_Tick;
          _reenableTimer.Interval = _postTriggerTime;
+         _waitForRetrigger = false;
       }
 
       public uint Channel
@@ -75,12 +77,14 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       {
          GpioPinEdge gpEdge = args.Edge;
 
-         if (_reenableTimer.IsEnabled == false)
+         if (_waitForRetrigger == false)
          {
             if (InputLevelChanged != null)
             {
                InputLevelChanged.Invoke(this, new EventArgsINPUT((gpEdge == GpioPinEdge.RisingEdge ? tenTriggerLvl.tHigh : tenTriggerLvl.tLow), Channel));
 
+               _waitForRetrigger = true;
+               _reenableTimer.Interval = _postTriggerTime;
                _reenableTimer.Start();
             }
          }
@@ -88,6 +92,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 
       private void _reenableTimer_Tick(object sender, object e)
       {
+         _waitForRetrigger = false;
          _reenableTimer.Stop();
       }
    }

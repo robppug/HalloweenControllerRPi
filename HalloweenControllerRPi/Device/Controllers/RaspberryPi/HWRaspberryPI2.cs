@@ -321,6 +321,9 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       private async void OnConnect()
       {
+         /* Allow the HW to initialise */
+         await Task.Delay(1000);
+
          i2cDevice = i2cController.GetDevice(i2cSettings);
 
          byte[] buffer = new byte[10];

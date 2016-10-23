@@ -222,7 +222,6 @@ namespace HalloweenControllerRPi.Functions
 
          writer.WriteAttributeString("Duration", Duration_ms.ToString());
          writer.WriteAttributeString("Delay", Duration_ms.ToString());
-         writer.WriteAttributeString("File", (fileSOUND != null ? fileSOUND.ToString() : ""));
          writer.WriteAttributeString("Loop", Loop.ToString());
          writer.WriteAttributeString("Repeats", Repeats.ToString());
          writer.WriteAttributeString("Volume", (activePlaybackDevice != null ? activePlaybackDevice.Volume.ToString() : "1"));

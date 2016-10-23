@@ -109,6 +109,11 @@ namespace HalloweenControllerRPi
             }
 
             loadSettingsFile();
+
+            if(this.checkBox_LoadOnStart.IsChecked == true)
+            {
+               buttonStart_Click(this, null);
+            }
          }
          catch { }
       }

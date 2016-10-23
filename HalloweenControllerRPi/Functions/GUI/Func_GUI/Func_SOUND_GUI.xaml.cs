@@ -162,6 +162,7 @@ namespace HalloweenControllerRPi.Function_GUI
          {
             slider_Duration.Value = (int)this._Func.Duration_ms;
             slider_StartDelay.Value = (int)this._Func.Delay_ms;
+            comboBox_Sounds.SelectedIndex = Convert.ToUInt16(reader.GetAttribute("Sound"));
          }
          catch { }
       }
@@ -170,7 +171,8 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          writer.WriteAttributeString("Type", GetType().ToString());
          writer.WriteAttributeString("CustomName", this.textTitle.Text);
-
+         writer.WriteAttributeString("Sound", this.comboBox_Sounds.SelectedIndex.ToString());
+         
          this._Func.WriteXml(writer);
       }
 
