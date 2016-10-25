@@ -324,10 +324,18 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          byte[] buffer = new byte[10];
 
-         /* Change to NORMAL mode */
+         /* Adjust the PWM Frequency - 1526Hz - Must be before being set to NORMAL mode */
+         i2cDevice.Write(new byte[2] { 0xFE, 0x03 });
+
+         /* Set MODE 1 Register - Change to NORMAL mode */
          i2cDevice.Write(new byte[2] { 0x00, 0x00 });
 
          await Task.Delay(1);
+
+         /* Set MODE 2 Register */
+         //i2cDevice.Write(new byte[2] { 0x00, 0x00 });
+
+         //await Task.Delay(1);
 
          /* Initialise PWM channels */
          for (uint i = 0; i < PWMs; i++)
