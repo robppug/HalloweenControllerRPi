@@ -103,59 +103,61 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Container\GroupContainer.xaml.cs">
+    <Compile Include="UI\Container\GroupContainer.xaml.cs">
       <DependentUpon>GroupContainer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Container\GroupContainerTriggered.xaml.cs">
+    <Compile Include="UI\Container\GroupContainerTriggered.xaml.cs">
       <DependentUpon>GroupContainerTriggered.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\RangeSlider.xaml.cs">
+    <Compile Include="UI\Controls\RangeSlider.xaml.cs">
       <DependentUpon>RangeSlider.xaml</DependentUpon>
     </Compile>
     <Compile Include="Device\Command.cs" />
     <Compile Include="Device\CommandEventArgs.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\FunctionHandle\IFunctionHandler.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Function\IChannel.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\IHat.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\HWRaspberryPI2.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\FunctionHandle\HWRaspberryPI_RELAY.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\FunctionHandle\HWRaspberryPI_INPUT.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Function\Channel_RELAY.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Function\Channel_INPUT.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\IProcessTick.cs" />
     <Compile Include="Device\Controllers\Simulated\HWSimulatedUI.xaml.cs">
       <DependentUpon>HWSimulatedUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="Device\Controllers\Simulated\HWSimulated.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\FunctionHandle\HWRaspberryPI_PWM.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Function\Channel_PWM.cs" />
     <Compile Include="Device\HWInterface.cs" />
     <Compile Include="Device\IHWInterface.cs" />
     <Compile Include="Device\ISupportedFunctions.cs" />
-    <Compile Include="FileHandler.cs" />
-    <Compile Include="Functions\Function.cs" />
-    <Compile Include="Functions\Func_SOUND.cs" />
-    <Compile Include="Functions\Func_INPUT.cs" />
-    <Compile Include="Functions\Func_Relay.cs" />
-    <Compile Include="Functions\Func_PWM.cs" />
-    <Compile Include="Functions\GUI\Func_GUI\Func_Sound_GUI.xaml.cs">
+    <Compile Include="UI\FileHandler.cs" />
+    <Compile Include="UI\Functions\Function.cs" />
+    <Compile Include="UI\Functions\Func_SOUND.cs" />
+    <Compile Include="UI\Functions\Func_INPUT.cs" />
+    <Compile Include="UI\Functions\Func_Relay.cs" />
+    <Compile Include="UI\Functions\Func_PWM.cs" />
+    <Compile Include="UI\Functions\Func_GUI\Func_Sound_GUI.xaml.cs">
       <DependentUpon>Func_Sound_GUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Functions\IFunction.cs" />
-    <Compile Include="Functions\GUI\Function_Button\Function_Button.xaml.cs">
+    <Compile Include="UI\Functions\IFunction.cs" />
+    <Compile Include="UI\Functions\Function_Button\Function_Button.xaml.cs">
       <DependentUpon>Function_Button.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Functions\GUI\Function_Button\Function_Button_SOUND.cs" />
-    <Compile Include="Functions\GUI\Function_Button\Function_Button_RELAY.cs" />
-    <Compile Include="Functions\GUI\Function_Button\Function_Button_PWM.cs" />
-    <Compile Include="Functions\GUI\Function_Button\Function_Button_INPUT.cs" />
-    <Compile Include="Functions\GUI\Func_GUI\Func_Relay_GUI.xaml.cs">
+    <Compile Include="UI\Functions\Function_Button\Function_Button_SOUND.cs" />
+    <Compile Include="UI\Functions\Function_Button\Function_Button_RELAY.cs" />
+    <Compile Include="UI\Functions\Function_Button\Function_Button_PWM.cs" />
+    <Compile Include="UI\Functions\Function_Button\Function_Button_INPUT.cs" />
+    <Compile Include="UI\Functions\Func_GUI\Func_Relay_GUI.xaml.cs">
       <DependentUpon>Func_Relay_GUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Functions\GUI\Func_GUI\Func_PWM_GUI.xaml.cs">
+    <Compile Include="UI\Functions\Func_GUI\Func_PWM_GUI.xaml.cs">
       <DependentUpon>Func_PWM_GUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Functions\GUI\Func_GUI\Func_Input_GUI.xaml.cs">
+    <Compile Include="UI\Functions\Func_GUI\Func_Input_GUI.xaml.cs">
       <DependentUpon>Func_Input_GUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Functions\GUI\IFunctionGUI.cs" />
-    <Compile Include="IHostApp.cs" />
-    <Compile Include="MainPage.xaml.cs" />
+    <Compile Include="UI\Functions\IFunctionGUI.cs" />
+    <Compile Include="UI\IHostApp.cs" />
+    <Compile Include="UI\MainPage.xaml.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -184,15 +186,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="Container\GroupContainer.xaml">
+    <Page Include="UI\Container\GroupContainer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Container\GroupContainerTriggered.xaml">
+    <Page Include="UI\Container\GroupContainerTriggered.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\RangeSlider.xaml">
+    <Page Include="UI\Controls\RangeSlider.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -200,27 +202,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Functions\GUI\Function_Button\Function_Button.xaml">
+    <Page Include="UI\Functions\Function_Button\Function_Button.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Functions\GUI\Func_GUI\Func_Sound_GUI.xaml">
+    <Page Include="UI\Functions\Func_GUI\Func_Sound_GUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Functions\GUI\Func_GUI\Func_Relay_GUI.xaml">
+    <Page Include="UI\Functions\Func_GUI\Func_Relay_GUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Functions\GUI\Func_GUI\Func_PWM_GUI.xaml">
+    <Page Include="UI\Functions\Func_GUI\Func_PWM_GUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Functions\GUI\Func_GUI\Func_Input_GUI.xaml">
+    <Page Include="UI\Functions\Func_GUI\Func_Input_GUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainPage.xaml">
+    <Page Include="UI\MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -230,6 +232,7 @@
       <Name>Windows IoT Extensions for the UWP</Name>
     </SDKReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

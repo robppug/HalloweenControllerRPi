@@ -4,7 +4,7 @@ using static HalloweenControllerRPi.Functions.Func_INPUT;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 {
-   class HWRaspberryPI_INPUT : IFunctionHandler
+   class Channel_INPUT : IChannel
    {
       public class EventArgsINPUT : EventArgs
       {
@@ -28,16 +28,16 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       public delegate void EventHandlerInput(object sender, EventArgsINPUT e);
       public event EventHandlerInput InputLevelChanged;
 
-      public HWRaspberryPI_INPUT(uint chan, GpioPin pin)
+      public Channel_INPUT(uint chan, GpioPin pin)
       {
-         Channel = chan;
+         Index = chan;
 
          _Pin = pin;
 
          _Pin.ValueChanged += Pin_ValueChanged;
       }
 
-      public uint Channel
+      public uint Index
       {
          set { _channelIdx = value;  }
          get { return _channelIdx; }
@@ -59,7 +59,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       {
          GpioPinEdge gpEdge = args.Edge;
 
-         InputLevelChanged.Invoke(this, new EventArgsINPUT((gpEdge == GpioPinEdge.RisingEdge ? tenTriggerLvl.tHigh : tenTriggerLvl.tLow), Channel));
+         InputLevelChanged.Invoke(this, new EventArgsINPUT((gpEdge == GpioPinEdge.RisingEdge ? tenTriggerLvl.tHigh : tenTriggerLvl.tLow), Index));
       }
    }
 }

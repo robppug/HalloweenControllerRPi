@@ -5,7 +5,7 @@ using static HalloweenControllerRPi.Functions.Func_PWM;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 {
-   class HWRaspberryPI_PWM : IFunctionHandler, IProcessTick
+   class Channel_PWM : IChannel, IProcessTick
    {
       private IInterpolation curve = Interpolate.Common(new double[] { 0, 455, 910, 1365, 1820, 2275, 2730, 3185, 3640, 4095 },  /* 4095 / 9 points  */
                                                         new double[] { 0, 51,  202, 455,  809,  1264, 1820, 2477, 3236, 4095 }); /* y = x * x / 4095 */
@@ -21,7 +21,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 
       public const uint PWMResolution = 4095;
 
-      public HWRaspberryPI_PWM(uint chan)
+      public Channel_PWM(uint chan)
       {
          MinLevel = 0;
          MaxLevel = PWMResolution;
@@ -31,10 +31,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
          toggle = false;
          updateTick = 0;
 
-         Channel = chan;
+         Index = chan;
       }
 
-      public uint Channel
+      public uint Index
       {
          set { _channelIdx = value;  }
          get { return _channelIdx; }

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Windows.Devices;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
-using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.HWRaspberryPI_INPUT;
+using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.Channel_INPUT;
 using static HalloweenControllerRPi.Functions.Func_RELAY;
 
 namespace HalloweenControllerRPi.Device.Controllers
@@ -67,10 +67,10 @@ namespace HalloweenControllerRPi.Device.Controllers
       private static Stopwatch sWatch;
       private static long TriggerTime;
 
-      private static List<HWRaspberryPI_PWM> lPWMs = new List<HWRaspberryPI_PWM>();
-      private static List<HWRaspberryPI_INPUT> lINPUTs = new List<HWRaspberryPI_INPUT>();
-      private static List<HWRaspberryPI_RELAY> lRELAYs = new List<HWRaspberryPI_RELAY>();
-      private static List<IFunctionHandler> lAllFunctions = new List<IFunctionHandler>();
+      private static List<Channel_PWM> lPWMs = new List<Channel_PWM>();
+      private static List<Channel_INPUT> lINPUTs = new List<Channel_INPUT>();
+      private static List<Channel_RELAY> lRELAYs = new List<Channel_RELAY>();
+      private static List<IChannel> lAllFunctions = new List<IChannel>();
 
       private static byte[] bMODE1 = new byte[1] { 0x00 };
       private static byte[] bMODE2 = new byte[1] { 0x01 };
@@ -340,18 +340,18 @@ namespace HalloweenControllerRPi.Device.Controllers
          /* Initialise PWM channels */
          for (uint i = 0; i < PWMs; i++)
          {
-            lPWMs.Add(new HWRaspberryPI_PWM(i));
+            lPWMs.Add(new Channel_PWM(i));
 
-            i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
-            i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
-            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
-            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
+            i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)lPWMs[(int)i].Index * 4)), 0x00 });
+            i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)lPWMs[(int)i].Index * 4)), 0x00 });
+            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)lPWMs[(int)i].Index * 4)), 0x00 });
+            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)lPWMs[(int)i].Index * 4)), 0x00 });
          }
 
          /* Initialise INPUT channels */
          for (uint i = 0; i < Inputs; i++)
          {
-            HWRaspberryPI_INPUT piInput;
+            Channel_INPUT piInput;
             GpioPin pin = gpioController.OpenPin((int)lInputMap[(int)i].Pin);
 
             if (pin != null)
@@ -364,7 +364,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                   pin.SetDriveMode(gpioDriveMode);
                }
 
-               piInput = new HWRaspberryPI_INPUT(i, pin);
+               piInput = new Channel_INPUT(i, pin);
                piInput.InputLevelChanged += HWRaspberryPI2_InputLevelChanged;
 
                lINPUTs.Add(piInput);
@@ -374,7 +374,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          /* Initialise RELAY channels */
          for (uint i = 0; i < Relays; i++)
          {
-            HWRaspberryPI_RELAY piRelay;
+            Channel_RELAY piRelay;
             GpioPin pin = gpioController.OpenPin((int)lOutputMap[(int)i].Pin);
 
             if (pin != null)
@@ -388,7 +388,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                   pin.SetDriveMode(gpioDriveMode);
                }
 
-               piRelay = new HWRaspberryPI_RELAY(i, pin);
+               piRelay = new Channel_RELAY(i, pin);
 
                lRELAYs.Add(piRelay);
             }
@@ -436,29 +436,29 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                sWatch.Restart();
                
-               foreach (IFunctionHandler c in lAllFunctions)
+               foreach (IChannel c in lAllFunctions)
                {
                   if ((c as IProcessTick) != null)
                   {
                      (c as IProcessTick).Tick();
 
-                     if ((c as HWRaspberryPI_PWM) != null)
+                     if ((c as Channel_PWM) != null)
                      {
-                        HWRaspberryPI_PWM pwm = (c as HWRaspberryPI_PWM);
+                        Channel_PWM pwm = (c as Channel_PWM);
 
                         if (pwm.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
                         {
-                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)pwm.Channel * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)pwm.Channel * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Channel * 4)), (byte)(pwm.Level & 0xFF) });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Channel * 4)), (byte)((pwm.Level >> 8) & 0xFF) });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)pwm.Index * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)pwm.Index * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Index * 4)), (byte)(pwm.Level & 0xFF) });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Index * 4)), (byte)((pwm.Level >> 8) & 0xFF) });
                         }
                         else
                         {
-                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)pwm.Channel * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)pwm.Channel * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Channel * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Channel * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)pwm.Index * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)pwm.Index * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Index * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Index * 4)), 0x00 });
                         }
                      }
                   }
@@ -497,9 +497,9 @@ namespace HalloweenControllerRPi.Device.Controllers
             {
                #region /* INPUT HANDLING */
                case 'I': 
-                  foreach (HWRaspberryPI_INPUT c in lINPUTs)
+                  foreach (Channel_INPUT c in lINPUTs)
                   {
-                     if (channel == c.Channel + 1)
+                     if (channel == c.Index + 1)
                      {
                         /* Remove the Function and Channel from the string */
                         new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
@@ -519,9 +519,9 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                #region /* RELAY HANDLING */
                case 'R': 
-                  foreach (HWRaspberryPI_RELAY c in lRELAYs)
+                  foreach (Channel_RELAY c in lRELAYs)
                   {
-                     if (channel == c.Channel + 1)
+                     if (channel == c.Index + 1)
                      {
                         /* Remove the Function and Channel from the string */
                         new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
@@ -543,9 +543,9 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                #region /* PWM HANDLING */
                case 'T':
-                  foreach (HWRaspberryPI_PWM c in lPWMs)
+                  foreach (Channel_PWM c in lPWMs)
                   {
-                     if (channel == c.Channel + 1)
+                     if (channel == c.Index + 1)
                      {
                         /* Remove the Function and Channel from the string */
                         new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
