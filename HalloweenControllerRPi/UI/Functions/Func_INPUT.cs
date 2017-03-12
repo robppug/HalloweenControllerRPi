@@ -16,6 +16,7 @@ namespace HalloweenControllerRPi.Functions
       };
 
       private uint _debounceTime_ms;
+      private uint _postTriggerDelay_ms;
       private tenTriggerLvl _triggerLevel;
 
       public tenTriggerLvl TriggerLevel
@@ -40,7 +41,23 @@ namespace HalloweenControllerRPi.Functions
             this.SendCommand("DEBTIME", data.ToArray());
          }
       }
-      
+
+      public uint PostTriggerDelay_ms
+      {
+         get { return _postTriggerDelay_ms; }
+         set
+         {
+            List<string> data = new List<string>();
+
+            _postTriggerDelay_ms = value;
+
+            data.Add(Index.ToString("00"));
+            data.Add(_postTriggerDelay_ms.ToString());
+
+            /* Notify the HW to configure its input post-debouncing time */
+            this.SendCommand("POSTDEBTIME", data.ToArray());
+         }
+      }
       public Func_INPUT()
       {
 
@@ -70,6 +87,7 @@ namespace HalloweenControllerRPi.Functions
 
          writer.WriteAttributeString("TriggerLevel", _triggerLevel.GetHashCode().ToString());
          writer.WriteAttributeString("DebounceTime", _debounceTime_ms.GetHashCode().ToString());
+         writer.WriteAttributeString("PostTriggerTime", _postTriggerDelay_ms.GetHashCode().ToString());
       }
 
       public override bool boProcessRequest(char cFunc, char cFuncIndex, uint u32FuncValue)

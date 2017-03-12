@@ -22,18 +22,93 @@ namespace HalloweenControllerRPi
    {
       private StorageFile fileToLoad;
       private StorageFile fileToSave;
+      private StorageFile fileSettings;
 
       public object DriveInfo { get; private set; }
 
       #region /* XML Loading */
-      private async void buttonLoadSequence_Click(object sender, RoutedEventArgs e)
+      private async void loadSettingsFile()
       {
+         this.checkBox_LoadOnStart.IsChecked = false;
+
          try
          {
             fileToLoad = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync("HWControllerSequence.sqn");
          }
-         catch { fileToLoad = null; }
+         catch
+         {
+            fileToLoad = null;
+         }
 
+         try
+         {
+            fileSettings = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync("HWController.cfg");
+         }
+         catch
+         {
+            fileSettings = null;
+         }
+
+         if (fileSettings != null)
+         {
+            StreamReader settingsFile = new StreamReader(await fileSettings.OpenStreamForReadAsync());
+            XmlReader xmlReader = XmlReader.Create(settingsFile);
+
+            //XDocument xDoc = XDocument.Load(XmlReader.Create(new StreamReader(await fileSettings.OpenStreamForReadAsync())));
+
+            if (xmlReader.ReadToFollowing("HalloweenControllerRPi.MainPage") == true)
+            {
+               if (xmlReader.GetAttribute("Version") == "0.5")
+               {
+                  if (xmlReader.ReadToFollowing("Settings") == true)
+                  {
+                     this.checkBox_LoadOnStart.IsChecked = (bool)(xmlReader.GetAttribute("LoadOnStart") == "True" ? true : false);
+
+                     if (this.checkBox_LoadOnStart.IsChecked == true)
+                     {
+                        this.buttonLoadSequence_Click(this, null);
+                     }
+                  }
+               }
+            }
+
+            settingsFile.Dispose();
+         }
+         else
+         {
+            fileSettings = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync("HWController.cfg", CreationCollisionOption.ReplaceExisting);
+
+            /* File doesnt exist */
+            saveSettingsFile();
+         }
+      }
+
+      private async void saveSettingsFile()
+      {
+         XmlWriterSettings xmlSettings = new XmlWriterSettings();
+         Stream settingsfile = await fileSettings.OpenStreamForWriteAsync();
+
+         xmlSettings.Indent = true;
+
+         using (XmlWriter xmlWriter = XmlWriter.Create(settingsfile, xmlSettings))
+         {
+            xmlWriter.WriteStartDocument();
+
+            /* Store Version */
+            xmlWriter.WriteStartElement(this.GetType().ToString());
+            xmlWriter.WriteAttributeString("Version", "0.5");
+               xmlWriter.WriteStartElement("Settings");
+               xmlWriter.WriteAttributeString("LoadOnStart", this.checkBox_LoadOnStart.IsChecked.ToString());
+               xmlWriter.WriteEndElement();
+            xmlWriter.WriteEndElement();
+            xmlWriter.WriteEndDocument();
+         }
+
+         settingsfile.Dispose();
+      }
+
+      private async void buttonLoadSequence_Click(object sender, RoutedEventArgs e)
+      {
          if (fileToLoad != null)
          {
             StreamReader loadfile = new StreamReader(await fileToLoad.OpenStreamForReadAsync());
@@ -58,8 +133,17 @@ namespace HalloweenControllerRPi
             //DrawingControl.ResumeDrawing(groupContainer_Trigger);
 
             loadfile.Dispose();
-                  
          }
+      }
+
+      private void checkBox_LoadOnStart_Checked(object sender, RoutedEventArgs e)
+      {
+         saveSettingsFile();
+      }
+
+      private void checkBox_LoadOnStart_Unchecked(object sender, RoutedEventArgs e)
+      {
+         saveSettingsFile();
       }
 
       public void ReadXml(System.Xml.XmlReader reader)

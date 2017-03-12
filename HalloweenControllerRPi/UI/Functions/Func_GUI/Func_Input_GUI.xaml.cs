@@ -37,7 +37,7 @@ namespace HalloweenControllerRPi.Function_GUI
          this.textTitle.DoubleTapped += TextTitle_DoubleTapped;
 
          this.comboBox_TrigEdge.Items.Add("Low (GND)");
-         this.comboBox_TrigEdge.Items.Add("High (5V)");
+         this.comboBox_TrigEdge.Items.Add("High (3.3V)");
          this.comboBox_TrigEdge.SelectedIndex = 0;
       }
 
@@ -58,6 +58,15 @@ namespace HalloweenControllerRPi.Function_GUI
          }
       }
 
+      private void slider_PostDelay_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+      {
+         if (_boInitialised == true)
+         {
+            this._Func.PostTriggerDelay_ms = (uint)(sender as Slider).Value;
+            this.textBlock_PostDelay.Text = "Post Trigger Time: " + this._Func.PostTriggerDelay_ms.ToString() + " (ms)";
+         }
+      }
+
       #region XML Handling
       private void comboBox_TrigEdge_SelectionChanged(object sender, SelectionChangedEventArgs e)
       {
@@ -68,9 +77,11 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          this._Func.TriggerLevel = (Func_INPUT.tenTriggerLvl)Convert.ToUInt16(reader.GetAttribute("TriggerLevel"));
          this._Func.DebounceTime_ms = Convert.ToUInt16(reader.GetAttribute("DebounceTime"));
+         this._Func.PostTriggerDelay_ms = Convert.ToUInt16(reader.GetAttribute("PostTriggerTime"));
          //this.textTitle.Text = reader.GetAttribute("CustomName");
 
          this.textBlock_Debounce.Text = "Debounce Time: " + this._Func.DebounceTime_ms.ToString() + " (ms)";
+         this.textBlock_PostDelay.Text = "Post Trigger Time: " + this._Func.PostTriggerDelay_ms.ToString() + " (ms)";
 
          /* Ignore MIN/MAX limits. */
          try

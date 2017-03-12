@@ -156,7 +156,8 @@ namespace HalloweenControllerRPi.Device.Controllers
             new List<Command>
             {
                new Command("GET", 'G'),
-               new Command("DEBTIME", 'D')
+               new Command("DEBTIME", 'D'),
+               new Command("POSTDEBTIME", 'P')
             }
          },
          /* Command : RELAY */
@@ -320,6 +321,9 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       private async void OnConnect()
       {
+         /* Allow the HW to initialise */
+         await Task.Delay(1000);
+
          i2cDevice = i2cController.GetDevice(i2cSettings);
 
          byte[] buffer = new byte[10];
@@ -508,6 +512,9 @@ namespace HalloweenControllerRPi.Device.Controllers
                         {
                            case 'D':
                               c.DebounceTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
+                              break;
+                           case 'P':
+                              c.PostTriggerTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
                               break;
                            default:
                               break;

@@ -1,5 +1,6 @@
 ﻿using System;
 using Windows.Devices.Gpio;
+using Windows.UI.Xaml;
 using static HalloweenControllerRPi.Functions.Func_INPUT;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
@@ -23,7 +24,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 
       private uint _channelIdx;
       private TimeSpan _debTime;
+      private TimeSpan _postTriggerTime;
       private GpioPin _Pin;
+      private DispatcherTimer _reenableTimer;
+      private bool _waitForRetrigger;
 
       public delegate void EventHandlerInput(object sender, EventArgsINPUT e);
       public event EventHandlerInput InputLevelChanged;
@@ -34,7 +38,15 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 
          _Pin = pin;
 
+         _Pin.DebounceTimeout = TimeSpan.FromMilliseconds(50);
          _Pin.ValueChanged += Pin_ValueChanged;
+
+         _postTriggerTime = TimeSpan.FromMilliseconds(50);
+
+         _reenableTimer = new DispatcherTimer();
+         _reenableTimer.Tick += _reenableTimer_Tick;
+         _reenableTimer.Interval = _postTriggerTime;
+         _waitForRetrigger = false;
       }
 
       public uint Index
@@ -55,11 +67,33 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
          set { _debTime = value; if(_Pin != null) _Pin.DebounceTimeout = _debTime; }
       }
 
+      public TimeSpan PostTriggerTime
+      {
+         get { return _postTriggerTime; }
+         set { _postTriggerTime = value; }
+      }
+      
       private void Pin_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
       {
          GpioPinEdge gpEdge = args.Edge;
 
-         InputLevelChanged.Invoke(this, new EventArgsINPUT((gpEdge == GpioPinEdge.RisingEdge ? tenTriggerLvl.tHigh : tenTriggerLvl.tLow), Index));
+         if (_waitForRetrigger == false)
+         {
+            if (InputLevelChanged != null)
+            {
+               InputLevelChanged.Invoke(this, new EventArgsINPUT((gpEdge == GpioPinEdge.RisingEdge ? tenTriggerLvl.tHigh : tenTriggerLvl.tLow), Channel));
+
+               _waitForRetrigger = true;
+               _reenableTimer.Interval = _postTriggerTime;
+               _reenableTimer.Start();
+            }
+         }
+      }
+
+      private void _reenableTimer_Tick(object sender, object e)
+      {
+         _waitForRetrigger = false;
+         _reenableTimer.Stop();
       }
    }
 }
