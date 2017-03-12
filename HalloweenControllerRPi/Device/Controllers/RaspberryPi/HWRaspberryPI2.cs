@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices;
+using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.HWRaspberryPI_INPUT;
@@ -74,6 +75,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       private static byte[] bMODE1 = new byte[1] { 0x00 };
       private static byte[] bMODE2 = new byte[1] { 0x01 };
+      private static byte[] bPWM_CLK = new byte[1] { 0xFE };
       private static byte[] LED_ON_L = new byte[1] { 0x06 };
       private static byte[] LED_ON_H = new byte[1] { 0x07 };
       private static byte[] LED_OFF_L = new byte[1] { 0x08 };
@@ -128,15 +130,20 @@ namespace HalloweenControllerRPi.Device.Controllers
          if (LightningProvider.IsLightningEnabled == true)
          {
             LowLevelDevicesController.DefaultProvider = LightningProvider.GetAggregateProvider();
+         }
 
-            GetControllers();
-         }
-         else
-         {
-            //throw new Exception("No supported devices found.");
-         }
+         var getCtrlTask = Task.Run(async () => { await GetControllers(); });
       }
       #endregion
+      private async Task GetControllers()
+      {
+         if (LightningProvider.IsLightningEnabled == true)
+         {
+            gpioController = (await GpioController.GetControllersAsync(LightningGpioProvider.GetGpioProvider()))[0];
+            i2cController = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
+         }
+      }
+
 
       #region /* COMMAND LIST & HANDLING */
       /// <summary>
@@ -312,27 +319,52 @@ namespace HalloweenControllerRPi.Device.Controllers
       }
       #endregion
 
-      private async void GetControllers()
-      {
-         gpioController = (await GpioController.GetControllersAsync(LightningGpioProvider.GetGpioProvider()))[0];
-
-         i2cController = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
-      }
 
       private async void OnConnect()
       {
          /* Allow the HW to initialise */
          await Task.Delay(1000);
 
-         i2cDevice = i2cController.GetDevice(i2cSettings);
+         if (LightningProvider.IsLightningEnabled == true)
+         {
+            i2cDevice = i2cController.GetDevice(i2cSettings);
+         }
+         else
+         {
+            bool boSuccessful = false;
+            int Address = 0x40;
+            string deviceSelector = I2cDevice.GetDeviceSelector("I2C1");
+            var i2cDeviceControllers = await DeviceInformation.FindAllAsync(deviceSelector).AsTask();
+
+            while(boSuccessful == false)
+            {
+               i2cSettings = new I2cConnectionSettings(Address);
+               i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
+               i2cSettings.SharingMode = I2cSharingMode.Exclusive;
+
+               i2cDevice = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, i2cSettings);
+
+               try
+               {
+                  i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x00 });
+
+                  boSuccessful = true;
+               }
+               catch
+               {
+                  Address++;
+
+                  if (Address == 0x70)
+                     Address++;
+                  continue;
+               }
+            }
+         }
 
          byte[] buffer = new byte[10];
 
-         /* Adjust the PWM Frequency - 1526Hz - Must be before being set to NORMAL mode */
-         i2cDevice.Write(new byte[2] { 0xFE, 0x03 });
-
          /* Set MODE 1 Register - Change to NORMAL mode */
-         i2cDevice.Write(new byte[2] { 0x00, 0x00 });
+         i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x00 });
 
          await Task.Delay(1);
 
@@ -352,55 +384,66 @@ namespace HalloweenControllerRPi.Device.Controllers
             i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
          }
 
+         /* Set MODE 1 Register - Change to SLEEP mode */
+         i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x90 });
+
+         /* Adjust the PWM Frequency - 1526Hz - Must be before being set to NORMAL mode */
+         i2cDevice.Write(new byte[2] { (byte)bPWM_CLK[0], 0x03 });
+
+         /* Set MODE 1 Register - Change to NORMAL mode */
+         i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x00 });
+
+         await Task.Delay(1);
+
          /* Initialise INPUT channels */
-         for (uint i = 0; i < Inputs; i++)
-         {
-            HWRaspberryPI_INPUT piInput;
-            GpioPin pin = gpioController.OpenPin((int)lInputMap[(int)i].Pin);
+         //for (uint i = 0; i < Inputs; i++)
+         //{
+         //   HWRaspberryPI_INPUT piInput;
+         //   GpioPin pin = gpioController.OpenPin((int)lInputMap[(int)i].Pin);
 
-            if (pin != null)
-            {
-               GpioPinDriveMode gpioDriveMode;
+         //   if (pin != null)
+         //   {
+         //      GpioPinDriveMode gpioDriveMode;
 
-               gpioDriveMode = GpioPinDriveMode.InputPullUp;
-               if (pin.IsDriveModeSupported(gpioDriveMode) == true)
-               {
-                  pin.SetDriveMode(gpioDriveMode);
-               }
+         //      gpioDriveMode = GpioPinDriveMode.InputPullUp;
+         //      if (pin.IsDriveModeSupported(gpioDriveMode) == true)
+         //      {
+         //         pin.SetDriveMode(gpioDriveMode);
+         //      }
 
-               piInput = new HWRaspberryPI_INPUT(i, pin);
-               piInput.InputLevelChanged += HWRaspberryPI2_InputLevelChanged;
+         //      piInput = new HWRaspberryPI_INPUT(i, pin);
+         //      piInput.InputLevelChanged += HWRaspberryPI2_InputLevelChanged;
 
-               lINPUTs.Add(piInput);
-            }
-         }
+         //      lINPUTs.Add(piInput);
+         //   }
+         //}
 
          /* Initialise RELAY channels */
-         for (uint i = 0; i < Relays; i++)
-         {
-            HWRaspberryPI_RELAY piRelay;
-            GpioPin pin = gpioController.OpenPin((int)lOutputMap[(int)i].Pin);
+         //for (uint i = 0; i < Relays; i++)
+         //{
+         //   HWRaspberryPI_RELAY piRelay;
+         //   GpioPin pin = gpioController.OpenPin((int)lOutputMap[(int)i].Pin);
 
-            if (pin != null)
-            {
-               GpioPinDriveMode gpioDriveMode;
+         //   if (pin != null)
+         //   {
+         //      GpioPinDriveMode gpioDriveMode;
 
-               gpioDriveMode = GpioPinDriveMode.Output;
-               if (pin.IsDriveModeSupported(gpioDriveMode) == true)
-               {
-                  pin.Write(GpioPinValue.High);
-                  pin.SetDriveMode(gpioDriveMode);
-               }
+         //      gpioDriveMode = GpioPinDriveMode.Output;
+         //      if (pin.IsDriveModeSupported(gpioDriveMode) == true)
+         //      {
+         //         pin.Write(GpioPinValue.High);
+         //         pin.SetDriveMode(gpioDriveMode);
+         //      }
 
-               piRelay = new HWRaspberryPI_RELAY(i, pin);
+         //      piRelay = new HWRaspberryPI_RELAY(i, pin);
 
-               lRELAYs.Add(piRelay);
-            }
-         }
+         //      lRELAYs.Add(piRelay);
+         //   }
+         //}
 
-         lAllFunctions.AddRange(lINPUTs);
+         //lAllFunctions.AddRange(lINPUTs);
          lAllFunctions.AddRange(lPWMs);
-         lAllFunctions.AddRange(lRELAYs);
+         //lAllFunctions.AddRange(lRELAYs);
 
          /* Create the Background Task handle */
          TaskFactory tTaskFactory = new TaskFactory(TaskScheduler.Current);
@@ -411,21 +454,17 @@ namespace HalloweenControllerRPi.Device.Controllers
          await tTaskFactory.StartNew(new Action(ControllerTask), TaskCreationOptions.RunContinuationsAsynchronously);
       }
 
-
+      /// <summary>
+      /// Initialise any drivers (ie. I2C) 
+      /// </summary>
       public override void Connect()
       {
-         /* Initialise any drivers (ie. I2C) */
-         if (LightningProvider.IsLightningEnabled)
-         {
-            LowLevelDevicesController.DefaultProvider = LightningProvider.GetAggregateProvider();
+         /* Setup the I2C bus for access to the PWM channels */
+         i2cSettings = new I2cConnectionSettings(0x40);
+         i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
+         i2cSettings.SharingMode = I2cSharingMode.Exclusive;
 
-            /* Setup the I2C bus for access to the PWM channels */
-            i2cSettings = new I2cConnectionSettings(0x40);
-            i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
-            i2cSettings.SharingMode = I2cSharingMode.Exclusive;
-
-            OnConnect();
-         }
+         OnConnect();
       }
 
       private void ControllerTask()

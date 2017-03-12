@@ -67,6 +67,10 @@ namespace HalloweenControllerRPi
                      if (this.checkBox_LoadOnStart.IsChecked == true)
                      {
                         this.buttonLoadSequence_Click(this, null);
+
+                        await Task.Delay(12000);
+
+                        this.buttonStart_Click(this, null);
                      }
                   }
                }

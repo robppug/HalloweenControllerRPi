@@ -18,9 +18,11 @@ using Windows.Devices.I2c.Provider;
 using Windows.Devices.Pwm.Provider;
 using Windows.Media.Playback;
 using Windows.Storage;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Media;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -47,6 +49,8 @@ namespace HalloweenControllerRPi
          lGroupContainers.Add(groupContainer_AlwaysActive);
          lGroupContainers.Add(groupContainer_Triggered);
 
+         buttonStart.Background = new SolidColorBrush(Colors.Red);
+
          this.Loaded += OnLoaded;
          this.Unloaded += OnUnloaded;
       }
@@ -66,13 +70,13 @@ namespace HalloweenControllerRPi
       {
          HWInterface HWDevice;
 
-         if (LightningProvider.IsLightningEnabled == true)
+         //if (LightningProvider.IsLightningEnabled == true)
          {
             HWDevice = new HWRaspberryPI2();
          }
-         else
+         //else
          { 
-            HWDevice = new HWSimulated();
+            //HWDevice = new HWSimulated();
          }
 
          HWDevice.CommandReceived += HWDevice_CommandReceived;
@@ -108,16 +112,12 @@ namespace HalloweenControllerRPi
                this.Available_Board.Items.Add(new Function_Button_RELAY(i + 1));
             }
 
-            loadSettingsFile();
+            //Func_SOUND.GetAvailableSounds();
 
-            if(this.checkBox_LoadOnStart.IsChecked == true)
-            {
-               buttonStart_Click(this, null);
-            }
+            //loadSettingsFile();
          }
          catch { }
       }
-
 
       /// <summary>
       /// COMMAND received from HW Device that needs processing.
@@ -181,11 +181,13 @@ namespace HalloweenControllerRPi
 
       private void buttonStart_Click(object sender, RoutedEventArgs e)
       {
+         buttonStart.Background = new SolidColorBrush(Colors.Green);
          groupContainer_AlwaysActive.ProcessAlwaysActives(true);
       }
 
       private void buttonStop_Click(object sender, RoutedEventArgs e)
       {
+         buttonStart.Background = new SolidColorBrush(Colors.Red);
          TriggerEnd(new Func_INPUT());
 
          groupContainer_AlwaysActive.ProcessAlwaysActives(false);

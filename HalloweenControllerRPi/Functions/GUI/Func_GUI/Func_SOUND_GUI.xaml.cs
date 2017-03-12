@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Windows.Storage;
 using Windows.UI.Xaml;
@@ -54,19 +55,19 @@ namespace HalloweenControllerRPi.Function_GUI
          _Func.FuncButtonType = typeof(Function_Button_SOUND);
 
          GetListofSounds();
-         
+
          _Func.TimerTick += UpdatePosition;
       }
       
-      private async void GetListofSounds()
+      private void GetListofSounds()
       {
          int noOfSounds;
 
-         noOfSounds = await _Func.GetAvailableSounds();
+         noOfSounds = Func_SOUND.lSoundFiles.Count;
 
          if(noOfSounds > 0)
          {
-            foreach (StorageFile file in _Func.lSoundFiles)
+            foreach (StorageFile file in Func_SOUND.lSoundFiles)
             {
                comboBox_Sounds.Items.Add(file.DisplayName + " (" + file.DisplayType + ")");
             }
@@ -160,9 +161,10 @@ namespace HalloweenControllerRPi.Function_GUI
          /* Ignore MIN/MAX limits. */
          try
          {
-            slider_Duration.Value = (int)this._Func.Duration_ms;
-            slider_StartDelay.Value = (int)this._Func.Delay_ms;
-            comboBox_Sounds.SelectedIndex = Convert.ToUInt16(reader.GetAttribute("Sound"));
+            slider_Duration.Value = _Func.Duration_ms;
+            slider_StartDelay.Value = _Func.Delay_ms;
+            slider_Volume.Value = _Func.activePlaybackDevice.Volume * 100;
+            comboBox_Sounds.SelectedIndex = Convert.ToInt32(reader.GetAttribute("Sound"));
          }
          catch { }
       }
@@ -181,11 +183,11 @@ namespace HalloweenControllerRPi.Function_GUI
          //new PopupTextBox().SetCustomName(gb_FunctionName);
       }
 
-      private void comboBox_Sounds_SelectionChanged(object sender, SelectionChangedEventArgs e)
+      private async void comboBox_Sounds_SelectionChanged(object sender, SelectionChangedEventArgs e)
       {
-         if (_Func.lSoundFiles.Count > 0)
+         if (Func_SOUND.lSoundFiles.Count > 0)
          {
-            _Func.OpenFile((sender as ComboBox).SelectedIndex);
+            await _Func.OpenFile((sender as ComboBox).SelectedIndex);
          }
       }
    }

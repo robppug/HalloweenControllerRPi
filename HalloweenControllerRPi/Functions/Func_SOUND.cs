@@ -15,12 +15,13 @@ namespace HalloweenControllerRPi.Functions
 {
    public class Func_SOUND : Function
    {
+      public static List<StorageFile> lSoundFiles;
+
       private string _fileSound;
       private int _SoundDuration_s;
       private uint _Repeats = 0;
       private uint RepeatCount;
       private bool? _Looping = false;
-      public List<StorageFile> lSoundFiles;
       public MediaElement activePlaybackDevice;
       public IRandomAccessStream sSoundStream;
       public EventHandler TimerTick;
@@ -53,6 +54,7 @@ namespace HalloweenControllerRPi.Functions
       }
       #endregion
 
+
       public Func_SOUND() { }
 
       public Func_SOUND(IHostApp host, tenTYPE entype, MediaElement mediaE) : base(host, entype)
@@ -60,8 +62,6 @@ namespace HalloweenControllerRPi.Functions
          activePlaybackDevice = mediaE;
          activePlaybackDevice.RealTimePlayback = true;
          activePlaybackDevice.MediaEnded += ActivePlaybackDevice_Ended;
-
-         lSoundFiles = new List<StorageFile>();
 
          FunctionKeyCommand = new Command("SOUND", 'S');
 
@@ -91,8 +91,13 @@ namespace HalloweenControllerRPi.Functions
          tickTimer.Start();
       }
 
-      public async Task<int> GetAvailableSounds()
+      public async static void GetAvailableSounds()
       {
+         if (lSoundFiles == null)
+         {
+            lSoundFiles = new List<StorageFile>();
+         }
+
          var files = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFilesAsync();
 
          lSoundFiles.Clear();
@@ -104,11 +109,9 @@ namespace HalloweenControllerRPi.Functions
                lSoundFiles.Add(file);
             }
          }
-
-         return lSoundFiles.Count;
       }
 
-      public async void OpenFile(int index)
+      public async Task OpenFile(int index)
       {
          if (activePlaybackDevice != null)
          {
@@ -118,6 +121,8 @@ namespace HalloweenControllerRPi.Functions
 
             activePlaybackDevice.AutoPlay = false;
             activePlaybackDevice.SetSource(sSoundStream, lSoundFiles[index].ContentType);
+
+            await Task.Delay(10000);
          }
       }
 
