@@ -1,7 +1,7 @@
 ﻿namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 {
-   public interface IFunctionHandler
+   public interface IChannel
    {
-      uint Channel { get; set; }
+      uint Index { get; set; }
    }
 }

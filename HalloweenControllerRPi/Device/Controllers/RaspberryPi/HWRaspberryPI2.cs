@@ -1,4 +1,5 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi;
+using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats;
 using HalloweenControllerRPi.Functions;
 using Microsoft.IoT.Lightning.Providers;
 using System;
@@ -11,7 +12,7 @@ using Windows.Devices;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
-using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.HWRaspberryPI_INPUT;
+using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.Channel_INPUT;
 using static HalloweenControllerRPi.Functions.Func_RELAY;
 
 namespace HalloweenControllerRPi.Device.Controllers
@@ -68,10 +69,11 @@ namespace HalloweenControllerRPi.Device.Controllers
       private static Stopwatch sWatch;
       private static long TriggerTime;
 
-      private static List<HWRaspberryPI_PWM> lPWMs = new List<HWRaspberryPI_PWM>();
-      private static List<HWRaspberryPI_INPUT> lINPUTs = new List<HWRaspberryPI_INPUT>();
-      private static List<HWRaspberryPI_RELAY> lRELAYs = new List<HWRaspberryPI_RELAY>();
-      private static List<IFunctionHandler> lAllFunctions = new List<IFunctionHandler>();
+      private static List<IHat> lHats = new List<IHat>();
+      private static List<Channel_PWM> lPWMs = new List<Channel_PWM>();
+      private static List<Channel_INPUT> lINPUTs = new List<Channel_INPUT>();
+      private static List<Channel_RELAY> lRELAYs = new List<Channel_RELAY>();
+      private static List<IChannel> lAllFunctions = new List<IChannel>();
 
       private static byte[] bMODE1 = new byte[1] { 0x00 };
       private static byte[] bMODE2 = new byte[1] { 0x01 };
@@ -322,9 +324,12 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       private async void OnConnect()
       {
+         RPiHat m_RPiHat;
+
          /* Allow the HW to initialise */
          await Task.Delay(1000);
 
+         /* Discover 'HATs' that are connected */
          if (LightningProvider.IsLightningEnabled == true)
          {
             i2cDevice = i2cController.GetDevice(i2cSettings);
@@ -346,7 +351,15 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                try
                {
-                  i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x00 });
+                  i2cDevice.Write(new byte[1] { 0x00 });
+
+                  /* Device found, store the HAT and it's Address */
+                  m_RPiHat = new RPiHat(i2cDevice, (UInt16)Address);
+
+                  /* Establishes communcation with the HAT and initialises the HATs available CHANNELS */
+                  m_RPiHat.Open();
+
+                  lHats.Add(m_RPiHat);
 
                   boSuccessful = true;
                }
@@ -361,37 +374,41 @@ namespace HalloweenControllerRPi.Device.Controllers
             }
          }
 
-         byte[] buffer = new byte[10];
+         //byte[] buffer = new byte[10];
 
-         /* Set MODE 1 Register - Change to NORMAL mode */
-         i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x00 });
-
-         await Task.Delay(1);
-
-         /* Set MODE 2 Register */
-         //i2cDevice.Write(new byte[2] { 0x00, 0x00 });
+         ///* Set MODE 1 Register - Change to NORMAL mode */
+         //i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x00 });
 
          //await Task.Delay(1);
 
-         /* Initialise PWM channels */
-         for (uint i = 0; i < PWMs; i++)
-         {
-            lPWMs.Add(new HWRaspberryPI_PWM(i));
+         ///* Set MODE 2 Register */
+         ////i2cDevice.Write(new byte[2] { 0x00, 0x00 });
 
-            i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
-            i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
-            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
-            i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)lPWMs[(int)i].Channel * 4)), 0x00 });
-         }
+         ////await Task.Delay(1);
 
-         /* Set MODE 1 Register - Change to SLEEP mode */
-         i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x90 });
+         ///* Initialise PWM channels */
+         //for (uint i = 0; i < PWMs; i++)
+         //{
+         //   IChannel m_Channel = new Channel_PWM(i);
 
-         /* Adjust the PWM Frequency - 1526Hz - Must be before being set to NORMAL mode */
-         i2cDevice.Write(new byte[2] { (byte)bPWM_CLK[0], 0x03 });
+         //   m_RPiHat.AddChannel(m_Channel);
 
-         /* Set MODE 1 Register - Change to NORMAL mode */
-         i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x00 });
+         //   lPWMs.Add((Channel_PWM)m_Channel);
+
+         //   i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)lPWMs[(int)i].Index * 4)), 0x00 });
+         //   i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)lPWMs[(int)i].Index * 4)), 0x00 });
+         //   i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)lPWMs[(int)i].Index * 4)), 0x00 });
+         //   i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)lPWMs[(int)i].Index * 4)), 0x00 });
+         //}
+
+         ///* Set MODE 1 Register - Change to SLEEP mode */
+         //i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x90 });
+
+         ///* Adjust the PWM Frequency - 1526Hz - Must be before being set to NORMAL mode */
+         //i2cDevice.Write(new byte[2] { (byte)bPWM_CLK[0], 0x03 });
+
+         ///* Set MODE 1 Register - Change to NORMAL mode */
+         //i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x00 });
 
          await Task.Delay(1);
 
@@ -479,29 +496,29 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                sWatch.Restart();
                
-               foreach (IFunctionHandler c in lAllFunctions)
+               foreach (IChannel c in lAllFunctions)
                {
                   if ((c as IProcessTick) != null)
                   {
                      (c as IProcessTick).Tick();
 
-                     if ((c as HWRaspberryPI_PWM) != null)
+                     if ((c as Channel_PWM) != null)
                      {
-                        HWRaspberryPI_PWM pwm = (c as HWRaspberryPI_PWM);
+                        Channel_PWM pwm = (c as Channel_PWM);
 
                         if (pwm.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
                         {
-                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)pwm.Channel * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)pwm.Channel * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Channel * 4)), (byte)(pwm.Level & 0xFF) });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Channel * 4)), (byte)((pwm.Level >> 8) & 0xFF) });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)pwm.Index * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)pwm.Index * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Index * 4)), (byte)(pwm.Level & 0xFF) });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Index * 4)), (byte)((pwm.Level >> 8) & 0xFF) });
                         }
                         else
                         {
-                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)pwm.Channel * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)pwm.Channel * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Channel * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Channel * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)pwm.Index * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)pwm.Index * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Index * 4)), 0x00 });
+                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Index * 4)), 0x00 });
                         }
                      }
                   }
@@ -540,9 +557,9 @@ namespace HalloweenControllerRPi.Device.Controllers
             {
                #region /* INPUT HANDLING */
                case 'I': 
-                  foreach (HWRaspberryPI_INPUT c in lINPUTs)
+                  foreach (Channel_INPUT c in lINPUTs)
                   {
-                     if (channel == c.Channel + 1)
+                     if (channel == c.Index + 1)
                      {
                         /* Remove the Function and Channel from the string */
                         new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
@@ -565,9 +582,9 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                #region /* RELAY HANDLING */
                case 'R': 
-                  foreach (HWRaspberryPI_RELAY c in lRELAYs)
+                  foreach (Channel_RELAY c in lRELAYs)
                   {
-                     if (channel == c.Channel + 1)
+                     if (channel == c.Index + 1)
                      {
                         /* Remove the Function and Channel from the string */
                         new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
@@ -589,9 +606,9 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                #region /* PWM HANDLING */
                case 'T':
-                  foreach (HWRaspberryPI_PWM c in lPWMs)
+                  foreach (Channel_PWM c in lPWMs)
                   {
-                     if (channel == c.Channel + 1)
+                     if (channel == c.Index + 1)
                      {
                         /* Remove the Function and Channel from the string */
                         new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
