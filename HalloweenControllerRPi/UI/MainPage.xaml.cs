@@ -33,7 +33,7 @@ namespace HalloweenControllerRPi
    /// </summary>
    public partial class MainPage : Page, IHostApp
    {
-      public List<HWInterface> lHWInterfaces = new List<HWInterface>();
+      public List<HWController> lHWControllers = new List<HWController>();
       public List<GroupContainer> lGroupContainers = new List<GroupContainer>();
 
       static public IHostApp HostApp;
@@ -51,15 +51,15 @@ namespace HalloweenControllerRPi
 
          buttonStart.Background = new SolidColorBrush(Colors.Red);
 
-         this.Loaded += OnLoaded;
-         this.Unloaded += OnUnloaded;
+         Loaded += OnLoaded;
+         Unloaded += OnUnloaded;
       }
 
       private void OnUnloaded(object sender, RoutedEventArgs e)
       {
-         if( lHWInterfaces.Count > 0 )
+         if( lHWControllers.Count > 0 )
          {
-            foreach( IHWInterface hw in lHWInterfaces)
+            foreach( IHWController hw in lHWControllers)
             {
                hw.Disconnect();
             }
@@ -68,46 +68,46 @@ namespace HalloweenControllerRPi
 
       private void OnLoaded(object sender, RoutedEventArgs e)
       {
-         HWInterface HWDevice;
+         HWController HWController;
 
          //if (LightningProvider.IsLightningEnabled == true)
          {
-            HWDevice = new HWRaspberryPI2();
+            HWController = new HWRaspberryPI2();
          }
          //else
-         { 
-            //HWDevice = new HWSimulated();
+         {
+            //HWController = new HWSimulated();
          }
 
-         HWDevice.CommandReceived += HWDevice_CommandReceived;
+         HWController.CommandReceived += HWController_CommandReceived;
          //HWDevice.VersionInfoUpdated += this.ev_VersionInfoUpdated;
          //HWDevice.FunctionAdded += this.ev_FunctionAdded;
 
          try
          {
-            HWDevice.Connect();
+            HWController.Connect();
 
-            HWDevice.DevicePID = 0xAAAA;
+            HWController.DevicePID = 0xAAAA;
 
-            lHWInterfaces.Add(HWDevice);
+            lHWControllers.Add(HWController);
 
-            if (HWDevice.GetUIPanel() != null)
+            if (HWController.GetUIPanel() != null)
             {
-               HWSimulatedGrid.Items.Add(HWDevice.GetUIPanel());
+               HWSimulatedGrid.Items.Add(HWController.GetUIPanel());
             }
 
             /* Populate the available Functions the HWDevice provides. */
             this.Available_Statics.Items.Add(new Function_Button_SOUND(1));
 
-            for (uint i = 0; i < HWDevice.Inputs; i++)
+            for (uint i = 0; i < HWController.Inputs; i++)
             {
                this.Available_Board.Items.Add(new Function_Button_INPUT(i + 1));
             }
-            for (uint i = 0; i < HWDevice.PWMs; i++)
+            for (uint i = 0; i < HWController.PWMs; i++)
             {
                this.Available_Board.Items.Add(new Function_Button_PWM(i + 1));
             }
-            for (uint i = 0; i < HWDevice.Relays; i++)
+            for (uint i = 0; i < HWController.Relays; i++)
             {
                this.Available_Board.Items.Add(new Function_Button_RELAY(i + 1));
             }
@@ -124,7 +124,7 @@ namespace HalloweenControllerRPi
       /// </summary>
       /// <param name="sender"></param>
       /// <param name="args"></param>
-      private void HWDevice_CommandReceived(object sender, CommandEventArgs args)
+      private void HWController_CommandReceived(object sender, CommandEventArgs args)
       {
          /* HW Device has received a COMMAND that needs processing */
          groupContainer_Triggered.ProcessTrigger(args);
@@ -136,23 +136,23 @@ namespace HalloweenControllerRPi
       /// <param name="cmd"></param>
       public void TransmitCommandToDevice(string cmd)
       {
-         lHWInterfaces[0].TransmitCommand(cmd);
+         lHWControllers[0].TransmitCommand(cmd);
       }
 
       public string BuildCommand(string function, string subFunc, params string[] data)
       {
-         return lHWInterfaces[0].BuildCommand(function, subFunc, data);
+         return lHWControllers[0].BuildCommand(function, subFunc, data);
       }
 
       public List<Command> GetSubFunctionCommandsList(Command functionKey)
       {
          List<Command> availableSubFuncCommands = null;
 
-         foreach (Command c in lHWInterfaces[0].Commands.Keys)
+         foreach (Command c in lHWControllers[0].Commands.Keys)
          {
             if (c.Key == functionKey.Key)
             {
-               availableSubFuncCommands = lHWInterfaces[0].Commands[c];
+               availableSubFuncCommands = lHWControllers[0].Commands[c];
                break;
             }
          }

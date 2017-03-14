@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HalloweenControllerRPi.Device
 {
-   public interface IHWInterface : ISupportedFunctions
+   public interface IHWController : ISupportedFunctions
    {
       void Connect();
       void Disconnect();

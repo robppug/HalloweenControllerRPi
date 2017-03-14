@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Devices.I2c;
 
@@ -8,40 +9,37 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
    {
       private UInt16 m_Address = 0;
       private I2cDevice m_I2CDevice;
-      private II2CBusHW m_I2CBusHW;
+      private II2CBusDevice m_I2CBusDevice;
 
       public UInt16 Address
       {
          get { return m_Address; }
       }
 
-      public HatInterface_I2C(I2cDevice i2cDevice, UInt16 i2cAddress, II2CBusHW busHW)
+      public II2CBusDevice BusDevice
+      {
+         get { return m_I2CBusDevice; }
+      }
+
+      public HatInterface_I2C(I2cDevice i2cDevice, UInt16 i2cAddress, II2CBusDevice busDevice)
       {
          m_I2CDevice = i2cDevice;
          m_Address = i2cAddress;
-         m_I2CBusHW = busHW;
+         m_I2CBusDevice = busDevice;
       }
 
-      public async Task Open()
+      public List<IChannel> Open()
       {
-         await m_I2CBusHW.Open(m_I2CDevice);
+         m_I2CBusDevice.Open(m_I2CDevice);
 
-         m_I2CBusHW.InitialiseChannels();
+         m_I2CBusDevice.InitialiseChannels();
+
+         return m_I2CBusDevice.Channels;
       }
 
-      public async Task Close()
-      {
-         throw new NotImplementedException();
-      }
-
-      public void Read(out byte[] data)
+      public void Close()
       {
          throw new NotImplementedException();
-      }
-
-      public void Write(byte[] data)
-      {
-         m_I2CDevice.Write(data);
       }
    }
 }

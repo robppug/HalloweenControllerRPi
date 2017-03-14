@@ -8,7 +8,7 @@ using Windows.UI.Xaml.Controls;
 
 namespace HalloweenControllerRPi.Device.Controllers
 {
-   public partial class HWSimulated : HWInterface
+   public partial class HWSimulated : HWController
    {
       HWSimulatedUI UIPanel;
 

@@ -7,7 +7,7 @@ using Windows.UI.Xaml.Controls;
 
 namespace HalloweenControllerRPi.Device
 {
-   public abstract class HWInterface : IHWInterface
+   public abstract class HWController : IHWController
    {
       #region Declarations
       public delegate void DataEventHandler<T>(T data);

@@ -17,29 +17,9 @@ using static HalloweenControllerRPi.Functions.Func_RELAY;
 
 namespace HalloweenControllerRPi.Device.Controllers
 {
-   class HWRaspberryPI2 : HWInterface
+   class HWRaspberryPI2 : HWController
    {
       #region /* ENUMS */
-      private enum tenPWMChannels
-      {
-         enChan1 = 0,
-         enChan2,
-         enChan3,
-         enChan4,
-         enChan5,
-         enChan6,
-         enChan7,
-         enChan8,
-         enChan9,
-         enChan10,
-         enChan11,
-         enChan12,
-         enChan13,
-         enChan14,
-         enChan15,
-         enChan16
-      };
-      
       public enum tenInputPins
       {
          INPUT_PIN_12 = 12,
@@ -70,18 +50,10 @@ namespace HalloweenControllerRPi.Device.Controllers
       private static long TriggerTime;
 
       private static List<IHat> lHats = new List<IHat>();
-      private static List<Channel_PWM> lPWMs = new List<Channel_PWM>();
-      private static List<Channel_INPUT> lINPUTs = new List<Channel_INPUT>();
-      private static List<Channel_RELAY> lRELAYs = new List<Channel_RELAY>();
+      private static UInt16 m_PWMs = 0;
+      private static UInt16 m_Inputs = 0;
+      private static UInt16 m_Relays = 0;
       private static List<IChannel> lAllFunctions = new List<IChannel>();
-
-      private static byte[] bMODE1 = new byte[1] { 0x00 };
-      private static byte[] bMODE2 = new byte[1] { 0x01 };
-      private static byte[] bPWM_CLK = new byte[1] { 0xFE };
-      private static byte[] LED_ON_L = new byte[1] { 0x06 };
-      private static byte[] LED_ON_H = new byte[1] { 0x07 };
-      private static byte[] LED_OFF_L = new byte[1] { 0x08 };
-      private static byte[] LED_OFF_H = new byte[1] { 0x09 };
       #endregion
 
       #region /* HW MAPPING */
@@ -300,7 +272,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return (uint)lInputMap.Count;
+            return m_Inputs;
          }
       }
 
@@ -308,7 +280,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return (uint)(tenPWMChannels.enChan16 + 1);
+            return m_PWMs;
          }
       }
 
@@ -322,12 +294,10 @@ namespace HalloweenControllerRPi.Device.Controllers
       #endregion
 
 
-      private async void OnConnect()
+      private async Task OnConnect()
       {
-         RPiHat m_RPiHat;
-
          /* Allow the HW to initialise */
-         await Task.Delay(1000);
+         await Task.Delay(500);
 
          /* Discover 'HATs' that are connected */
          if (LightningProvider.IsLightningEnabled == true)
@@ -341,7 +311,12 @@ namespace HalloweenControllerRPi.Device.Controllers
             string deviceSelector = I2cDevice.GetDeviceSelector("I2C1");
             var i2cDeviceControllers = await DeviceInformation.FindAllAsync(deviceSelector).AsTask();
 
-            while(boSuccessful == false)
+            if (i2cDeviceControllers == null)
+            {
+               throw new Exception("Device note found (" + deviceSelector + ")");
+            }
+
+            while (boSuccessful == false)
             {
                i2cSettings = new I2cConnectionSettings(Address);
                i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
@@ -353,14 +328,9 @@ namespace HalloweenControllerRPi.Device.Controllers
                {
                   i2cDevice.Write(new byte[1] { 0x00 });
 
-                  /* Device found, store the HAT and it's Address */
-                  m_RPiHat = new RPiHat(i2cDevice, (UInt16)Address);
-
-                  /* Establishes communcation with the HAT and initialises the HATs available CHANNELS */
-                  m_RPiHat.Open();
-
-                  lHats.Add(m_RPiHat);
-
+                  /* Device found, store the HAT and it's Address then establish communcation with the HAT and initialise the HATs available CHANNELS */
+                  lHats.Add(RPiHat.Open(i2cDevice, (UInt16)Address));
+                  
                   boSuccessful = true;
                }
                catch
@@ -374,44 +344,26 @@ namespace HalloweenControllerRPi.Device.Controllers
             }
          }
 
-         //byte[] buffer = new byte[10];
-
-         ///* Set MODE 1 Register - Change to NORMAL mode */
-         //i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x00 });
-
-         //await Task.Delay(1);
-
-         ///* Set MODE 2 Register */
-         ////i2cDevice.Write(new byte[2] { 0x00, 0x00 });
-
-         ////await Task.Delay(1);
-
-         ///* Initialise PWM channels */
-         //for (uint i = 0; i < PWMs; i++)
-         //{
-         //   IChannel m_Channel = new Channel_PWM(i);
-
-         //   m_RPiHat.AddChannel(m_Channel);
-
-         //   lPWMs.Add((Channel_PWM)m_Channel);
-
-         //   i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)lPWMs[(int)i].Index * 4)), 0x00 });
-         //   i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)lPWMs[(int)i].Index * 4)), 0x00 });
-         //   i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)lPWMs[(int)i].Index * 4)), 0x00 });
-         //   i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)lPWMs[(int)i].Index * 4)), 0x00 });
-         //}
-
-         ///* Set MODE 1 Register - Change to SLEEP mode */
-         //i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x90 });
-
-         ///* Adjust the PWM Frequency - 1526Hz - Must be before being set to NORMAL mode */
-         //i2cDevice.Write(new byte[2] { (byte)bPWM_CLK[0], 0x03 });
-
-         ///* Set MODE 1 Register - Change to NORMAL mode */
-         //i2cDevice.Write(new byte[2] { (byte)bMODE1[0], 0x00 });
-
-         await Task.Delay(1);
-
+         /* Initialise available channels (PWM, RELAY, INPUT) */
+         foreach (IHat hat in lHats)
+         {
+            foreach (IChannel c in hat.Channels)
+            {
+               if (c is Channel_PWM)
+               {
+                  m_PWMs++;
+               }
+               else if (c is Channel_RELAY)
+               {
+                  m_Inputs++;
+               }
+               else if (c is Channel_INPUT)
+               {
+                  m_Relays++;
+               }
+            }
+         }
+         
          /* Initialise INPUT channels */
          //for (uint i = 0; i < Inputs; i++)
          //{
@@ -459,16 +411,8 @@ namespace HalloweenControllerRPi.Device.Controllers
          //}
 
          //lAllFunctions.AddRange(lINPUTs);
-         lAllFunctions.AddRange(lPWMs);
+         //lAllFunctions.AddRange(lPWMs);
          //lAllFunctions.AddRange(lRELAYs);
-
-         /* Create the Background Task handle */
-         TaskFactory tTaskFactory = new TaskFactory(TaskScheduler.Current);
-
-         sWatch = new Stopwatch();
-         sWatch.Start();
-
-         await tTaskFactory.StartNew(new Action(ControllerTask), TaskCreationOptions.RunContinuationsAsynchronously);
       }
 
       /// <summary>
@@ -476,12 +420,22 @@ namespace HalloweenControllerRPi.Device.Controllers
       /// </summary>
       public override void Connect()
       {
+
          /* Setup the I2C bus for access to the PWM channels */
          i2cSettings = new I2cConnectionSettings(0x40);
          i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
          i2cSettings.SharingMode = I2cSharingMode.Exclusive;
 
-         OnConnect();
+         /* Wait for the 'OnConnect' to complete without blocking the UI */
+         Microsoft.IoT.DeviceHelpers.TaskExtensions.UISafeWait(OnConnect);
+
+         /* Create the Background Task handle */
+         TaskFactory tTaskFactory = new TaskFactory(TaskScheduler.Current);
+
+         sWatch = new Stopwatch();
+         sWatch.Start();
+
+         tTaskFactory.StartNew(new Action(ControllerTask), TaskCreationOptions.RunContinuationsAsynchronously);
       }
 
       private void ControllerTask()
@@ -496,32 +450,10 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                sWatch.Restart();
                
-               foreach (IChannel c in lAllFunctions)
+               /* Process each connected HAT */
+               foreach(IHat hat in lHats)
                {
-                  if ((c as IProcessTick) != null)
-                  {
-                     (c as IProcessTick).Tick();
-
-                     if ((c as Channel_PWM) != null)
-                     {
-                        Channel_PWM pwm = (c as Channel_PWM);
-
-                        if (pwm.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
-                        {
-                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)pwm.Index * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)pwm.Index * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Index * 4)), (byte)(pwm.Level & 0xFF) });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Index * 4)), (byte)((pwm.Level >> 8) & 0xFF) });
-                        }
-                        else
-                        {
-                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)pwm.Index * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)pwm.Index * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)pwm.Index * 4)), 0x00 });
-                           i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)pwm.Index * 4)), 0x00 });
-                        }
-                     }
-                  }
+                  hat.ProcessTask();
                }
             }
          }
@@ -557,89 +489,89 @@ namespace HalloweenControllerRPi.Device.Controllers
             {
                #region /* INPUT HANDLING */
                case 'I': 
-                  foreach (Channel_INPUT c in lINPUTs)
-                  {
-                     if (channel == c.Index + 1)
-                     {
-                        /* Remove the Function and Channel from the string */
-                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+                  //foreach (Channel_INPUT c in lINPUTs)
+                  //{
+                  //   if (channel == c.Index + 1)
+                  //   {
+                  //      /* Remove the Function and Channel from the string */
+                  //      new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
 
-                        switch (subFunction.Value)
-                        {
-                           case 'D':
-                              c.DebounceTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
-                              break;
-                           case 'P':
-                              c.PostTriggerTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
-                              break;
-                           default:
-                              break;
-                        }
-                     }
-                  }
+                  //      switch (subFunction.Value)
+                  //      {
+                  //         case 'D':
+                  //            c.DebounceTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
+                  //            break;
+                  //         case 'P':
+                  //            c.PostTriggerTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
+                  //            break;
+                  //         default:
+                  //            break;
+                  //      }
+                  //   }
+                  //}
                   break;
                #endregion
 
                #region /* RELAY HANDLING */
                case 'R': 
-                  foreach (Channel_RELAY c in lRELAYs)
-                  {
-                     if (channel == c.Index + 1)
-                     {
-                        /* Remove the Function and Channel from the string */
-                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+                  //foreach (Channel_RELAY c in lRELAYs)
+                  //{
+                  //   if (channel == c.Index + 1)
+                  //   {
+                  //      /* Remove the Function and Channel from the string */
+                  //      new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
 
-                        switch (subFunction.Value)
-                        {
-                           case 'S':
-                              c.OutputLevel = (tenOutputLevel)UInt32.Parse(new string(decodedData));
-                              break;
-                           case 'G':
-                              break;
-                           default:
-                              break;
-                        }
-                     }
-                  }
+                  //      switch (subFunction.Value)
+                  //      {
+                  //         case 'S':
+                  //            c.OutputLevel = (tenOutputLevel)UInt32.Parse(new string(decodedData));
+                  //            break;
+                  //         case 'G':
+                  //            break;
+                  //         default:
+                  //            break;
+                  //      }
+                  //   }
+                  //}
                   break;
                #endregion
 
                #region /* PWM HANDLING */
                case 'T':
-                  foreach (Channel_PWM c in lPWMs)
-                  {
-                     if (channel == c.Index + 1)
-                     {
-                        /* Remove the Function and Channel from the string */
-                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+                  //foreach (Channel_PWM c in lPWMs)
+                  //{
+                  //   if (channel == c.Index + 1)
+                  //   {
+                  //      /* Remove the Function and Channel from the string */
+                  //      new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
 
-                        switch (subFunction.Value)
-                        {
-                           case 'S':
-                              c.Level = UInt32.Parse(new string(decodedData));
-                              break;
-                           case 'G':
-                              break;
-                           case 'F':
-                              c.Function = (Func_PWM.tenFUNCTION)UInt32.Parse(new string(decodedData));
-                              break;
-                           case 'N':
-                              c.MinLevel = UInt32.Parse(new string(decodedData));
-                              break;
-                           case 'M':
-                              c.MaxLevel = UInt32.Parse(new string(decodedData));
-                              break;
-                           case 'R':
-                              c.UpdateCount = UInt32.Parse(new string(decodedData));
-                              break;
-                           default:
-                              break;
-                        }
+                  //      switch (subFunction.Value)
+                  //      {
+                  //         case 'S':
+                  //            c.Level = UInt32.Parse(new string(decodedData));
+                  //            break;
+                  //         case 'G':
+                  //            break;
+                  //         case 'F':
+                  //            c.Function = (Func_PWM.tenFUNCTION)UInt32.Parse(new string(decodedData));
+                  //            break;
+                  //         case 'N':
+                  //            c.MinLevel = UInt32.Parse(new string(decodedData));
+                  //            break;
+                  //         case 'M':
+                  //            c.MaxLevel = UInt32.Parse(new string(decodedData));
+                  //            break;
+                  //         case 'R':
+                  //            c.UpdateCount = UInt32.Parse(new string(decodedData));
+                  //            break;
+                  //         default:
+                  //            break;
+                  //      }
 
-                        c.Tick();
-                        return;
-                     }
-                  }
+                  //      c.Tick();
+                  //      return;
+                  //   }
+                  //}
                   break;
                #endregion
 

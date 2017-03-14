@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Functions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,16 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
    /// </summary>
    public class RPiHat : IHat, ISupportedFunctions
    {
+      #region /* ENUMS */
+      public enum SupportedHATs
+      {
+         MOSTFET_v1 = 0,
+         RELAY_v1,
+         INPUT_v1,
+         NoOfSupportedHATs
+      };
+      #endregion
+
       #region Declarations
       private IHatInterface m_HatInterface;
 
@@ -26,9 +37,41 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       public uint Relays { get { return (uint)Channels.Count; } }
       #endregion
 
-      public void Open()
+      /// <summary>
+      /// RPiHat object if the HAT is supported and successfully initialised.
+      /// </summary>
+      /// <param name="i2cDevice"></param>
+      /// <param name="hatAddress"></param>
+      /// <returns>If successful an initialised RPiHat object otherwise null.</returns>
+      public static RPiHat Open(I2cDevice i2cDevice, UInt16 hatAddress)
       {
-         m_HatInterface.Open();
+         II2CBusDevice busDevice = null;
+         SupportedHATs hat = SupportedHATs.NoOfSupportedHATs;
+         RPiHat rpiHat = null;
+
+         /* Discover the type of HAT connected */
+         hat = SupportedHATs.MOSTFET_v1;
+
+         switch (hat)
+         {
+            case SupportedHATs.MOSTFET_v1:
+               busDevice = new BusDevice_PCA9685();
+               break;
+            case SupportedHATs.INPUT_v1:
+               break;
+            case SupportedHATs.RELAY_v1:
+               break;
+            case SupportedHATs.NoOfSupportedHATs:
+            default:
+               throw new Exception("Hat not supported.");
+         }
+
+         if (busDevice != null)
+         {
+            rpiHat = new RPiHat(i2cDevice, hatAddress, busDevice);
+         }
+
+         return rpiHat;
       }
 
       public void Close()
@@ -36,11 +79,41 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       }
 
-      public RPiHat(I2cDevice i2cDevice, UInt16 hatAddress)
+      private RPiHat(I2cDevice i2cDevice, UInt16 hatAddress, II2CBusDevice busDevice)
       {
-         m_HatInterface = new HatInterface_I2C(i2cDevice, hatAddress, new I2CBusHW_PCA9685());
+         m_HatInterface = new HatInterface_I2C(i2cDevice, hatAddress, busDevice);
 
-         Channels = new List<IChannel>();
+         Channels = m_HatInterface.Open();
+      }
+
+      /// <summary>
+      /// TASK execution call for HAT channel processing.
+      /// </summary>
+      public void ProcessTask()
+      {
+         /* Process each CHANNEL available on this HAT */
+         foreach (IChannel c in Channels)
+         {
+            if ((c as IProcessTick) != null)
+            {
+               (c as IProcessTick).Tick();
+
+               if ((c as Channel_PWM) != null)
+               {
+                  Channel_PWM pwm = (c as Channel_PWM);
+                  IBusDevicePwmChannelProvider pwmDevice = (IBusDevicePwmChannelProvider)m_HatInterface.BusDevice;
+
+                  if (pwm.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
+                  {
+                     pwmDevice.SetChannel((ushort)pwm.Index, (ushort)pwm.Level);
+                  }
+                  else
+                  {
+                     pwmDevice.SetChannel((ushort)pwm.Index, 0x00);
+                  }
+               }
+            }
+         }
       }
    }
 }

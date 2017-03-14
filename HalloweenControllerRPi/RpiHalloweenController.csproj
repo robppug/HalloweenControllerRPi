@@ -96,6 +96,7 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="ClassDiagram1.cd" />
     <None Include="project.json" />
     <None Include="RpiHalloweenController_TemporaryKey.pfx" />
   </ItemGroup>
@@ -103,10 +104,13 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\HatInterface_I2C.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\I2CBusHW_PCA9685.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\IHatInterface.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\II2CBusHW.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\IBusDevicePwmChannelProvider.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\HatInterface_SPI.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\HatInterface_I2C.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\BusDevice_PCA9685.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\IHatInterface.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\II2CBusDevice.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\IBusDeviceRelayChannelProvider.cs" />
     <Compile Include="UI\Container\GroupContainer.xaml.cs">
       <DependentUpon>GroupContainer.xaml</DependentUpon>
     </Compile>
@@ -130,8 +134,8 @@
     </Compile>
     <Compile Include="Device\Controllers\Simulated\HWSimulated.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Function\Channel_PWM.cs" />
-    <Compile Include="Device\HWInterface.cs" />
-    <Compile Include="Device\IHWInterface.cs" />
+    <Compile Include="Device\Controllers\HWController.cs" />
+    <Compile Include="Device\Controllers\IHWController.cs" />
     <Compile Include="Device\ISupportedFunctions.cs" />
     <Compile Include="UI\FileHandler.cs" />
     <Compile Include="UI\Functions\Function.cs" />
