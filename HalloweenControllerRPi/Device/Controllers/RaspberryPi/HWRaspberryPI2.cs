@@ -12,7 +12,7 @@ using Windows.Devices;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
-using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.Channel_INPUT;
+using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.ChannelFunction_INPUT;
 using static HalloweenControllerRPi.Functions.Func_RELAY;
 
 namespace HalloweenControllerRPi.Device.Controllers
@@ -349,15 +349,15 @@ namespace HalloweenControllerRPi.Device.Controllers
          {
             foreach (IChannel c in hat.Channels)
             {
-               if (c is Channel_PWM)
+               if (c is ChannelFunction_PWM)
                {
                   m_PWMs++;
                }
-               else if (c is Channel_RELAY)
+               else if (c is ChannelFunction_RELAY)
                {
                   m_Inputs++;
                }
-               else if (c is Channel_INPUT)
+               else if (c is ChannelFunction_INPUT)
                {
                   m_Relays++;
                }

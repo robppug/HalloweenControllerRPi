@@ -5,7 +5,7 @@ using static HalloweenControllerRPi.Functions.Func_INPUT;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 {
-   class Channel_INPUT : IChannel
+   class ChannelFunction_INPUT : IChannel
    {
       public class EventArgsINPUT : EventArgs
       {
@@ -32,7 +32,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       public delegate void EventHandlerInput(object sender, EventArgsINPUT e);
       public event EventHandlerInput InputLevelChanged;
 
-      public Channel_INPUT(uint chan, GpioPin pin)
+      public ChannelFunction_INPUT(uint chan, GpioPin pin)
       {
          Index = chan;
 

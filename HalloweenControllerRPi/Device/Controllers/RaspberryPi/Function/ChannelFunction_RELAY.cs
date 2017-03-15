@@ -4,13 +4,13 @@ using static HalloweenControllerRPi.Functions.Func_RELAY;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 {
-   class Channel_RELAY : IChannel, IProcessTick
+   class ChannelFunction_RELAY : IChannel, IProcessTick
    {
       private uint _channelIdx;
       private tenOutputLevel _outputLevel;
       private GpioPin _Pin;
 
-      public Channel_RELAY(uint chan, GpioPin pin)
+      public ChannelFunction_RELAY(uint chan, GpioPin pin)
       {
          _outputLevel = tenOutputLevel.tLow;
 

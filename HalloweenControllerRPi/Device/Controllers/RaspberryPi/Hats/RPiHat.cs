@@ -14,7 +14,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
    public class RPiHat : IHat, ISupportedFunctions
    {
       #region /* ENUMS */
-      public enum SupportedHATs
+      public enum SupportedHATs : byte
       {
          MOSTFET_v1 = 0,
          RELAY_v1,
@@ -81,8 +81,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       private RPiHat(I2cDevice i2cDevice, UInt16 hatAddress, II2CBusDevice busDevice)
       {
+         /* Get the Interfaces used by the HAT */
          m_HatInterface = new HatInterface_I2C(i2cDevice, hatAddress, busDevice);
 
+         /* Get the available CHANNELS offered by the HAT */
          Channels = m_HatInterface.Open();
       }
 
@@ -98,9 +100,9 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
             {
                (c as IProcessTick).Tick();
 
-               if ((c as Channel_PWM) != null)
+               if ((c as ChannelFunction_PWM) != null)
                {
-                  Channel_PWM pwm = (c as Channel_PWM);
+                  ChannelFunction_PWM pwm = (c as ChannelFunction_PWM);
                   IBusDevicePwmChannelProvider pwmDevice = (IBusDevicePwmChannelProvider)m_HatInterface.BusDevice;
 
                   if (pwm.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
