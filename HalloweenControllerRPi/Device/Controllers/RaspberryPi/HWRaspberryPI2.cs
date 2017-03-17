@@ -313,7 +313,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
             if (i2cDeviceControllers == null)
             {
-               throw new Exception("Device note found (" + deviceSelector + ")");
+               throw new Exception("Device not found (" + deviceSelector + ")");
             }
 
             while (boSuccessful == false)
@@ -330,8 +330,6 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                   /* Device found, store the HAT and it's Address then establish communcation with the HAT and initialise the HATs available CHANNELS */
                   lHats.Add(RPiHat.Open(i2cDevice, (UInt16)Address));
-                  
-                  boSuccessful = true;
                }
                catch
                {
@@ -339,6 +337,8 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                   if (Address == 0x70)
                      Address++;
+                  else if (Address > 128)
+                     break;
                   continue;
                }
             }

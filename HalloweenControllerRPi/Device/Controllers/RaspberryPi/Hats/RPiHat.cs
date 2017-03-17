@@ -85,7 +85,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          m_HatInterface = new HatInterface_I2C(i2cDevice, hatAddress, busDevice);
 
          /* Get the available CHANNELS offered by the HAT */
-         Channels = m_HatInterface.Open();
+         Channels.AddRange(m_HatInterface.Open());
       }
 
       /// <summary>
