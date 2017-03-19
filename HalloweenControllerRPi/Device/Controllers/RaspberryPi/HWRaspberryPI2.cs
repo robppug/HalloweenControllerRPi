@@ -328,9 +328,12 @@ namespace HalloweenControllerRPi.Device.Controllers
                {
                   i2cDevice.Write(new byte[1] { 0x00 });
 
-                  /* Device found, store the HAT and it's Address then establish communcation with the HAT and initialise the HATs available CHANNELS */
+                  /* Device found, store the HAT and it's Address then establish communication with the HAT and initialise the HATs available CHANNELS */
                   lHats.Add(RPiHat.Open(i2cDevice, (UInt16)Address));
-                  
+
+                  /* Store a collection of all the available Channels */
+                  lAllFunctions.AddRange(lHats.Last().Channels);
+
                   boSuccessful = true;
                }
                catch
@@ -345,22 +348,19 @@ namespace HalloweenControllerRPi.Device.Controllers
          }
 
          /* Initialise available channels (PWM, RELAY, INPUT) */
-         foreach (IHat hat in lHats)
+         foreach (IChannel c in lAllFunctions)
          {
-            foreach (IChannel c in hat.Channels)
+            if (c is Channel_PWM)
             {
-               if (c is Channel_PWM)
-               {
-                  m_PWMs++;
-               }
-               else if (c is Channel_RELAY)
-               {
-                  m_Inputs++;
-               }
-               else if (c is Channel_INPUT)
-               {
-                  m_Relays++;
-               }
+               m_PWMs++;
+            }
+            else if (c is Channel_RELAY)
+            {
+               m_Inputs++;
+            }
+            else if (c is Channel_INPUT)
+            {
+               m_Relays++;
             }
          }
          
@@ -538,40 +538,40 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                #region /* PWM HANDLING */
                case 'T':
-                  //foreach (Channel_PWM c in lPWMs)
-                  //{
-                  //   if (channel == c.Index + 1)
-                  //   {
-                  //      /* Remove the Function and Channel from the string */
-                  //      new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+                  foreach (Channel_PWM c in lAllFunctions)
+                  {
+                     if (channel == c.Index + 1)
+                     {
+                        /* Remove the Function and Channel from the string */
+                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
 
-                  //      switch (subFunction.Value)
-                  //      {
-                  //         case 'S':
-                  //            c.Level = UInt32.Parse(new string(decodedData));
-                  //            break;
-                  //         case 'G':
-                  //            break;
-                  //         case 'F':
-                  //            c.Function = (Func_PWM.tenFUNCTION)UInt32.Parse(new string(decodedData));
-                  //            break;
-                  //         case 'N':
-                  //            c.MinLevel = UInt32.Parse(new string(decodedData));
-                  //            break;
-                  //         case 'M':
-                  //            c.MaxLevel = UInt32.Parse(new string(decodedData));
-                  //            break;
-                  //         case 'R':
-                  //            c.UpdateCount = UInt32.Parse(new string(decodedData));
-                  //            break;
-                  //         default:
-                  //            break;
-                  //      }
+                        switch (subFunction.Value)
+                        {
+                           case 'S':
+                              c.Level = UInt32.Parse(new string(decodedData));
+                              break;
+                           case 'G':
+                              break;
+                           case 'F':
+                              c.Function = (Func_PWM.tenFUNCTION)UInt32.Parse(new string(decodedData));
+                              break;
+                           case 'N':
+                              c.MinLevel = UInt32.Parse(new string(decodedData));
+                              break;
+                           case 'M':
+                              c.MaxLevel = UInt32.Parse(new string(decodedData));
+                              break;
+                           case 'R':
+                              c.UpdateCount = UInt32.Parse(new string(decodedData));
+                              break;
+                           default:
+                              break;
+                        }
 
-                  //      c.Tick();
-                  //      return;
-                  //   }
-                  //}
+                        c.Tick();
+                        return;
+                     }
+                  }
                   break;
                #endregion
 

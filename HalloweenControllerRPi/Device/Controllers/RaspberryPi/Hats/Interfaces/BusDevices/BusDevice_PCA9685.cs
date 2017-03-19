@@ -10,7 +10,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       /// <summary>
       /// PCA9685 register addresses
       /// </summary>
-      private enum Registers : byte
+      public enum Registers : byte
       {
          MODE1 = 0x00,
          MODE2 = 0x01,
@@ -91,7 +91,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       public static uint NumberOfChannels
       {
-         get { return 16; }
+         get { return 0x0F; }
       }
 
       private I2cDevice m_i2cDevice;
@@ -115,7 +115,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          m_i2cDevice = i2cDevice;
 
          /* Set MODE 1 Register - Change to NORMAL mode */
-         SetRegister((byte)Registers.MODE1, 0x00);
+         SetRegister(Registers.MODE1, 0x00);
 
          Task.Delay(1);
 
@@ -125,13 +125,13 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          //await Task.Delay(1);
 
          /* Set MODE 1 Register - Change to SLEEP mode */
-         SetRegister((byte)Registers.MODE1, 0x90);
+         SetRegister(Registers.MODE1, 0x90);
          
          /* Adjust the PWM Frequency - 1526Hz - Must be before being set to NORMAL mode */
          SetPWMFrequency(0x03);
 
          /* Set MODE 1 Register - Change to NORMAL mode */
-         SetRegister((byte)Registers.MODE1, 0x00);
+         SetRegister(Registers.MODE1, 0x00);
       }
 
       public void Close()
@@ -159,25 +159,15 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
             throw new Exception("Requested CHANNEL #" + channel + " is out of range (MAX #" + Channels.Count + ")");
          }
 
-         m_i2cDevice.Write(new byte[2] { (byte)(LED_ON_L[0] + ((byte)channel * 4)), 0x00 });
-         m_i2cDevice.Write(new byte[2] { (byte)(LED_ON_H[0] + ((byte)channel * 4)), 0x00 });
-         m_i2cDevice.Write(new byte[2] { (byte)(LED_OFF_L[0] + ((byte)channel * 4)), (byte)(value & 0xFF) });
-         m_i2cDevice.Write(new byte[2] { (byte)(LED_OFF_H[0] + ((byte)channel * 4)), (byte)((value >> 8) & 0xFF) });
+         m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_L + ((byte)channel * 4)), 0x00 });
+         m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_H + ((byte)channel * 4)), 0x00 });
+         m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_L + ((byte)channel * 4)), (byte)(value & 0xFF) });
+         m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_H + ((byte)channel * 4)), (byte)((value >> 8) & 0xFF) });
       }
 
-      public void SetRegister(byte register, byte value)
+      public void SetRegister(Registers register, byte value)
       {
-         switch(register)
-         {
-            case (byte)Registers.MODE1:
-               m_i2cDevice.Write(new byte[2] { (byte)bMODE1[0], value });
-               break;
-            case (byte)Registers.MODE2:
-               m_i2cDevice.Write(new byte[2] { (byte)bMODE2[0], value });
-               break;
-            default:
-               break;
-         }
+         m_i2cDevice.Write(new byte[2] { (byte)register, value });
       }
 
       public void SetPWMFrequency(byte value)
