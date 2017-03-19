@@ -126,17 +126,17 @@
     <Compile Include="Device\Controllers\RaspberryPi\Hats\IHat.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\HWRaspberryPI2.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Function\Channel_RELAY.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Function\Channel_INPUT.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Function\ChannelFunction_RELAY.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Function\ChannelFunction_INPUT.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\IProcessTick.cs" />
     <Compile Include="Device\Controllers\Simulated\HWSimulatedUI.xaml.cs">
       <DependentUpon>HWSimulatedUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="Device\Controllers\Simulated\HWSimulated.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Function\Channel_PWM.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Function\ChannelFunction_PWM.cs" />
     <Compile Include="Device\Controllers\HWController.cs" />
     <Compile Include="Device\Controllers\IHWController.cs" />
-    <Compile Include="Device\ISupportedFunctions.cs" />
+    <Compile Include="Device\Controllers\ISupportedFunctions.cs" />
     <Compile Include="UI\FileHandler.cs" />
     <Compile Include="UI\Functions\Function.cs" />
     <Compile Include="UI\Functions\Func_SOUND.cs" />

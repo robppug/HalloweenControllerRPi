@@ -12,7 +12,7 @@ using Windows.Devices;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
-using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.Channel_INPUT;
+using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.ChannelFunction_INPUT;
 using static HalloweenControllerRPi.Functions.Func_RELAY;
 
 namespace HalloweenControllerRPi.Device.Controllers
@@ -313,7 +313,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
             if (i2cDeviceControllers == null)
             {
-               throw new Exception("Device note found (" + deviceSelector + ")");
+               throw new Exception("Device not found (" + deviceSelector + ")");
             }
 
             while (boSuccessful == false)
@@ -342,6 +342,8 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                   if (Address == 0x70)
                      Address++;
+                  else if (Address > 128)
+                     break;
                   continue;
                }
             }

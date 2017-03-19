@@ -97,32 +97,33 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       private I2cDevice m_i2cDevice;
       private List<IChannel> m_Channels;
 
-      private byte[] bMODE1 = new byte[1] { 0x00 };
-      private byte[] bMODE2 = new byte[1] { 0x01 };
-      private byte[] bPWM_CLK = new byte[1] { 0xFE };
-      private byte[] LED_ON_L = new byte[1] { 0x06 };
-      private byte[] LED_ON_H = new byte[1] { 0x07 };
-      private byte[] LED_OFF_L = new byte[1] { 0x08 };
-      private byte[] LED_OFF_H = new byte[1] { 0x09 };
-
       public List<IChannel> Channels
       {
          get { return m_Channels; }
       }
 
+      public bool Initialised { get; private set; }
+
+      public BusDevice_PCA9685()
+      {
+         Initialised = false;
+      }
+
       public void Open(I2cDevice i2cDevice)
-      { 
-         m_i2cDevice = i2cDevice;
+      {
+         if (Initialised == false)
+         {
+            m_i2cDevice = i2cDevice;
 
          /* Set MODE 1 Register - Change to NORMAL mode */
          SetRegister(Registers.MODE1, 0x00);
 
-         Task.Delay(1);
+            Task.Delay(1);
 
-         /* Set MODE 2 Register */
-         //i2cDevice.Write(new byte[2] { 0x00, 0x00 });
+            /* Set MODE 2 Register */
+            //i2cDevice.Write(new byte[2] { 0x00, 0x00 });
 
-         //await Task.Delay(1);
+            //await Task.Delay(1);
 
          /* Set MODE 1 Register - Change to SLEEP mode */
          SetRegister(Registers.MODE1, 0x90);
@@ -130,15 +131,27 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          /* Adjust the PWM Frequency - 1526Hz - Must be before being set to NORMAL mode */
          SetPWMFrequency(0x03);
 
-         /* Set MODE 1 Register - Change to NORMAL mode */
-         SetRegister(Registers.MODE1, 0x00);
+            /* Set MODE 1 Register - Change to NORMAL mode */
+            SetRegister((byte)Registers.MODE1, 0x00);
+         }
+         else
+         {
+            throw new Exception("Bus Device (" + this + ") is already Open.");
+         }
       }
 
       public void Close()
       {
-         throw new NotImplementedException();
+         if (Initialised == true)
+         {
+            Initialised = false;
+         }
       }
 
+
+      /// <summary>
+      /// Initialises the available CHANNELS provided by the BusDevice.
+      /// </summary>
       public void InitialiseChannels()
       {
          m_Channels = new List<IChannel>();
@@ -146,10 +159,12 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          /* Initialise PWM channels */
          for (uint i = 0; i < NumberOfChannels; i++)
          {
-            m_Channels.Add(new Channel_PWM(i));
+            m_Channels.Add(new ChannelFunction_PWM(i));
 
             SetChannel((ushort)m_Channels[(int)i].Index, 0x00);
          }
+
+         Initialised = true;
       }
 
       public void SetChannel(ushort channel, ushort value)
@@ -172,7 +187,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       public void SetPWMFrequency(byte value)
       {
-         m_i2cDevice.Write(new byte[2] { (byte)bPWM_CLK[0], value });
+         m_i2cDevice.Write(new byte[2] { (byte)Registers.PRESCALE, value });
       }
    }
 }

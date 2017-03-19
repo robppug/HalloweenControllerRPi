@@ -14,7 +14,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
    public class RPiHat : IHat, ISupportedFunctions
    {
       #region /* ENUMS */
-      public enum SupportedHATs
+      public enum SupportedHATs : byte
       {
          MOSTFET_v1 = 0,
          RELAY_v1,
@@ -100,9 +100,9 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
             {
                (c as IProcessTick).Tick();
 
-               if ((c as Channel_PWM) != null)
+               if ((c as ChannelFunction_PWM) != null)
                {
-                  Channel_PWM pwm = (c as Channel_PWM);
+                  ChannelFunction_PWM pwm = (c as ChannelFunction_PWM);
                   IBusDevicePwmChannelProvider pwmDevice = (IBusDevicePwmChannelProvider)m_HatInterface.BusDevice;
 
                   if (pwm.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
