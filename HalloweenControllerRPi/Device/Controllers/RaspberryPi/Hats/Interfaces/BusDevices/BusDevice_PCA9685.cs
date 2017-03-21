@@ -94,6 +94,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          get { return 0x0F; }
       }
 
+      public static uint Resolution
+      {
+         get { return 4095; }
+      }
+
       private I2cDevice m_i2cDevice;
       private List<IChannel> m_Channels;
 
@@ -174,10 +179,20 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
             throw new Exception("Requested CHANNEL #" + channel + " is out of range (MAX #" + Channels.Count + ")");
          }
 
-         m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_L + ((byte)channel * 4)), 0x00 });
-         m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_H + ((byte)channel * 4)), 0x00 });
-         m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_L + ((byte)channel * 4)), (byte)(value & 0xFF) });
-         m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_H + ((byte)channel * 4)), (byte)((value >> 8) & 0xFF) });
+         if (value == Resolution)
+         {
+            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_L + ((byte)channel * 4)), (byte)((Resolution + 1) & 0xFF) });
+            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_H + ((byte)channel * 4)), (byte)(((Resolution + 1) >> 8) & 0xFF) });
+            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_L + ((byte)channel * 4)), 0x00 });
+            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_H + ((byte)channel * 4)), 0x00 });
+         }
+         else
+         {
+            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_L + ((byte)channel * 4)), 0x00 });
+            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_H + ((byte)channel * 4)), 0x00 });
+            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_L + ((byte)channel * 4)), (byte)(value & 0xFF) });
+            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_H + ((byte)channel * 4)), (byte)((value >> 8) & 0xFF) });
+         }
       }
 
       public void SetRegister(Registers register, byte value)

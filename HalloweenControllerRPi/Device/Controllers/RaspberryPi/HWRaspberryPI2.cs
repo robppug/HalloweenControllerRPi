@@ -352,15 +352,15 @@ namespace HalloweenControllerRPi.Device.Controllers
          /* Initialise available channels (PWM, RELAY, INPUT) */
          foreach (IChannel c in lAllFunctions)
          {
-            if (c is Channel_PWM)
+            if (c is ChannelFunction_PWM)
             {
                m_PWMs++;
             }
-            else if (c is Channel_RELAY)
+            else if (c is ChannelFunction_RELAY)
             {
                m_Inputs++;
             }
-            else if (c is Channel_INPUT)
+            else if (c is ChannelFunction_INPUT)
             {
                m_Relays++;
             }
@@ -540,7 +540,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                #region /* PWM HANDLING */
                case 'T':
-                  foreach (Channel_PWM c in lAllFunctions)
+                  foreach (ChannelFunction_PWM c in lAllFunctions)
                   {
                      if (channel == c.Index + 1)
                      {
