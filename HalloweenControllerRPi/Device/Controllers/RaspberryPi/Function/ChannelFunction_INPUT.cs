@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
+using System;
 using Windows.Devices.Gpio;
 using Windows.UI.Xaml;
 using static HalloweenControllerRPi.Functions.Func_INPUT;
@@ -25,14 +26,14 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       private uint _channelIdx;
       private TimeSpan _debTime;
       private TimeSpan _postTriggerTime;
-      private GpioPin _Pin;
+      private IIOPin _Pin;
       private DispatcherTimer _reenableTimer;
       private bool _waitForRetrigger;
 
       public delegate void EventHandlerInput(object sender, EventArgsINPUT e);
       public event EventHandlerInput InputLevelChanged;
 
-      public ChannelFunction_INPUT(uint chan, GpioPin pin)
+      public ChannelFunction_INPUT(uint chan, IIOPin pin)
       {
          Index = chan;
 
@@ -73,7 +74,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
          set { _postTriggerTime = value; }
       }
       
-      private void Pin_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
+      private void Pin_ValueChanged(IIOPin sender, GpioPinValueChangedEventArgs args)
       {
          GpioPinEdge gpEdge = args.Edge;
 

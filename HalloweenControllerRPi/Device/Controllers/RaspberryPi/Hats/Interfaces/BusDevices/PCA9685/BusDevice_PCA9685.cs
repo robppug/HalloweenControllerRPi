@@ -120,8 +120,8 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          {
             m_i2cDevice = i2cDevice;
 
-         /* Set MODE 1 Register - Change to NORMAL mode */
-         SetRegister(Registers.MODE1, 0x00);
+            /* Set MODE 1 Register - Change to NORMAL mode */
+            SetRegister(Registers.MODE1, 0x00);
 
             Task.Delay(1);
 
@@ -130,11 +130,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
             //await Task.Delay(1);
 
-         /* Set MODE 1 Register - Change to SLEEP mode */
-         SetRegister(Registers.MODE1, 0x90);
+            /* Set MODE 1 Register - Change to SLEEP mode */
+            SetRegister(Registers.MODE1, 0x90);
          
-         /* Adjust the PWM Frequency - 1526Hz - Must be before being set to NORMAL mode */
-         SetPWMFrequency(0x03);
+            /* Adjust the PWM Frequency - 1526Hz - Must be before being set to NORMAL mode */
+            SetPWMFrequency(0x03);
 
             /* Set MODE 1 Register - Change to NORMAL mode */
             SetRegister((byte)Registers.MODE1, 0x00);

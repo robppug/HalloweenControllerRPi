@@ -60,6 +60,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
             case SupportedHATs.INPUT_v1:
                break;
             case SupportedHATs.RELAY_v1:
+               busDevice = new BusDevice_PCA9501();
                break;
             case SupportedHATs.NoOfSupportedHATs:
             default:

@@ -104,10 +104,15 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Device\Controllers\RaspberryPi\Function\IIOPin.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\PCA9501\IOPin_PCA9501.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\PCA9501\BusDevice_PCA9501.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\IBusDeviceEEPROMChannelProvider.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\IBusDeviceGpioChannelProvider.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\IBusDevicePwmChannelProvider.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\HatInterface_SPI.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\HatInterface_I2C.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\BusDevice_PCA9685.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\PCA9685\BusDevice_PCA9685.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\IHatInterface.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\II2CBusDevice.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\IBusDeviceRelayChannelProvider.cs" />

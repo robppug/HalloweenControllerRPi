@@ -490,27 +490,27 @@ namespace HalloweenControllerRPi.Device.Controllers
             switch (function.Value)
             {
                #region /* INPUT HANDLING */
-               case 'I': 
-                  //foreach (Channel_INPUT c in lINPUTs)
-                  //{
-                  //   if (channel == c.Index + 1)
-                  //   {
-                  //      /* Remove the Function and Channel from the string */
-                  //      new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+               case 'I':
+                  foreach (ChannelFunction_INPUT c in lAllFunctions)
+                  {
+                     if (channel == c.Index + 1)
+                     {
+                        /* Remove the Function and Channel from the string */
+                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
 
-                  //      switch (subFunction.Value)
-                  //      {
-                  //         case 'D':
-                  //            c.DebounceTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
-                  //            break;
-                  //         case 'P':
-                  //            c.PostTriggerTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
-                  //            break;
-                  //         default:
-                  //            break;
-                  //      }
-                  //   }
-                  //}
+                        switch (subFunction.Value)
+                        {
+                           case 'D':
+                              c.DebounceTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
+                              break;
+                           case 'P':
+                              c.PostTriggerTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
+                              break;
+                           default:
+                              break;
+                        }
+                     }
+                  }
                   break;
                #endregion
 
