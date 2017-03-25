@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
+using System;
 using Windows.Devices.Gpio;
 using static HalloweenControllerRPi.Functions.Func_RELAY;
 
@@ -8,9 +9,9 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
    {
       private uint _channelIdx;
       private tenOutputLevel _outputLevel;
-      private GpioPin _Pin;
+      private IIOPin _Pin;
 
-      public ChannelFunction_RELAY(uint chan, GpioPin pin)
+      public ChannelFunction_RELAY(uint chan, IIOPin pin)
       {
          _outputLevel = tenOutputLevel.tLow;
 

@@ -28,15 +28,13 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          m_I2CBusDevice = busDevice;
       }
 
-      public List<IChannel> Open()
+      public void Open()
       {
          /* Open the BUS DEVICE */
          m_I2CBusDevice.Open(m_I2CDevice);
 
          /* Initialise the BUS DEVICE */
          m_I2CBusDevice.InitialiseChannels();
-
-         return m_I2CBusDevice.Channels;
       }
 
       public void Close()

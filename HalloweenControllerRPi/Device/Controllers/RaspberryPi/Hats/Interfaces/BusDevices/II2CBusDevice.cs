@@ -6,7 +6,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
    interface II2CBusDevice
    {
-      List<IChannel> Channels { get; }
+      uint NumberOfChannels { get; }
 
       void Open(I2cDevice i2cDevice);
       void Close();

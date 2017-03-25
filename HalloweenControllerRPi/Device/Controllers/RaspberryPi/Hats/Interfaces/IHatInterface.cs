@@ -10,7 +10,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       /// </summary>
       II2CBusDevice BusDevice { get; }
 
-      List<IChannel> Open();
+      void Open();
       void Close();
    }
 }

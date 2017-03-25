@@ -288,7 +288,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return (uint)lOutputMap.Count;
+            return m_Relays;
          }
       }
       #endregion
@@ -356,11 +356,11 @@ namespace HalloweenControllerRPi.Device.Controllers
             {
                m_PWMs++;
             }
-            else if (c is ChannelFunction_RELAY)
+            else if (c is ChannelFunction_INPUT)
             {
                m_Inputs++;
             }
-            else if (c is ChannelFunction_INPUT)
+            else if (c is ChannelFunction_RELAY)
             {
                m_Relays++;
             }

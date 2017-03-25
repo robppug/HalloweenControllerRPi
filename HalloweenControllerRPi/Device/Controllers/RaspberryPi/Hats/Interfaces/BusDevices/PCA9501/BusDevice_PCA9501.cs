@@ -19,20 +19,14 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          READ_EEPROM = 0x41,  //b1xxxxxx1
       };
 
-      public static uint NumberOfChannels
+      public uint NumberOfChannels
       {
          get { return 0x08; }
       }
 
       private I2cDevice m_i2cDevice;
       private List<IIOPin> m_GpioPins;
-      private List<IChannel> m_Channels;
-
-      public List<IChannel> Channels
-      {
-         get { return m_Channels; }
-      }
-
+      
       public bool Initialised { get; private set; }
 
       public ushort EEPROMSize
@@ -75,8 +69,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       /// </summary>
       public void InitialiseChannels()
       {
-         m_Channels = new List<IChannel>();
-
          /* Create a list of GPIO objects */
          m_GpioPins = new List<IIOPin>();
 
@@ -84,7 +76,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          for (uint i = 0; i < NumberOfChannels; i++)
          {
             m_GpioPins.Add(new IOPin_PCA9501(i));
-            m_Channels.Add(new ChannelFunction_INPUT(i, m_GpioPins[(int)i]));
          }
 
          Initialised = true;

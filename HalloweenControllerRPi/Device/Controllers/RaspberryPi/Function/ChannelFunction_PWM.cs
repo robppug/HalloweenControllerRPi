@@ -8,7 +8,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
    class ChannelFunction_PWM : IChannel, IProcessTick
    {
       private IInterpolation curve = Interpolate.Common(new double[] { 0, 455, 910, 1365, 1820, 2275, 2730, 3185, 3640, 4095 },  /* 4095 / 9 points  */
-                                                        new double[] { 0, 51,  202, 455,  809,  1264, 1820, 2477, 3236, 4095 }); /* y = x * x / 4095 */
+                                                        new double[] { 0, 40,  140,  320,  620, 1000, 1450, 2200, 3100, 4095 }); /* y = x * x / 4095 */
       private tenFUNCTION _enFunction;
       private uint _channelIdx;
       private uint _minLevel;
@@ -191,6 +191,15 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
                default:
                   break;
             }
+         }
+
+         if (_functionLevel > MaxLevel)
+         {
+            _functionLevel = MaxLevel;
+         }
+         else if(_functionLevel < MinLevel)
+         {
+            _functionLevel = MinLevel;
          }
 
          Level = (uint)curve.Interpolate(_functionLevel);

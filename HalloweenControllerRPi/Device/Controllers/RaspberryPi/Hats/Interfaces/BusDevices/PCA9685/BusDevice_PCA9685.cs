@@ -89,7 +89,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          PRESCALE = 0xFE,
       };
 
-      public static uint NumberOfChannels
+      public uint NumberOfChannels
       {
          get { return 0x0F; }
       }
@@ -100,12 +100,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       }
 
       private I2cDevice m_i2cDevice;
-      private List<IChannel> m_Channels;
-
-      public List<IChannel> Channels
-      {
-         get { return m_Channels; }
-      }
 
       public bool Initialised { get; private set; }
 
@@ -159,14 +153,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       /// </summary>
       public void InitialiseChannels()
       {
-         m_Channels = new List<IChannel>();
-
          /* Initialise PWM channels */
          for (uint i = 0; i < NumberOfChannels; i++)
          {
-            m_Channels.Add(new ChannelFunction_PWM(i));
-
-            SetChannel((ushort)m_Channels[(int)i].Index, 0x00);
+            SetChannel((ushort)i, 0x00);
          }
 
          Initialised = true;
@@ -174,9 +164,9 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       public void SetChannel(ushort channel, ushort value)
       {
-         if((channel >= NumberOfChannels) || (channel >= Channels.Count))
+         if(channel >= NumberOfChannels)
          {
-            throw new Exception("Requested CHANNEL #" + channel + " is out of range (MAX #" + Channels.Count + ")");
+            throw new Exception("Requested CHANNEL #" + channel + " is out of range (MAX #" + NumberOfChannels + ")");
          }
 
          if (value == Resolution)

@@ -15,9 +15,8 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          }
       }
 
-      public List<IChannel> Open()
+      public void Open()
       {
-         return null;
       }
 
       public void Close()
