@@ -15,6 +15,7 @@ namespace HalloweenControllerRPi.Device
       public event HostedMessageDelegate CommandReceived;
       public event DataEventHandler<Type> FunctionAdded;
       public event DataEventHandler<string> VersionInfoUpdated;
+      public event DataEventHandler<uint> DiscoveryProgress;
       public event EventHandler ControllerInitialised;
 
       public class HWInterfaceException : Exception { public HWInterfaceException(String msg) : base(msg) { } }
@@ -56,10 +57,12 @@ namespace HalloweenControllerRPi.Device
 
       protected virtual void OnControllerInitialised()
       {
-         if (this.ControllerInitialised != null)
-         {
-            this.ControllerInitialised.Invoke(this, EventArgs.Empty);
-         }
+         this.ControllerInitialised?.Invoke(this, EventArgs.Empty);
+      }
+
+      protected virtual void OnDiscoveryProgressUpdated(uint percentage)
+      {
+         this.DiscoveryProgress?.Invoke(percentage);
       }
 
       public abstract Dictionary<Command, List<Command>> Commands { get; }

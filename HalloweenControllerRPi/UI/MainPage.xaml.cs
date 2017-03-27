@@ -46,6 +46,9 @@ namespace HalloweenControllerRPi
 
          HostApp = this;
 
+         buttonStart.IsEnabled = false;
+         buttonStop.IsEnabled = false;
+
          lGroupContainers.Add(groupContainer_AlwaysActive);
          lGroupContainers.Add(groupContainer_Triggered);
 
@@ -115,14 +118,17 @@ namespace HalloweenControllerRPi
             this.Available_Board.Items.Add(new Function_Button_RELAY(i + 1));
          }
 
-         //Func_SOUND.GetAvailableSounds();
+         Func_SOUND.GetAvailableSounds();
 
-         //loadSettingsFile();
+         loadSettingsFile();
 
          if (HWController.GetUIPanel() != null)
          {
             HWSimulatedGrid.Items.Add(HWController.GetUIPanel());
          }
+
+         buttonStart.IsEnabled = true;
+         buttonStop.IsEnabled = true;
       }
 
       /// <summary>

@@ -169,7 +169,8 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
             switch (HatType)
             {
                case SupportedHATs.MOSFET_v1:
-                  chan = new ChannelFunction_PWM(i);
+                  if (i < 5)
+                     chan = new ChannelFunction_PWM(i);
                   break;
 
                case SupportedHATs.INPUT_v1:
@@ -177,7 +178,8 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
                   break;
 
                case SupportedHATs.RELAY_v1:
-                  Channels.Add(new ChannelFunction_RELAY(i, (busDevice as BusDevice_PCA9501).GetPin((ushort)i)));
+                  if (i < 4)
+                     Channels.Add(new ChannelFunction_RELAY(i, (busDevice as BusDevice_PCA9501).GetPin((ushort)i)));
                   break;
 
                case SupportedHATs.NoOfSupportedHATs:

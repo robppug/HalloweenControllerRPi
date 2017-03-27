@@ -38,6 +38,8 @@ namespace HalloweenControllerRPi.Device.Controllers
          OUTPUT_PIN_24 = 24,
          OUTPUT_PIN_25 = 25
       };
+
+      private const int MaxI2CAddresses = 128;
       #endregion
 
       #region /* PRIVATE */
@@ -393,7 +395,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          int Address = 0x00;
 
-         while (Address < 128)
+         while (Address < MaxI2CAddresses)
          {
             i2cSettings = new I2cConnectionSettings(Address);
             i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
@@ -427,6 +429,8 @@ namespace HalloweenControllerRPi.Device.Controllers
             }
 
             Address++;
+
+            OnDiscoveryProgressUpdated((uint)(Address / MaxI2CAddresses * 100));
          }
       }
 
@@ -435,7 +439,6 @@ namespace HalloweenControllerRPi.Device.Controllers
       /// </summary>
       public override void Connect()
       {
-
          /* Setup the I2C bus for access to the PWM channels */
          i2cSettings = new I2cConnectionSettings(0x40);
          i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
