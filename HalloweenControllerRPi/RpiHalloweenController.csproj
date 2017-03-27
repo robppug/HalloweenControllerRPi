@@ -96,7 +96,6 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="ClassDiagram1.cd" />
     <None Include="project.json" />
     <None Include="RpiHalloweenController_TemporaryKey.pfx" />
   </ItemGroup>

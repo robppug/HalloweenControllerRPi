@@ -88,19 +88,33 @@ namespace HalloweenControllerRPi
 
          try
          {
+            ControllerProgressBar.Visibility = Visibility.Visible;
+            textControllerProgressBar.Visibility = Visibility.Visible;
+
+            HWController.ControllerInitialised += HWController_OnControllerInitialised;
+            HWController.DiscoveryProgress += HWController_DiscoveryProgress;
+
             HWController.Connect();
 
             HWController.DevicePID = 0xAAAA;
-            HWController.ControllerInitialised += HWController_OnControllerInitialised;
 
             lHWControllers.Add(HWController);
          }
          catch { }
       }
 
+      private void HWController_DiscoveryProgress(uint data)
+      {
+         textControllerProgressBar.Text = "Loading... " + data.ToString() + "%";
+         ControllerProgressBar.Value = (double)data;
+      }
+
       private void HWController_OnControllerInitialised(object sender, EventArgs e)
       {
          HWController HWController = (sender as HWController);
+
+         ControllerProgressBar.Visibility = Visibility.Collapsed;
+         textControllerProgressBar.Visibility = Visibility.Collapsed;
 
          /* Populate the available Functions the HWDevice provides. */
          this.Available_Statics.Items.Add(new Function_Button_SOUND(1));

@@ -157,5 +157,30 @@
                 Checked="checkBox_LoadOnStart_Checked"
                 Content="Load 'saved' file on startup."
                 Unchecked="checkBox_LoadOnStart_Unchecked" />
+      <ProgressBar x:Name="ControllerProgressBar"
+                   Width="631"
+                   Height="28"
+                   Margin="14,160,0,0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   BorderBrush="Black"
+                   BorderThickness="1"
+                   Foreground="#FFD79300"
+                   IsDoubleTapEnabled="False"
+                   IsHoldingEnabled="False"
+                   IsRightTapEnabled="False"
+                   IsTapEnabled="False" />
+      <TextBlock x:Name="textControllerProgressBar"
+                 Width="631"
+                 Height="28"
+                 Margin="14,160,1275,0"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Top"
+                 Canvas.ZIndex="1"
+                 FontSize="18"
+                 FontWeight="Bold"
+                 Text="0%"
+                 TextAlignment="Center" />
+
    </Grid>
 </Page>

@@ -403,6 +403,8 @@ namespace HalloweenControllerRPi.Device.Controllers
 
             i2cDevice = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, i2cSettings);
 
+            OnDiscoveryProgressUpdated((uint)((double)Address / (double)MaxI2CAddresses * 100));
+
             try
             {
                i2cDevice.Write(new byte[1] { 0x00 });
@@ -429,9 +431,9 @@ namespace HalloweenControllerRPi.Device.Controllers
             }
 
             Address++;
-
-            OnDiscoveryProgressUpdated((uint)(Address / MaxI2CAddresses * 100));
          }
+
+         OnDiscoveryProgressUpdated(100);
       }
 
       /// <summary>
@@ -445,7 +447,6 @@ namespace HalloweenControllerRPi.Device.Controllers
          i2cSettings.SharingMode = I2cSharingMode.Exclusive;
 
          /* Wait for the 'OnConnect' to complete without blocking the UI */
-         //Microsoft.IoT.DeviceHelpers.TaskExtensions.UISafeWait(OnConnect);
          OnConnect();
 
          /* Create the Background Task handle */
