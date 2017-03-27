@@ -15,6 +15,7 @@ namespace HalloweenControllerRPi.Device
       public event HostedMessageDelegate CommandReceived;
       public event DataEventHandler<Type> FunctionAdded;
       public event DataEventHandler<string> VersionInfoUpdated;
+      public event EventHandler ControllerInitialised;
 
       public class HWInterfaceException : Exception { public HWInterfaceException(String msg) : base(msg) { } }
 
@@ -50,6 +51,14 @@ namespace HalloweenControllerRPi.Device
          if (this.VersionInfoUpdated != null)
          {
             this.VersionInfoUpdated(sVersion);
+         }
+      }
+
+      protected virtual void OnControllerInitialised()
+      {
+         if (this.ControllerInitialised != null)
+         {
+            this.ControllerInitialised.Invoke(this, EventArgs.Empty);
          }
       }
 

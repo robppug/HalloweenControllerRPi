@@ -5,6 +5,7 @@ using Microsoft.IoT.Lightning.Providers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -306,47 +307,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          }
          else
          {
-            bool boSuccessful = false;
-            int Address = 0x40;
-            string deviceSelector = I2cDevice.GetDeviceSelector("I2C1");
-            var i2cDeviceControllers = await DeviceInformation.FindAllAsync(deviceSelector).AsTask();
-
-            if (i2cDeviceControllers == null)
-            {
-               throw new Exception("Device not found (" + deviceSelector + ")");
-            }
-
-            while (boSuccessful == false)
-            {
-               i2cSettings = new I2cConnectionSettings(Address);
-               i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
-               i2cSettings.SharingMode = I2cSharingMode.Exclusive;
-
-               i2cDevice = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, i2cSettings);
-
-               try
-               {
-                  i2cDevice.Write(new byte[1] { 0x00 });
-
-                  /* Device found, store the HAT and it's Address then establish communication with the HAT and initialise the HATs available CHANNELS */
-                  lHats.Add(RPiHat.Open(i2cDevice, (UInt16)Address));
-
-                  /* Store a collection of all the available Channels */
-                  lAllFunctions.AddRange(lHats.Last().Channels);
-
-                  boSuccessful = true;
-               }
-               catch
-               {
-                  Address++;
-
-                  if (Address == 0x70)
-                     Address++;
-                  else if (Address > 128)
-                     break;
-                  continue;
-               }
-            }
+            await DiscoverHats();
          }
 
          /* Initialise available channels (PWM, RELAY, INPUT) */
@@ -365,7 +326,9 @@ namespace HalloweenControllerRPi.Device.Controllers
                m_Relays++;
             }
          }
-         
+
+         OnControllerInitialised();
+
          /* Initialise INPUT channels */
          //for (uint i = 0; i < Inputs; i++)
          //{
@@ -417,6 +380,56 @@ namespace HalloweenControllerRPi.Device.Controllers
          //lAllFunctions.AddRange(lRELAYs);
       }
 
+      private async Task DiscoverHats()
+      {
+         RPiHat rpiHat;
+         string deviceSelector = I2cDevice.GetDeviceSelector("I2C1");
+         var i2cDeviceControllers = await DeviceInformation.FindAllAsync(deviceSelector).AsTask();
+
+         if (i2cDeviceControllers == null)
+         {
+            throw new Exception("Device not found (" + deviceSelector + ")");
+         }
+
+         int Address = 0x00;
+
+         while (Address < 128)
+         {
+            i2cSettings = new I2cConnectionSettings(Address);
+            i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
+            i2cSettings.SharingMode = I2cSharingMode.Exclusive;
+
+            i2cDevice = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, i2cSettings);
+
+            try
+            {
+               i2cDevice.Write(new byte[1] { 0x00 });
+            }
+            catch (FileNotFoundException ex)
+            {
+               System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - " + ex.Message);
+
+               /* No device found */
+               Address++;
+
+               continue;
+            }
+
+            /* Device found, store the HAT and it's Address then establish communication with the HAT and initialise the HATs available CHANNELS */
+            rpiHat = RPiHat.Open(i2cDevice, (UInt16)Address);
+
+            if (rpiHat != null)
+            {
+               lHats.Add(rpiHat);
+
+               /* Store a collection of all the available Channels */
+               lAllFunctions.AddRange(lHats.Last().Channels);
+            }
+
+            Address++;
+         }
+      }
+
       /// <summary>
       /// Initialise any drivers (ie. I2C) 
       /// </summary>
@@ -429,7 +442,8 @@ namespace HalloweenControllerRPi.Device.Controllers
          i2cSettings.SharingMode = I2cSharingMode.Exclusive;
 
          /* Wait for the 'OnConnect' to complete without blocking the UI */
-         Microsoft.IoT.DeviceHelpers.TaskExtensions.UISafeWait(OnConnect);
+         //Microsoft.IoT.DeviceHelpers.TaskExtensions.UISafeWait(OnConnect);
+         OnConnect();
 
          /* Create the Background Task handle */
          TaskFactory tTaskFactory = new TaskFactory(TaskScheduler.Current);

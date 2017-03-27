@@ -88,35 +88,41 @@ namespace HalloweenControllerRPi
             HWController.Connect();
 
             HWController.DevicePID = 0xAAAA;
+            HWController.ControllerInitialised += HWController_OnControllerInitialised;
 
             lHWControllers.Add(HWController);
-
-            if (HWController.GetUIPanel() != null)
-            {
-               HWSimulatedGrid.Items.Add(HWController.GetUIPanel());
-            }
-
-            /* Populate the available Functions the HWDevice provides. */
-            this.Available_Statics.Items.Add(new Function_Button_SOUND(1));
-
-            for (uint i = 0; i < HWController.Inputs; i++)
-            {
-               this.Available_Board.Items.Add(new Function_Button_INPUT(i + 1));
-            }
-            for (uint i = 0; i < HWController.PWMs; i++)
-            {
-               this.Available_Board.Items.Add(new Function_Button_PWM(i + 1));
-            }
-            for (uint i = 0; i < HWController.Relays; i++)
-            {
-               this.Available_Board.Items.Add(new Function_Button_RELAY(i + 1));
-            }
-
-            //Func_SOUND.GetAvailableSounds();
-
-            //loadSettingsFile();
          }
          catch { }
+      }
+
+      private void HWController_OnControllerInitialised(object sender, EventArgs e)
+      {
+         HWController HWController = (sender as HWController);
+
+         /* Populate the available Functions the HWDevice provides. */
+         this.Available_Statics.Items.Add(new Function_Button_SOUND(1));
+
+         for (uint i = 0; i < HWController.Inputs; i++)
+         {
+            this.Available_Board.Items.Add(new Function_Button_INPUT(i + 1));
+         }
+         for (uint i = 0; i < HWController.PWMs; i++)
+         {
+            this.Available_Board.Items.Add(new Function_Button_PWM(i + 1));
+         }
+         for (uint i = 0; i < HWController.Relays; i++)
+         {
+            this.Available_Board.Items.Add(new Function_Button_RELAY(i + 1));
+         }
+
+         //Func_SOUND.GetAvailableSounds();
+
+         //loadSettingsFile();
+
+         if (HWController.GetUIPanel() != null)
+         {
+            HWSimulatedGrid.Items.Add(HWController.GetUIPanel());
+         }
       }
 
       /// <summary>
