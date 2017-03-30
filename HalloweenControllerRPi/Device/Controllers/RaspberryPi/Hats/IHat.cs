@@ -14,5 +14,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       List<IChannel> Channels { get; }
 
       void ProcessTask();
+      void UpdateChannel(IChannel chan);
    }
 }

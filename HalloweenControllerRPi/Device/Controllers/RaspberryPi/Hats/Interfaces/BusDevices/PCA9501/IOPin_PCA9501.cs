@@ -63,7 +63,14 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function
 
       public void SetDriveMode(GpioPinDriveMode value)
       {
-         m_driveMode = value;
+         if (IsDriveModeSupported(value) == true)
+         {
+            m_driveMode = value;
+         }
+         else
+         {
+            throw new Exception("Drive mode (" + value.ToString() + ") is not supported.");
+         }
       }
 
       public GpioPinDriveMode GetDriveMode()

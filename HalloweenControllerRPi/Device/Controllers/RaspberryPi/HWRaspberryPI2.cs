@@ -296,7 +296,10 @@ namespace HalloweenControllerRPi.Device.Controllers
       }
       #endregion
 
-
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
       private async Task OnConnect()
       {
          /* Allow the HW to initialise */
@@ -382,6 +385,10 @@ namespace HalloweenControllerRPi.Device.Controllers
          //lAllFunctions.AddRange(lRELAYs);
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
       private async Task DiscoverHats()
       {
          RPiHat rpiHat;
@@ -458,6 +465,9 @@ namespace HalloweenControllerRPi.Device.Controllers
          tTaskFactory.StartNew(new Action(ControllerTask), TaskCreationOptions.RunContinuationsAsynchronously);
       }
 
+      /// <summary>
+      /// Task which calls the ProcessTask for each of the attached HATs
+      /// </summary>
       private void ControllerTask()
       {
          while (sWatch.IsRunning == true)
@@ -489,6 +499,26 @@ namespace HalloweenControllerRPi.Device.Controllers
          throw new NotImplementedException();
       }
 
+      /// <summary>
+      /// Updates am available CHANNEL (ie. Read/Write to the HAT)
+      /// </summary>
+      /// <param name="chan"></param>
+      private void UpdateChannel(IChannel chan)
+      {
+         foreach (IHat hat in lHats)
+         {
+            if(hat.Channels.Find(x => x == chan) != null)
+            {
+               hat.UpdateChannel(chan);
+               break;
+            }
+         }
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="cmd"></param>
       public override void TransmitCommand(string cmd)
       {
          Command function;
@@ -533,26 +563,28 @@ namespace HalloweenControllerRPi.Device.Controllers
                #endregion
 
                #region /* RELAY HANDLING */
-               case 'R': 
-                  //foreach (Channel_RELAY c in lRELAYs)
-                  //{
-                  //   if (channel == c.Index + 1)
-                  //   {
-                  //      /* Remove the Function and Channel from the string */
-                  //      new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+               case 'R':
+                  foreach (ChannelFunction_RELAY c in lAllFunctions)
+                  {
+                     if (channel == c.Index + 1)
+                     {
+                        /* Remove the Function and Channel from the string */
+                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
 
-                  //      switch (subFunction.Value)
-                  //      {
-                  //         case 'S':
-                  //            c.OutputLevel = (tenOutputLevel)UInt32.Parse(new string(decodedData));
-                  //            break;
-                  //         case 'G':
-                  //            break;
-                  //         default:
-                  //            break;
-                  //      }
-                  //   }
-                  //}
+                        switch (subFunction.Value)
+                        {
+                           case 'S':
+                              c.OutputLevel = (tenOutputLevel)UInt32.Parse(new string(decodedData));
+                              break;
+                           case 'G':
+                              break;
+                           default:
+                              break;
+                        }
+
+                        UpdateChannel(c);
+                     }
+                  }
                   break;
                #endregion
 
@@ -588,7 +620,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                               break;
                         }
 
-                        c.Tick();
+                        UpdateChannel(c);
                         return;
                      }
                   }

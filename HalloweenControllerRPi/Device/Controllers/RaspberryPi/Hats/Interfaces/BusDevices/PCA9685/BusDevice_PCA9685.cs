@@ -194,5 +194,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       {
          m_i2cDevice.Write(new byte[2] { (byte)Registers.PRESCALE, value });
       }
+
+      public void RefreshChannel(ushort index)
+      {
+         throw new NotImplementedException();
+      }
    }
 }

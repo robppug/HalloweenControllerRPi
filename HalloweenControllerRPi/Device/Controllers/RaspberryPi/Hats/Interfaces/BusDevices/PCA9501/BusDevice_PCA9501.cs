@@ -59,6 +59,8 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       {
          if (Initialised == true)
          {
+            m_i2cDevice = null;
+
             Initialised = false;
          }
       }
@@ -135,32 +137,89 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          return null;
       }
 
+      /// <summary>
+      /// Write's to a PIN on the PCA9501 device.
+      /// </summary>
+      /// <param name="pin"></param>
+      /// <param name="value"></param>
       public void WritePin(IIOPin pin, GpioPinValue value)
       {
-         m_GpioPins.Find(x => x == pin).Write(value);
+         IIOPin gpioPin = m_GpioPins.Find(x => x == pin);
 
-         UpdateDeviceIO();
+         if (gpioPin.GetDriveMode() == GpioPinDriveMode.Output)
+         {
+            gpioPin.Write(value);
+
+            UpdateDeviceIO(Registers.WRITE_IO);
+         }
+         else
+         {
+            throw new Exception("Pin is READ ONLY");
+         }
       }
 
       public GpioPinValue ReadPin(IIOPin pin)
       {
-         UpdateDeviceIO();
+         UpdateDeviceIO(Registers.READ_IO);
 
          return m_GpioPins.Find(x => x == pin).Read();
       }
 
-      public void UpdateDeviceIO()
+      private void UpdateDeviceIO(Registers reg)
       {
-         byte[] data = new byte[1 + NumberOfChannels];
+         byte[] data = new byte[NumberOfChannels];
+         List<byte> dataBuffer = new List<byte>();
 
-         data[0] = (byte)Registers.WRITE_IO;
-
-         foreach ( IIOPin pin in m_GpioPins )
+         switch (reg)
          {
-            data[pin.PinNumber + 1] = (byte)pin.Read();
+            /* WRITE TO PIN */
+            case Registers.WRITE_IO:
+               foreach (IIOPin pin in m_GpioPins)
+               {
+                  data[pin.PinNumber] = (byte)pin.Read();
+               }
+
+               /* Write to the DEVICE - Address = b0xxxxxx1 */
+               m_i2cDevice.ConnectionSettings.SlaveAddress |= (byte)reg;
+
+               dataBuffer.Add((byte)reg);
+               dataBuffer.AddRange(data);
+               m_i2cDevice.Write(dataBuffer.ToArray());
+               break;
+
+            /* READ FROM PIN */
+            case Registers.READ_IO:
+               /* Read from the DEVICE - Address = b0xxxxxx0 */
+               m_i2cDevice.ConnectionSettings.SlaveAddress &= ~(byte)reg;
+               m_i2cDevice.Read(data);
+
+               foreach (IIOPin pin in m_GpioPins)
+               {
+                  pin.Write((GpioPinValue)data[pin.PinNumber]);
+               }
+               break;
+
+            default:
+               break;
          }
 
-         m_i2cDevice.Write(data);
+      }
+
+      /// <summary>
+      /// Will READ/WRITE the BUS device and physical update each Channel
+      /// </summary>
+      public void RefreshChannel(ushort chan)
+      {
+         IIOPin pin = GetPin(chan);
+
+         if (pin.GetDriveMode() == GpioPinDriveMode.Input)
+         {
+            ReadPin(pin);
+         }
+         else if (pin.GetDriveMode() == GpioPinDriveMode.Output)
+         {
+            WritePin(pin, pin.Read());
+         }
       }
       #endregion
    }

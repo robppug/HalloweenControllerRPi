@@ -1,7 +1,9 @@
-﻿using HalloweenControllerRPi.Functions;
+﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
+using HalloweenControllerRPi.Functions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
@@ -46,7 +48,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       {
          II2CBusDevice busDevice = null;
 
-         HatType = DiscoverHat(hatAddress);
+         HatType = GetHatType(hatAddress);
 
          if (HatType != SupportedHATs.NoOfSupportedHATs)
          {
@@ -57,6 +59,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
                   break;
 
                case SupportedHATs.INPUT_v1:
+                  busDevice = new BusDevice_PCA9501();
                   break;
 
                case SupportedHATs.RELAY_v1:
@@ -127,20 +130,24 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          }
       }
 
-      private SupportedHATs DiscoverHat(ushort hatAddress)
+      /// <summary>
+      /// Returns the type of HAT at the Address provided
+      /// </summary>
+      /// <param name="hatAddress"></param>
+      /// <returns></returns>
+      private SupportedHATs GetHatType(ushort hatAddress)
       {
          SupportedHATs hat = SupportedHATs.NoOfSupportedHATs;
 
-         /* Discover the type of HAT connected */
-         /* PCA9501 - RELAY with EEPROM (0x40 - 0x4F is EEPROM)*/
+         /* PCA9501 - INPUT with EEPROM (0x40 - 0x4F is EEPROM) */
          if ((hatAddress >= 0x00) && (hatAddress <= 0x0F))
          {
-            hat = SupportedHATs.RELAY_v1;
+            hat = SupportedHATs.INPUT_v1;
          }
-         /* PCA9501 - INPUT with EEPROM (0x50 - 0x5F is EEPROM) */
+         /* PCA9501 - RELAY with EEPROM (0x50 - 0x5F is EEPROM)*/
          else if ((hatAddress >= 0x10) && (hatAddress <= 0x1F))
          {
-            hat = SupportedHATs.INPUT_v1;
+            hat = SupportedHATs.RELAY_v1;
          }
          /* PCA9685 - PWM Driver */
          else if ((hatAddress >= 0x60) && (hatAddress <= 0x6F))
@@ -151,6 +158,12 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          return hat;
       }
 
+      /// <summary>
+      /// Open the HATs interface and populates the list of available CHANNELS
+      /// </summary>
+      /// <param name="i2cDevice"></param>
+      /// <param name="hatAddress"></param>
+      /// <param name="busDevice"></param>
       private void OpenHat(I2cDevice i2cDevice, ushort hatAddress, II2CBusDevice busDevice)
       {
          /* Initialise the HATs Interface (SPI, I2C, etc...) */
@@ -165,6 +178,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          for (uint i = 0; i < busDevice.NumberOfChannels; i++)
          {
             IChannel chan = null;
+            IIOPin pin = null;
 
             switch (HatType)
             {
@@ -174,12 +188,22 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
                   break;
 
                case SupportedHATs.INPUT_v1:
-                  Channels.Add(new ChannelFunction_INPUT(i, (busDevice as BusDevice_PCA9501).GetPin((ushort)i)));
+                  pin = (busDevice as BusDevice_PCA9501).GetPin((ushort)i);
+
+                  pin.SetDriveMode(GpioPinDriveMode.Input);
+
+                  Channels.Add(new ChannelFunction_INPUT(i, pin));
                   break;
 
                case SupportedHATs.RELAY_v1:
                   if (i < 4)
-                     Channels.Add(new ChannelFunction_RELAY(i, (busDevice as BusDevice_PCA9501).GetPin((ushort)i)));
+                  {
+                     pin = (busDevice as BusDevice_PCA9501).GetPin((ushort)i);
+
+                     pin.SetDriveMode(GpioPinDriveMode.Output);
+
+                     Channels.Add(new ChannelFunction_RELAY(i, pin));
+                  }
                   break;
 
                case SupportedHATs.NoOfSupportedHATs:
@@ -192,6 +216,15 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
                Channels.Add(chan);
             }
          }
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="chan"></param>
+      public void UpdateChannel(IChannel chan)
+      {
+         m_HatInterface.BusDevice.RefreshChannel((ushort)chan.Index);
       }
    }
 }

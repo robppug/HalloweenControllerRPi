@@ -83,11 +83,12 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
             if (InputLevelChanged != null)
             {
                InputLevelChanged.Invoke(this, new EventArgsINPUT((gpEdge == GpioPinEdge.RisingEdge ? tenTriggerLvl.tHigh : tenTriggerLvl.tLow), Index));
-
-               _waitForRetrigger = true;
-               _reenableTimer.Interval = _postTriggerTime;
-               _reenableTimer.Start();
             }
+
+            _waitForRetrigger = true;
+            _reenableTimer.Interval = _postTriggerTime;
+            _reenableTimer.Start();
+            
          }
       }
 

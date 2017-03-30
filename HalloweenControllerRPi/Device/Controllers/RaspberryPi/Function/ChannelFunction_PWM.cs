@@ -42,32 +42,32 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 
       public uint Level
       {
-         set { _func_value = value;  }
          get { return _func_value; }
+         set { _func_value = value; Tick(); }
       }
 
       public uint MinLevel
       {
-         set { _minLevel = (PWMResolution * value) / 100; }
          get { return _minLevel; }
+         set { _minLevel = (PWMResolution * value) / 100; Tick(); }
       }
 
       public uint MaxLevel
       {
-         set { _maxLevel = (PWMResolution * value) / 100; }
          get { return _maxLevel; }
+         set { _maxLevel = (PWMResolution * value) / 100; Tick(); }
       }
 
       public tenFUNCTION Function
       {
          get { return _enFunction; }
-         set { _enFunction = value; }
+         set { _enFunction = value; Tick(); }
       }
 
       public uint UpdateCount
       {
          get { return _updateCnt; }
-         set { _updateCnt = value; }
+         set { _updateCnt = value; Tick(); }
       }
 
       private bool boUpdateTick()
@@ -202,7 +202,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
             _functionLevel = MinLevel;
          }
 
-         Level = (uint)curve.Interpolate(_functionLevel);
+         _func_value = (uint)curve.Interpolate(_functionLevel);
       }
    }
 }

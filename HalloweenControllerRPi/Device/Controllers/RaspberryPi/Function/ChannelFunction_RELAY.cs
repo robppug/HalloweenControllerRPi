@@ -29,7 +29,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       public tenOutputLevel OutputLevel
       {
          get { return _outputLevel; }
-         set { _outputLevel = value; }
+         set { _outputLevel = value; Tick(); }
       }
 
       public GpioPinValue CurrentPinLevel
