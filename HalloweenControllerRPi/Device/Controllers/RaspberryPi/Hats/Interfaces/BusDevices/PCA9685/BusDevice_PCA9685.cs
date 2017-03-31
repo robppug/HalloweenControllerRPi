@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Functions;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Devices.I2c;
@@ -195,9 +196,21 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          m_i2cDevice.Write(new byte[2] { (byte)Registers.PRESCALE, value });
       }
 
-      public void RefreshChannel(ushort index)
+      public void RefreshChannel(IChannel chan)
       {
-         throw new NotImplementedException();
+         if ((chan as ChannelFunction_PWM) != null)
+         {
+            ChannelFunction_PWM pwm = (chan as ChannelFunction_PWM);
+
+            if (pwm.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
+            {
+               SetChannel((ushort)pwm.Index, (ushort)pwm.Level);
+            }
+            else
+            {
+               SetChannel((ushort)pwm.Index, 0x00);
+            }
+         }
       }
    }
 }

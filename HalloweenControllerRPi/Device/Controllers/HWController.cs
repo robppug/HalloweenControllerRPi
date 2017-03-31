@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HalloweenControllerRPi.Device.Controllers.RaspberryPi;
 using Windows.UI.Xaml.Controls;
 
 namespace HalloweenControllerRPi.Device
@@ -33,26 +34,17 @@ namespace HalloweenControllerRPi.Device
 
       protected virtual void OnCommandReceived(CommandEventArgs args)
       {
-         if (CommandReceived != null)
-         {
-            CommandReceived(this, args);
-         }
+         CommandReceived?.Invoke(this, args);
       }
 
       protected virtual void OnFunctionAdded(Type funcType)
       {
-         if (FunctionAdded != null)
-         {
-            FunctionAdded(funcType);
-         }
+         FunctionAdded?.Invoke(funcType);
       }
 
       protected virtual void OnVersionInfoUpdated(string sVersion)
       {
-         if (this.VersionInfoUpdated != null)
-         {
-            this.VersionInfoUpdated(sVersion);
-         }
+         this.VersionInfoUpdated?.Invoke(sVersion);
       }
 
       protected virtual void OnControllerInitialised()
@@ -63,6 +55,11 @@ namespace HalloweenControllerRPi.Device
       protected virtual void OnDiscoveryProgressUpdated(uint percentage)
       {
          this.DiscoveryProgress?.Invoke(percentage);
+      }
+
+      public void OnInputChannelNotification(object sender, ChannelFunction_INPUT.EventArgsINPUT e)
+      {
+         this.TriggerCommandReceived(new CommandEventArgs('I', e.Index + 1, (uint)e.TriggerLevel));
       }
 
       public abstract Dictionary<Command, List<Command>> Commands { get; }
@@ -112,5 +109,6 @@ namespace HalloweenControllerRPi.Device
       {
          return null;
       }
+
    }
 }

@@ -1,12 +1,14 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
 using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using Windows.Devices.Gpio;
 using Windows.UI.Xaml;
 using static HalloweenControllerRPi.Functions.Func_INPUT;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 {
-   class ChannelFunction_INPUT : IChannel
+   public class ChannelFunction_INPUT : IChannel
    {
       public class EventArgsINPUT : EventArgs
       {
@@ -73,23 +75,25 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
          get { return _postTriggerTime; }
          set { _postTriggerTime = value; }
       }
-      
-      private void Pin_ValueChanged(IIOPin sender, GpioPinValueChangedEventArgs args)
+
+      private async void Pin_ValueChanged(IIOPin sender, InputPinValueChangedEventArgs args)
+      {
+         if (_waitForRetrigger == false)
+         {
+            _waitForRetrigger = true;
+
+            Task.Run(() => OnInputLevelChanged(sender, args));
+         }
+      }
+
+      private async Task OnInputLevelChanged(IIOPin sender, InputPinValueChangedEventArgs args)
       {
          GpioPinEdge gpEdge = args.Edge;
 
-         if (_waitForRetrigger == false)
-         {
-            if (InputLevelChanged != null)
-            {
-               InputLevelChanged.Invoke(this, new EventArgsINPUT((gpEdge == GpioPinEdge.RisingEdge ? tenTriggerLvl.tHigh : tenTriggerLvl.tLow), Index));
-            }
+         InputLevelChanged?.Invoke(sender, new EventArgsINPUT((gpEdge == GpioPinEdge.RisingEdge ? tenTriggerLvl.tHigh : tenTriggerLvl.tLow), Index));
 
-            _waitForRetrigger = true;
-            _reenableTimer.Interval = _postTriggerTime;
-            _reenableTimer.Start();
-            
-         }
+         _reenableTimer.Interval = _postTriggerTime;
+         _reenableTimer.Start();
       }
 
       private void _reenableTimer_Tick(object sender, object e)

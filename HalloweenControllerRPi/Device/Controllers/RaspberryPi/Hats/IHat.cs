@@ -10,6 +10,8 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
    interface IHat
    {
+      IHWController HostController { get; }
+
       SupportedHATs HatType { get; }
       List<IChannel> Channels { get; }
 

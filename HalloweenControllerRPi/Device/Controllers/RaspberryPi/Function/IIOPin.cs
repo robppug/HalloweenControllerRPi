@@ -4,12 +4,12 @@ using Windows.Foundation;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function
 {
-   interface IIOPin
+   public interface IIOPin
    {
       TimeSpan DebounceTimeout { get; set; }
       UInt32 PinNumber { get; }
 
-      event TypedEventHandler<IIOPin, GpioPinValueChangedEventArgs> ValueChanged;
+      event TypedEventHandler<IIOPin, InputPinValueChangedEventArgs> ValueChanged;
 
       GpioPinDriveMode GetDriveMode();
       Boolean IsDriveModeSupported(GpioPinDriveMode driveMode);

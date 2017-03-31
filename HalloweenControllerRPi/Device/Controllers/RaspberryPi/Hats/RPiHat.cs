@@ -30,6 +30,13 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       #region Declarations
 
       private IHatInterface m_HatInterface;
+      private IHWController m_hostController;
+
+      public IHWController HostController
+      {
+         get { return m_hostController; }
+         private set { m_hostController = value; }
+      }
 
       public List<IChannel> Channels
       {
@@ -44,8 +51,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       }
       #endregion Declarations
 
-      private RPiHat(I2cDevice i2cDevice, UInt16 hatAddress)
+      private RPiHat(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress)
       {
+         HostController = host;
+
          II2CBusDevice busDevice = null;
 
          HatType = GetHatType(hatAddress);
@@ -84,9 +93,9 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       /// <param name="i2cDevice"></param>
       /// <param name="hatAddress"></param>
       /// <returns>If successful an initialised RPiHat object otherwise null.</returns>
-      public static RPiHat Open(I2cDevice i2cDevice, UInt16 hatAddress)
+      public static RPiHat Open(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress)
       {
-         RPiHat rpiHat = new RPiHat(i2cDevice, hatAddress);
+         RPiHat rpiHat = new RPiHat(host, i2cDevice, hatAddress);
 
          if (rpiHat.HatType == SupportedHATs.NoOfSupportedHATs)
          {
@@ -111,23 +120,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
             if ((c as IProcessTick) != null)
             {
                (c as IProcessTick).Tick();
-
-               if ((c as ChannelFunction_PWM) != null)
-               {
-                  ChannelFunction_PWM pwm = (c as ChannelFunction_PWM);
-                  IBusDevicePwmChannelProvider pwmDevice = (IBusDevicePwmChannelProvider)m_HatInterface.BusDevice;
-
-                  if (pwm.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
-                  {
-                     pwmDevice.SetChannel((ushort)pwm.Index, (ushort)pwm.Level);
-                  }
-                  else
-                  {
-                     pwmDevice.SetChannel((ushort)pwm.Index, 0x00);
-                  }
-               }
             }
+            UpdateChannel(c);
          }
+
+         
       }
 
       /// <summary>
@@ -190,9 +187,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
                case SupportedHATs.INPUT_v1:
                   pin = (busDevice as BusDevice_PCA9501).GetPin((ushort)i);
 
-                  pin.SetDriveMode(GpioPinDriveMode.Input);
+                  pin.SetDriveMode(GpioPinDriveMode.InputPullUp);
 
-                  Channels.Add(new ChannelFunction_INPUT(i, pin));
+                  chan = new ChannelFunction_INPUT(i, pin);
+                  (chan as ChannelFunction_INPUT).InputLevelChanged += HostController.OnInputChannelNotification;
                   break;
 
                case SupportedHATs.RELAY_v1:
@@ -202,7 +200,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
                      pin.SetDriveMode(GpioPinDriveMode.Output);
 
-                     Channels.Add(new ChannelFunction_RELAY(i, pin));
+                     chan = new ChannelFunction_RELAY(i, pin);
                   }
                   break;
 
@@ -224,7 +222,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       /// <param name="chan"></param>
       public void UpdateChannel(IChannel chan)
       {
-         m_HatInterface.BusDevice.RefreshChannel((ushort)chan.Index);
+         m_HatInterface.BusDevice.RefreshChannel(chan);
       }
    }
 }

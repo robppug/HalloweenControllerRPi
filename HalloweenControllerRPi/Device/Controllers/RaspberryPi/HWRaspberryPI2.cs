@@ -334,6 +334,13 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          OnControllerInitialised();
 
+         /* Create the Background Task handle */
+         TaskFactory tTaskFactory = new TaskFactory(TaskScheduler.Current);
+
+         sWatch = new Stopwatch();
+         sWatch.Start();
+
+         tTaskFactory.StartNew(new Action(ControllerTask), TaskCreationOptions.RunContinuationsAsynchronously);
          /* Initialise INPUT channels */
          //for (uint i = 0; i < Inputs; i++)
          //{
@@ -379,10 +386,6 @@ namespace HalloweenControllerRPi.Device.Controllers
          //      lRELAYs.Add(piRelay);
          //   }
          //}
-
-         //lAllFunctions.AddRange(lINPUTs);
-         //lAllFunctions.AddRange(lPWMs);
-         //lAllFunctions.AddRange(lRELAYs);
       }
 
       /// <summary>
@@ -412,13 +415,9 @@ namespace HalloweenControllerRPi.Device.Controllers
 
             OnDiscoveryProgressUpdated((uint)((double)Address / (double)MaxI2CAddresses * 100));
 
-            try
+            if (i2cDevice.ReadPartial(new byte[1] { 0x00 }).Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
             {
-               i2cDevice.Write(new byte[1] { 0x00 });
-            }
-            catch (FileNotFoundException ex)
-            {
-               System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - " + ex.Message);
+               System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - No device found.");
 
                /* No device found */
                Address++;
@@ -427,7 +426,7 @@ namespace HalloweenControllerRPi.Device.Controllers
             }
 
             /* Device found, store the HAT and it's Address then establish communication with the HAT and initialise the HATs available CHANNELS */
-            rpiHat = RPiHat.Open(i2cDevice, (UInt16)Address);
+            rpiHat = RPiHat.Open(this, i2cDevice, (UInt16)Address);
 
             if (rpiHat != null)
             {
@@ -456,13 +455,6 @@ namespace HalloweenControllerRPi.Device.Controllers
          /* Wait for the 'OnConnect' to complete without blocking the UI */
          OnConnect();
 
-         /* Create the Background Task handle */
-         TaskFactory tTaskFactory = new TaskFactory(TaskScheduler.Current);
-
-         sWatch = new Stopwatch();
-         sWatch.Start();
-
-         tTaskFactory.StartNew(new Action(ControllerTask), TaskCreationOptions.RunContinuationsAsynchronously);
       }
 
       /// <summary>
@@ -487,11 +479,6 @@ namespace HalloweenControllerRPi.Device.Controllers
                }
             }
          }
-      }
-
-      private void HWRaspberryPI2_InputLevelChanged(object sender, EventArgsINPUT e)
-      {
-         TriggerCommandReceived(new CommandEventArgs('I', e.Index + 1, (uint)e.TriggerLevel));
       }
 
       public override void Disconnect()

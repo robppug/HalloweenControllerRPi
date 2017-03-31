@@ -1,6 +1,7 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 
@@ -26,7 +27,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       private I2cDevice m_i2cDevice;
       private List<IIOPin> m_GpioPins;
-      
+
       public bool Initialised { get; private set; }
 
       public ushort EEPROMSize
@@ -149,7 +150,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          if (gpioPin.GetDriveMode() == GpioPinDriveMode.Output)
          {
             gpioPin.Write(value);
-
+            
             UpdateDeviceIO(Registers.WRITE_IO);
          }
          else
@@ -167,7 +168,8 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       private void UpdateDeviceIO(Registers reg)
       {
-         byte[] data = new byte[NumberOfChannels];
+         //byte[] data = new byte[NumberOfChannels];
+         byte[] data = new byte[1] { 0x00 };
          List<byte> dataBuffer = new List<byte>();
 
          switch (reg)
@@ -176,26 +178,27 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
             case Registers.WRITE_IO:
                foreach (IIOPin pin in m_GpioPins)
                {
-                  data[pin.PinNumber] = (byte)pin.Read();
+                  data[0] |= (byte)((byte)pin.Read() << (byte)pin.PinNumber);
                }
 
-               /* Write to the DEVICE - Address = b0xxxxxx1 */
-               m_i2cDevice.ConnectionSettings.SlaveAddress |= (byte)reg;
+               /* Write to the DEVICE - Address = b0xxxxxx0 */
+               m_i2cDevice.ConnectionSettings.SlaveAddress &= ~(byte)reg;
 
-               dataBuffer.Add((byte)reg);
                dataBuffer.AddRange(data);
                m_i2cDevice.Write(dataBuffer.ToArray());
                break;
 
             /* READ FROM PIN */
             case Registers.READ_IO:
-               /* Read from the DEVICE - Address = b0xxxxxx0 */
-               m_i2cDevice.ConnectionSettings.SlaveAddress &= ~(byte)reg;
-               m_i2cDevice.Read(data);
+               /* Read from the DEVICE - Address = b0xxxxxx1 */
+               m_i2cDevice.ConnectionSettings.SlaveAddress |= (byte)reg;
 
+               while (m_i2cDevice.ReadPartial(data).Status != I2cTransferStatus.FullTransfer) { }
+
+               Debug.WriteLine(Convert.ToString(data[0], 2).PadLeft(8, '0'));
                foreach (IIOPin pin in m_GpioPins)
                {
-                  pin.Write((GpioPinValue)data[pin.PinNumber]);
+                  pin.Write((GpioPinValue)((data[0] >> (byte)(NumberOfChannels - (pin.PinNumber + 1))) & 0x01));
                }
                break;
 
@@ -208,11 +211,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       /// <summary>
       /// Will READ/WRITE the BUS device and physical update each Channel
       /// </summary>
-      public void RefreshChannel(ushort chan)
+      public void RefreshChannel(IChannel chan)
       {
-         IIOPin pin = GetPin(chan);
+         IIOPin pin = GetPin((ushort)chan.Index);
 
-         if (pin.GetDriveMode() == GpioPinDriveMode.Input)
+         if (pin.GetDriveMode() == GpioPinDriveMode.InputPullUp)
          {
             ReadPin(pin);
          }

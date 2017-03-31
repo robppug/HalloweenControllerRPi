@@ -11,6 +11,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       void Open(I2cDevice i2cDevice);
       void Close();
       void InitialiseChannels();
-      void RefreshChannel(ushort index);
+      void RefreshChannel(IChannel chan);
    }
 }
