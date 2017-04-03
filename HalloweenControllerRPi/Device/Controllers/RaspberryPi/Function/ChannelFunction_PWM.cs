@@ -1,14 +1,16 @@
-﻿using MathNet.Numerics;
+﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats;
+using MathNet.Numerics;
 using MathNet.Numerics.Interpolation;
 using System;
 using static HalloweenControllerRPi.Functions.Func_PWM;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
 {
-   class ChannelFunction_PWM : IChannel, IProcessTick
+   internal class ChannelFunction_PWM : IChannel, IProcessTick
    {
       private IInterpolation curve = Interpolate.Common(new double[] { 0, 455, 910, 1365, 1820, 2275, 2730, 3185, 3640, 4095 },  /* 4095 / 9 points  */
-                                                        new double[] { 0, 40,  140,  320,  620, 1000, 1450, 2200, 3100, 4095 }); /* y = x * x / 4095 */
+                                                        new double[] { 0, 40, 140, 320, 620, 1000, 1450, 2200, 3100, 4095 }); /* y = x * x / 4095 */
+
       private tenFUNCTION _enFunction;
       private uint _channelIdx;
       private uint _minLevel;
@@ -18,10 +20,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
       private uint updateTick;
       private bool toggle;
       private uint _functionLevel;
+      private IHat _hostHat;
 
       public const uint PWMResolution = 4095;
 
-      public ChannelFunction_PWM(uint chan)
+      public ChannelFunction_PWM(IHat host, uint chan)
       {
          MinLevel = 0;
          MaxLevel = PWMResolution;
@@ -32,11 +35,12 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
          updateTick = 0;
 
          Index = chan;
+         HostHat = host;
       }
 
       public uint Index
       {
-         set { _channelIdx = value;  }
+         set { _channelIdx = value; }
          get { return _channelIdx; }
       }
 
@@ -70,6 +74,12 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
          set { _updateCnt = value; Tick(); }
       }
 
+      public IHat HostHat
+      {
+         get { return _hostHat; }
+         private set { _hostHat = value; }
+      }
+
       private bool boUpdateTick()
       {
          updateTick++;
@@ -90,7 +100,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
          {
             _functionLevel = 0;
          }
-         else if (Function == tenFUNCTION.FUNC_CONSTANT)
+         else if (Function == tenFUNCTION.FUNC_ON)
          {
             _functionLevel = MaxLevel;
          }
@@ -100,7 +110,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
             {
                case tenFUNCTION.FUNC_SWEEP_UP:
                   value = (_functionLevel + 16);
-                  if(value > MaxLevel)
+                  if (value > MaxLevel)
                   {
                      value = MinLevel;
                   }
@@ -130,8 +140,8 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
                      _functionLevel = (_functionLevel + (uint)(toggle ? -16 : 16));
                   }
 
-                  if (   (toggle == true && _functionLevel <= MinLevel) 
-                      || (toggle == false && _functionLevel >= MaxLevel) )
+                  if ((toggle == true && _functionLevel <= MinLevel)
+                      || (toggle == false && _functionLevel >= MaxLevel))
                   {
                      toggle = (toggle ? false : true);
                   }
@@ -197,7 +207,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
          {
             _functionLevel = MaxLevel;
          }
-         else if(_functionLevel < MinLevel)
+         else if (_functionLevel < MinLevel)
          {
             _functionLevel = MinLevel;
          }

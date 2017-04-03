@@ -270,7 +270,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                      {
                         case Func_PWM.tenFUNCTION.FUNC_OFF:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_CONSTANT:
+                        case Func_PWM.tenFUNCTION.FUNC_ON:
                            break;
                         case Func_PWM.tenFUNCTION.FUNC_FLICKER_OFF:
                            break;

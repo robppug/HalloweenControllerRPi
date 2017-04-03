@@ -49,6 +49,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          get;
          protected set;
       }
+
       #endregion Declarations
 
       private RPiHat(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress)
@@ -110,24 +111,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       }
 
       /// <summary>
-      /// TASK execution call for HAT channel processing.
-      /// </summary>
-      public void ProcessTask()
-      {
-         /* Process each CHANNEL available on this HAT */
-         foreach (IChannel c in Channels)
-         {
-            if ((c as IProcessTick) != null)
-            {
-               (c as IProcessTick).Tick();
-            }
-            UpdateChannel(c);
-         }
-
-         
-      }
-
-      /// <summary>
       /// Returns the type of HAT at the Address provided
       /// </summary>
       /// <param name="hatAddress"></param>
@@ -181,7 +164,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
             {
                case SupportedHATs.MOSFET_v1:
                   if (i < 5)
-                     chan = new ChannelFunction_PWM(i);
+                     chan = new ChannelFunction_PWM(this, i);
                   break;
 
                case SupportedHATs.INPUT_v1:
@@ -189,7 +172,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
                   pin.SetDriveMode(GpioPinDriveMode.InputPullUp);
 
-                  chan = new ChannelFunction_INPUT(i, pin);
+                  chan = new ChannelFunction_INPUT(this, i, pin);
                   (chan as ChannelFunction_INPUT).InputLevelChanged += HostController.OnInputChannelNotification;
                   break;
 
@@ -199,8 +182,9 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
                      pin = (busDevice as BusDevice_PCA9501).GetPin((ushort)i);
 
                      pin.SetDriveMode(GpioPinDriveMode.Output);
+                     pin.Write(GpioPinValue.Low);
 
-                     chan = new ChannelFunction_RELAY(i, pin);
+                     chan = new ChannelFunction_RELAY(this, i, pin);
                   }
                   break;
 
@@ -217,7 +201,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       }
 
       /// <summary>
-      /// 
+      ///
       /// </summary>
       /// <param name="chan"></param>
       public void UpdateChannel(IChannel chan)

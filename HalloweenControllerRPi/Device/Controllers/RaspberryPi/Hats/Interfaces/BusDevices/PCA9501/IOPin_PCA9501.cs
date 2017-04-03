@@ -50,7 +50,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function
 
       protected void OnValueChanged(InputPinValueChangedEventArgs e)
       {
-         ValueChanged?.Invoke(this, e);
+         if (ValueChanged != null)
+         {
+            ValueChanged(this, e);
+         }
       }
 
       public bool IsDriveModeSupported(GpioPinDriveMode driveMode)

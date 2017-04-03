@@ -84,7 +84,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                            lPwms[(int)index].Fill = new SolidColorBrush(Colors.Red);
                            lPwms[(int)index].Opacity = 1;
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_CONSTANT:
+                        case Func_PWM.tenFUNCTION.FUNC_ON:
                            break;
                         case Func_PWM.tenFUNCTION.FUNC_FLICKER_OFF:
                            break;

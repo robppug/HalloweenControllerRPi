@@ -12,7 +12,10 @@ namespace HalloweenControllerRPi.Functions
       public enum tenFUNCTION
       {
          FUNC_OFF,
-         FUNC_CONSTANT,
+         FUNC_ON,
+         FUNC_RAMP_ON,
+         FUNC_RAMP_OFF,
+         FUNC_RAMP_BOTH,
          FUNC_SWEEP_UP,
          FUNC_SWEEP_DOWN,
          FUNC_SIGNWAVE,
@@ -39,18 +42,22 @@ namespace HalloweenControllerRPi.Functions
          get { return _MaxLevel; }
          set { _MaxLevel = value; }
       }
+
       public uint UpdateRate
       {
          get { return _UpdateRate; }
          set { _UpdateRate = value; }
       }
+
       public tenFUNCTION Function
       {
          get { return _Function; }
          set { _Function = value; }
       }
 
-      public Func_PWM() { }
+      public Func_PWM()
+      {
+      }
 
       public Func_PWM(IHostApp host, tenTYPE entype)
          : base(host, entype)
