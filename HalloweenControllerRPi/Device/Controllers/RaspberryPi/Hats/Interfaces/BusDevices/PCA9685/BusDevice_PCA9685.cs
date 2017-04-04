@@ -109,7 +109,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          Initialised = false;
       }
 
-      public void Open(I2cDevice i2cDevice)
+      public async void Open(I2cDevice i2cDevice)
       {
          if (Initialised == false)
          {
@@ -118,7 +118,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
             /* Set MODE 1 Register - Change to NORMAL mode */
             SetRegister(Registers.MODE1, 0x00);
 
-            Task.Delay(1);
+            await Task.Delay(1);
 
             /* Set MODE 2 Register */
             //i2cDevice.Write(new byte[2] { 0x00, 0x00 });
@@ -198,10 +198,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       public void RefreshChannel(IChannel chan)
       {
-         if ((chan as ChannelFunction_PWM) != null)
-         {
-            ChannelFunction_PWM pwm = (chan as ChannelFunction_PWM);
+         ChannelFunction_PWM pwm = (chan as ChannelFunction_PWM);
 
+         if (pwm != null)
+         {
             if (pwm.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
             {
                SetChannel((ushort)pwm.Index, (ushort)pwm.Level);

@@ -11,7 +11,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
    /// <summary>
    /// Raspberry Pi HAT class for the Raspberry Pi 2/3
    /// </summary>
-   public class RPiHat : IHat
+   public abstract class RPiHat : IHat
    {
       #region /* ENUMS */
 
@@ -29,13 +29,13 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       #region Declarations
 
-      private IHatInterface m_HatInterface;
-      private IHWController m_hostController;
+      protected IHatInterface m_HatInterface;
+      protected IHWController m_hostController;
 
       public IHWController HostController
       {
          get { return m_hostController; }
-         private set { m_hostController = value; }
+         protected set { m_hostController = value; }
       }
 
       public List<IChannel> Channels
@@ -52,40 +52,9 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       #endregion Declarations
 
-      private RPiHat(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress)
+      protected RPiHat(IHWController host)
       {
          HostController = host;
-
-         II2CBusDevice busDevice = null;
-
-         HatType = GetHatType(hatAddress);
-
-         if (HatType != SupportedHATs.NoOfSupportedHATs)
-         {
-            switch (HatType)
-            {
-               case SupportedHATs.MOSFET_v1:
-                  busDevice = new BusDevice_PCA9685();
-                  break;
-
-               case SupportedHATs.INPUT_v1:
-                  busDevice = new BusDevice_PCA9501();
-                  break;
-
-               case SupportedHATs.RELAY_v1:
-                  busDevice = new BusDevice_PCA9501();
-                  break;
-
-               case SupportedHATs.NoOfSupportedHATs:
-               default:
-                  break;
-            }
-
-            if (busDevice != null)
-            {
-               OpenHat(i2cDevice, hatAddress, busDevice);
-            }
-         }
       }
 
       /// <summary>
@@ -96,17 +65,38 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       /// <returns>If successful an initialised RPiHat object otherwise null.</returns>
       public static RPiHat Open(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress)
       {
-         RPiHat rpiHat = new RPiHat(host, i2cDevice, hatAddress);
+         SupportedHATs hatType;
+         RPiHat rpiHat = null;
 
-         if (rpiHat.HatType == SupportedHATs.NoOfSupportedHATs)
+         hatType = RPiHat.GetHatType(hatAddress);
+
+         if (hatType != SupportedHATs.NoOfSupportedHATs)
          {
-            rpiHat = null;
+            switch (hatType)
+            {
+               case SupportedHATs.MOSFET_v1:
+                  rpiHat = new RPiHat_MOSFET_v1(host, i2cDevice, hatAddress);
+                  break;
+
+               case SupportedHATs.INPUT_v1:
+                  rpiHat = new RPiHat_INPUT_v1(host, i2cDevice, hatAddress);
+                  break;
+
+               case SupportedHATs.RELAY_v1:
+                  rpiHat = new RPiHat_RELAY_v1(host, i2cDevice, hatAddress);
+                  break;
+
+               case SupportedHATs.NoOfSupportedHATs:
+               default:
+                  break;
+            }
+
          }
 
          return rpiHat;
       }
 
-      public void Close()
+      public static void Close(RPiHat hat)
       {
       }
 
@@ -115,7 +105,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       /// </summary>
       /// <param name="hatAddress"></param>
       /// <returns></returns>
-      private SupportedHATs GetHatType(ushort hatAddress)
+      private static SupportedHATs GetHatType(ushort hatAddress)
       {
          SupportedHATs hat = SupportedHATs.NoOfSupportedHATs;
 
@@ -139,74 +129,27 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       }
 
       /// <summary>
-      /// Open the HATs interface and populates the list of available CHANNELS
+      ///
       /// </summary>
-      /// <param name="i2cDevice"></param>
-      /// <param name="hatAddress"></param>
-      /// <param name="busDevice"></param>
-      private void OpenHat(I2cDevice i2cDevice, ushort hatAddress, II2CBusDevice busDevice)
+      public virtual void UpdateChannels()
       {
-         /* Initialise the HATs Interface (SPI, I2C, etc...) */
-         m_HatInterface = new HatInterface_I2C(i2cDevice, hatAddress, busDevice);
-
-         /* Open communcation interface */
-         m_HatInterface.Open();
-
-         Channels = new List<IChannel>();
-
-         /* Initialise availble channels on attached HAT */
-         for (uint i = 0; i < busDevice.NumberOfChannels; i++)
+         foreach (IChannel c in Channels)
          {
-            IChannel chan = null;
-            IIOPin pin = null;
-
-            switch (HatType)
-            {
-               case SupportedHATs.MOSFET_v1:
-                  if (i < 5)
-                     chan = new ChannelFunction_PWM(this, i);
-                  break;
-
-               case SupportedHATs.INPUT_v1:
-                  pin = (busDevice as BusDevice_PCA9501).GetPin((ushort)i);
-
-                  pin.SetDriveMode(GpioPinDriveMode.InputPullUp);
-
-                  chan = new ChannelFunction_INPUT(this, i, pin);
-                  (chan as ChannelFunction_INPUT).InputLevelChanged += HostController.OnInputChannelNotification;
-                  break;
-
-               case SupportedHATs.RELAY_v1:
-                  if (i < 4)
-                  {
-                     pin = (busDevice as BusDevice_PCA9501).GetPin((ushort)i);
-
-                     pin.SetDriveMode(GpioPinDriveMode.Output);
-                     pin.Write(GpioPinValue.Low);
-
-                     chan = new ChannelFunction_RELAY(this, i, pin);
-                  }
-                  break;
-
-               case SupportedHATs.NoOfSupportedHATs:
-               default:
-                  throw new Exception("Hat not supported.");
-            }
-
-            if (chan != null)
-            {
-               Channels.Add(chan);
-            }
+            UpdateChannel(c);
          }
       }
 
       /// <summary>
       ///
       /// </summary>
-      /// <param name="chan"></param>
-      public void UpdateChannel(IChannel chan)
+      public virtual void UpdateChannel(IChannel chan)
       {
-         m_HatInterface.BusDevice.RefreshChannel(chan);
+         if ((chan as IProcessTick) != null)
+         {
+            (chan as IProcessTick).Tick();
+
+            m_HatInterface.BusDevice.RefreshChannel(chan);
+         }
       }
    }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
-   interface IHatInterface
+   public interface IHatInterface
    {
       /// <summary>
       /// This is the DEVICE which is connected to a HAT

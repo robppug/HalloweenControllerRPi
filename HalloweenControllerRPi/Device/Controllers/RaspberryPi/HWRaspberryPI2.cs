@@ -366,15 +366,11 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          //sWatch.Restart();
 
-         foreach (IChannel c in lAllFunctions)
+         foreach(IHat hat in lHats)
          {
-            if ((c as IProcessTick) != null)
-            {
-               (c as IProcessTick).Tick();
-
-               UpdateChannel(c);
-            }
+            hat.UpdateChannels();
          }
+
       }
 
       /// <summary>
@@ -453,15 +449,6 @@ namespace HalloweenControllerRPi.Device.Controllers
       }
 
       /// <summary>
-      /// Updates am available CHANNEL (ie. Read/Write to the HAT)
-      /// </summary>
-      /// <param name="chan"></param>
-      private void UpdateChannel(IChannel chan)
-      {
-         chan.HostHat.UpdateChannel(chan);
-      }
-
-      /// <summary>
       ///
       /// </summary>
       /// <param name="cmd"></param>
@@ -537,7 +524,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                            {
                               case 'S':
                                  c.Level = UInt32.Parse(new string(decodedData));
-                                 UpdateChannel(c);
+                                 c.HostHat.UpdateChannel(c);
                                  break;
 
                               case 'G':
@@ -573,7 +560,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                            {
                               case 'S':
                                  c.Level = UInt32.Parse(new string(decodedData));
-                                 UpdateChannel(c);
+                                 c.HostHat.UpdateChannel(c);
                                  break;
 
                               case 'G':

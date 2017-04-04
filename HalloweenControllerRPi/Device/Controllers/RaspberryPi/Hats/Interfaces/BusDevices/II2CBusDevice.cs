@@ -4,7 +4,7 @@ using Windows.Devices.I2c;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
-   interface II2CBusDevice
+   public interface II2CBusDevice
    {
       uint NumberOfChannels { get; }
 

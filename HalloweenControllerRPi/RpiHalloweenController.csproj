@@ -114,6 +114,9 @@
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\PCA9685\BusDevice_PCA9685.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\IHatInterface.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Interfaces\BusDevices\II2CBusDevice.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_INPUT_v1.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_RELAY_v1.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_MOSFET_v1.cs" />
     <Compile Include="UI\Container\GroupContainer.xaml.cs">
       <DependentUpon>GroupContainer.xaml</DependentUpon>
     </Compile>
