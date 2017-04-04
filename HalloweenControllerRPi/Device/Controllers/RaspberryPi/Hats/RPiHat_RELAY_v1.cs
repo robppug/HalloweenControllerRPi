@@ -19,33 +19,30 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
          HatType = SupportedHATs.RELAY_v1;
          
-         if (busDevice != null)
+         /* Initialise the HATs Interface (SPI, I2C, etc...) */
+         m_HatInterface = new HatInterface_I2C(i2cDevice, hatAddress, busDevice);
+
+         /* Open communcation interface */
+         m_HatInterface.Open();
+
+         Channels = new List<IChannel>();
+
+         /* Initialise availble channels on attached HAT */
+         for (uint i = 0; i < 4; i++)
          {
-            /* Initialise the HATs Interface (SPI, I2C, etc...) */
-            m_HatInterface = new HatInterface_I2C(i2cDevice, hatAddress, busDevice);
+            ChannelFunction_RELAY chan = null;
+            IIOPin pin = null;
 
-            /* Open communcation interface */
-            m_HatInterface.Open();
+            pin = busDevice.GetPin((ushort)i);
 
-            Channels = new List<IChannel>();
+            pin.SetDriveMode(GpioPinDriveMode.Output);
+            pin.Write(GpioPinValue.Low);
 
-            /* Initialise availble channels on attached HAT */
-            for (uint i = 0; i < 4; i++)
+            chan = new ChannelFunction_RELAY(this, i, pin);
+
+            if (chan != null)
             {
-               ChannelFunction_RELAY chan = null;
-               IIOPin pin = null;
-
-               pin = busDevice.GetPin((ushort)i);
-
-               pin.SetDriveMode(GpioPinDriveMode.Output);
-               pin.Write(GpioPinValue.Low);
-
-               chan = new ChannelFunction_RELAY(this, i, pin);
-
-               if (chan != null)
-               {
-                  Channels.Add(chan);
-               }
+               Channels.Add(chan);
             }
          }
       }
