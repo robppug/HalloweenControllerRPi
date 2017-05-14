@@ -1,5 +1,6 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi;
 using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats;
+using HalloweenControllerRPi.Device.Drivers;
 using HalloweenControllerRPi.Functions;
 using Microsoft.IoT.Lightning.Providers;
 using System;
@@ -13,6 +14,7 @@ using Windows.Devices;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
+using Windows.Devices.Spi;
 using Windows.UI.Xaml;
 using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.ChannelFunction_INPUT;
 using static HalloweenControllerRPi.Functions.Func_RELAY;
@@ -47,20 +49,22 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       #region /* PRIVATE */
 
-      private static I2cDevice i2cDevice;
-      private static I2cController i2cController;
-      private static I2cConnectionSettings i2cSettings;
+      private static I2cDevice _i2cDevice;
+      private static I2cController _i2cController;
+      private static I2cConnectionSettings _i2cSettings;
 
-      private static GpioController gpioController;
+      private static SpiDevice _spiDevice;
+
+      private static GpioController _gpioController;
 
       //private static Stopwatch sWatch;
       //private static long TriggerTime;
 
-      private static List<IHat> lHats = new List<IHat>();
-      private static UInt16 m_PWMs = 0;
-      private static UInt16 m_Inputs = 0;
-      private static UInt16 m_Relays = 0;
-      private static List<IChannel> lAllFunctions = new List<IChannel>();
+      private static List<IHat> _lHats = new List<IHat>();
+      private static UInt16 _PWMs = 0;
+      private static UInt16 _Inputs = 0;
+      private static UInt16 _Relays = 0;
+      private static List<IChannel> _lAllFunctions = new List<IChannel>();
 
       #endregion /* PRIVATE */
 
@@ -124,12 +128,26 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       #endregion /* CONSTRUCTORS */
 
+      #region /* HW Bus Devices */
+      public I2cDevice I2CBusDevice
+      {
+         get { return _i2cDevice; }
+         protected set { _i2cDevice = value; }
+      }
+
+      public SpiDevice SPIBusDevice
+      {
+         get { return _spiDevice; }
+         protected set { _spiDevice = value; }
+      }
+      #endregion
+
       private async Task GetControllers()
       {
          if (LightningProvider.IsLightningEnabled == true)
          {
-            gpioController = (await GpioController.GetControllersAsync(LightningGpioProvider.GetGpioProvider()))[0];
-            i2cController = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
+            _gpioController = (await GpioController.GetControllersAsync(LightningGpioProvider.GetGpioProvider()))[0];
+            _i2cController = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
          }
       }
 
@@ -287,7 +305,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return m_Inputs;
+            return _Inputs;
          }
       }
 
@@ -295,7 +313,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return m_PWMs;
+            return _PWMs;
          }
       }
 
@@ -303,7 +321,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return m_Relays;
+            return _Relays;
          }
       }
 
@@ -321,7 +339,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          /* Discover 'HATs' that are connected */
          if (LightningProvider.IsLightningEnabled == true)
          {
-            i2cDevice = i2cController.GetDevice(i2cSettings);
+            _i2cDevice = _i2cController.GetDevice(_i2cSettings);
          }
          else
          {
@@ -329,19 +347,19 @@ namespace HalloweenControllerRPi.Device.Controllers
          }
 
          /* Initialise available channels (PWM, RELAY, INPUT) */
-         foreach (IChannel c in lAllFunctions)
+         foreach (IChannel c in _lAllFunctions)
          {
             if (c is ChannelFunction_PWM)
             {
-               m_PWMs++;
+               _PWMs++;
             }
             else if (c is ChannelFunction_INPUT)
             {
-               m_Inputs++;
+               _Inputs++;
             }
             else if (c is ChannelFunction_RELAY)
             {
-               m_Relays++;
+               _Relays++;
             }
          }
 
@@ -366,9 +384,9 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          //sWatch.Restart();
 
-         foreach(IHat hat in lHats)
+         foreach(IHat hat in _lHats)
          {
-            hat.UpdateChannels();
+            hat.HatTask();
          }
 
       }
@@ -392,15 +410,16 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          while (Address < MaxI2CAddresses)
          {
-            i2cSettings = new I2cConnectionSettings(Address);
-            i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
-            i2cSettings.SharingMode = I2cSharingMode.Exclusive;
+            _i2cSettings = new I2cConnectionSettings(Address);
+            _i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
+            _i2cSettings.SharingMode = I2cSharingMode.Exclusive;
 
-            i2cDevice = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, i2cSettings);
+            _i2cDevice = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, _i2cSettings);
 
+            /* Update Discovery Progress event */
             OnDiscoveryProgressUpdated((uint)((double)Address / (double)MaxI2CAddresses * 100));
 
-            if (i2cDevice.ReadPartial(new byte[1] { 0x00 }).Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
+            if (_i2cDevice.ReadPartial(new byte[1] { 0x00 }).Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
             {
                System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - No device found.");
 
@@ -411,16 +430,16 @@ namespace HalloweenControllerRPi.Device.Controllers
             }
 
             /* Device found, store the HAT and it's Address then establish communication with the HAT and initialise the HATs available CHANNELS */
-            rpiHat = RPiHat.Open(this, i2cDevice, (UInt16)Address);
+            rpiHat = RPiHat.Open(this, (UInt16)Address);
 
             if (rpiHat != null)
             {
                System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - Device found (" + rpiHat.HatType.ToString() + ").");
 
-               lHats.Add(rpiHat);
+               _lHats.Add(rpiHat);
 
                /* Store a collection of all the available Channels */
-               lAllFunctions.AddRange(lHats.Last().Channels);
+               _lAllFunctions.AddRange(_lHats.Last().Channels);
             }
 
             Address++;
@@ -435,9 +454,9 @@ namespace HalloweenControllerRPi.Device.Controllers
       public override void Connect()
       {
          /* Setup the I2C bus for access to the PWM channels */
-         i2cSettings = new I2cConnectionSettings(0x40);
-         i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
-         i2cSettings.SharingMode = I2cSharingMode.Exclusive;
+         _i2cSettings = new I2cConnectionSettings(0x40);
+         _i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
+         _i2cSettings.SharingMode = I2cSharingMode.Exclusive;
 
          /* Wait for the 'OnConnect' to complete without blocking the UI */
          OnConnect();
@@ -473,7 +492,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                #region /* INPUT HANDLING */
 
                case 'I':
-                  foreach (IChannel chan in lAllFunctions)
+                  foreach (IChannel chan in _lAllFunctions)
                   {
                      ChannelFunction_INPUT c = (chan as ChannelFunction_INPUT);
 
@@ -509,7 +528,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                #region /* RELAY HANDLING */
 
                case 'R':
-                  foreach (IChannel chan in lAllFunctions)
+                  foreach (IChannel chan in _lAllFunctions)
                   {
                      ChannelFunction_RELAY c = (chan as ChannelFunction_RELAY);
 
@@ -545,7 +564,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                #region /* PWM HANDLING */
 
                case 'T':
-                  foreach (IChannel chan in lAllFunctions)
+                  foreach (IChannel chan in _lAllFunctions)
                   {
                      ChannelFunction_PWM c = (chan as ChannelFunction_PWM);
 

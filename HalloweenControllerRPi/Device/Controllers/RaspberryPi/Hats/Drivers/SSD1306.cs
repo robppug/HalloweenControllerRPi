@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi
+namespace HalloweenControllerRPi.Device.Drivers
 {
-   public interface IProcessTick
+   class SSD1306 : IDriverDisplayProvider
    {
-      void Tick();
    }
 }

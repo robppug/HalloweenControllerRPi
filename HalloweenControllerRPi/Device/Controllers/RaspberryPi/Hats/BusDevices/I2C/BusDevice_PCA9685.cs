@@ -1,13 +1,16 @@
-﻿using HalloweenControllerRPi.Functions;
+﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.BusDevices;
+using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Channels;
+using HalloweenControllerRPi.Functions;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Devices.I2c;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
-   class BusDevice_PCA9685 : II2CBusDevice, IBusDevicePwmChannelProvider
+   public class BusDevice_PCA9685 : II2CBusDevice, IChannelProvider, IPwmChannelProvider
    {
+      private I2cDevice m_i2cDevice;
+      
       /// <summary>
       /// PCA9685 register addresses
       /// </summary>
@@ -90,6 +93,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          PRESCALE = 0xFE,
       };
 
+      public uint NumberOfPwmChannels
+      {
+         get { return NumberOfChannels; }
+      }
+
       public uint NumberOfChannels
       {
          get { return 0x0F; }
@@ -100,9 +108,15 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          get { return 4095; }
       }
 
-      private I2cDevice m_i2cDevice;
-
       public bool Initialised { get; private set; }
+
+      public I2cDevice Device
+      {
+         get
+         {
+            return m_i2cDevice;
+         }
+      }
 
       public BusDevice_PCA9685()
       {

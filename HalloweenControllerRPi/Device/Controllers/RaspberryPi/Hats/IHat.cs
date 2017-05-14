@@ -15,7 +15,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       SupportedHATs HatType { get; }
       List<IChannel> Channels { get; }
 
-      void UpdateChannels();
+      void HatTask();
       void UpdateChannel(IChannel chan);
    }
 }

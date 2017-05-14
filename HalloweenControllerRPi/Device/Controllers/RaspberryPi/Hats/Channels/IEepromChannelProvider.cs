@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
+namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Channels
 {
-   interface IBusDeviceEEPROMChannelProvider
+   interface IEepromChannelProvider
    {
       UInt16 EEPROMSize { get; }
 

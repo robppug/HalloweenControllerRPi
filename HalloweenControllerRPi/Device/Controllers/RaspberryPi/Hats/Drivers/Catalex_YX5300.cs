@@ -48,14 +48,14 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
       {
          if (buffer != null)
          {
-            buffer.Add(0x7e);
-            buffer.Add(0xff);
+            buffer.Add(0x7e);   //
+            buffer.Add(0xff);   //
             buffer.Add(0x06);   // Len
-            buffer.Add((byte)command);
+            buffer.Add((byte)command);//
             buffer.Add(0x01);   // 0x00 NO, 0x01 feedback
             buffer.Add((byte)(dat >> 8));  //datah
             buffer.Add((byte)(dat));       //datal
-            buffer.Add(0xef);
+            buffer.Add(0xef);   //
          }
       }
    }

@@ -13,15 +13,20 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
    /// </summary>
    public class RPiHat_MOSFET_v1 : RPiHat
    {
+      public BusDevice_PCA9685 busDevice;
+      public UInt16 address;
+
       public RPiHat_MOSFET_v1(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress) : base(host)
       {
          HatType = SupportedHATs.MOSFET_v1;
-         
-         /* Initialise the HATs Interface (SPI, I2C, etc...) */
-         m_HatInterface = new HatInterface_I2C(i2cDevice, hatAddress, new BusDevice_PCA9685());
+         busDevice = new BusDevice_PCA9685();
+         address = hatAddress;
 
-         /* Open communcation interface */
-         m_HatInterface.Open();
+         /* Open the BUS DEVICE */
+         busDevice.Open(i2cDevice);
+
+         /* Initialise the BUS DEVICE */
+         busDevice.InitialiseChannels();
 
          Channels = new List<IChannel>();
 
@@ -37,6 +42,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
                Channels.Add(chan);
             }
          }
+      }
+
+      public override void RefreshChannel(IChannel chan)
+      {
+         busDevice.RefreshChannel(chan);
       }
    }
 }
