@@ -103,6 +103,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Device\Controllers\RaspberryPi\Function\ChannelFunction_SOUND.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Function\IIOPin.cs" />
     <Compile Include="Device\Controllers\IDisplayProvider.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\ICommsBusDeviceProvider.cs" />
