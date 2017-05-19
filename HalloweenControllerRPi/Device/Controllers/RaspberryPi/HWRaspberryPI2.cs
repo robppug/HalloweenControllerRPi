@@ -426,6 +426,10 @@ namespace HalloweenControllerRPi.Device.Controllers
                /* Store a collection of all the available Channels */
                lAllFunctions.AddRange(lHats.Last().Channels);
             }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - Device found (UNSUPPORTED).");
+            }
 
             Address++;
          }
@@ -481,54 +485,78 @@ namespace HalloweenControllerRPi.Device.Controllers
             /* The the CHANNEL of the request */
             channel = UInt32.Parse(new string(decodedData).Substring(0, 2));
 
-            switch (function.Value)
+            if ((channel <= lAllFunctions.Count) && (channel != 0))
             {
-               #region /* INPUT HANDLING */
+               switch (function.Value)
+               {
+                  #region /* INPUT HANDLING */
 
-               case 'I':
-                  foreach (IChannel chan in lAllFunctions)
-                  {
-                     ChannelFunction_INPUT c = (chan as ChannelFunction_INPUT);
+                  case 'I':
+                     ChannelFunction_INPUT cINPUT = (lAllFunctions[(int)channel - 1] as ChannelFunction_INPUT);
 
-                     if (c != null)
+                     if (cINPUT != null)
                      {
-                        if (channel == chan.Index + 1)
+                        /* Remove the Function and Channel from the string */
+                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+
+                        switch (subFunction.Value)
                         {
-                           /* Remove the Function and Channel from the string */
-                           new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+                           case 'D':
+                              cINPUT.DebounceTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
+                              break;
 
-                           switch (subFunction.Value)
-                           {
-                              case 'D':
-                                 c.DebounceTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
-                                 break;
+                           case 'P':
+                           cINPUT.PostTriggerTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
+                           break;
 
-                              case 'P':
-                                 c.PostTriggerTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
-                                 break;
-
-                              default:
-                                 break;
-                           }
-
-                           return;
+                           default:
+                              break;
                         }
+
+                        return;
                      }
-                  }
-                  break;
+                     break;
 
-               #endregion /* INPUT HANDLING */
+                  #endregion /* INPUT HANDLING */
 
-               #region /* RELAY HANDLING */
+                  #region /* RELAY HANDLING */
 
-               case 'R':
-                  foreach (IChannel chan in lAllFunctions)
-                  {
-                     ChannelFunction_RELAY c = (chan as ChannelFunction_RELAY);
+                  case 'R':
+                     ChannelFunction_RELAY cRELAY = (lAllFunctions[(int)channel - 1] as ChannelFunction_RELAY);
 
-                     if (c != null)
+                     if (cRELAY != null)
                      {
-                        if (channel == chan.Index + 1)
+                        /* Remove the Function and Channel from the string */
+                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+
+                        switch (subFunction.Value)
+                        {
+                           case 'S':
+                              cRELAY.Level = UInt32.Parse(new string(decodedData));
+                              UpdateChannel(cRELAY);
+                              break;
+
+                           case 'G':
+                              break;
+
+                           default:
+                              break;
+                        }
+
+                        return;
+                     }
+                     break;
+
+                  #endregion /* RELAY HANDLING */
+
+                  #region /* PWM HANDLING */
+
+                  case 'T':
+                     ChannelFunction_PWM cPWM = (lAllFunctions[(int)channel - 1] as ChannelFunction_PWM);
+
+                     if (cPWM != null)
+                     {
+                        //if (channel == chan.Index + 1)
                         {
                            /* Remove the Function and Channel from the string */
                            new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
@@ -536,63 +564,27 @@ namespace HalloweenControllerRPi.Device.Controllers
                            switch (subFunction.Value)
                            {
                               case 'S':
-                                 c.Level = UInt32.Parse(new string(decodedData));
-                                 UpdateChannel(c);
-                                 break;
-
-                              case 'G':
-                                 break;
-
-                              default:
-                                 break;
-                           }
-
-                           return;
-                        }
-                     }
-                  }
-                  break;
-
-               #endregion /* RELAY HANDLING */
-
-               #region /* PWM HANDLING */
-
-               case 'T':
-                  foreach (IChannel chan in lAllFunctions)
-                  {
-                     ChannelFunction_PWM c = (chan as ChannelFunction_PWM);
-
-                     if (c != null)
-                     {
-                        if (channel == chan.Index + 1)
-                        {
-                           /* Remove the Function and Channel from the string */
-                           new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
-
-                           switch (subFunction.Value)
-                           {
-                              case 'S':
-                                 c.Level = UInt32.Parse(new string(decodedData));
-                                 UpdateChannel(c);
+                                 cPWM.Level = UInt32.Parse(new string(decodedData));
+                                 UpdateChannel(cPWM);
                                  break;
 
                               case 'G':
                                  break;
 
                               case 'F':
-                                 c.Function = (Func_PWM.tenFUNCTION)UInt32.Parse(new string(decodedData));
+                                 cPWM.Function = (Func_PWM.tenFUNCTION)UInt32.Parse(new string(decodedData));
                                  break;
 
                               case 'N':
-                                 c.MinLevel = UInt32.Parse(new string(decodedData));
+                                 cPWM.MinLevel = UInt32.Parse(new string(decodedData));
                                  break;
 
                               case 'M':
-                                 c.MaxLevel = UInt32.Parse(new string(decodedData));
+                                 cPWM.MaxLevel = UInt32.Parse(new string(decodedData));
                                  break;
 
                               case 'R':
-                                 c.UpdateCount = UInt32.Parse(new string(decodedData));
+                                 cPWM.UpdateCount = UInt32.Parse(new string(decodedData));
                                  break;
 
                               default:
@@ -602,19 +594,19 @@ namespace HalloweenControllerRPi.Device.Controllers
                            return;
                         }
                      }
-                  }
-                  break;
+                     break;
 
-               #endregion /* PWM HANDLING */
+                  #endregion /* PWM HANDLING */
 
-               case 'A': /* ADC */
-                  break;
+                  case 'A': /* ADC */
+                     break;
 
-               case 'C':
-                  break;
+                  case 'C':
+                     break;
 
-               default:
-                  break;
+                  default:
+                     break;
+               }
             }
          }
          else
