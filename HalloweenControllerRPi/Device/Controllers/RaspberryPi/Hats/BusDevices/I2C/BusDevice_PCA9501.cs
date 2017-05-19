@@ -1,14 +1,21 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
+using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.BusDevices;
+using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Channels;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
-   internal class BusDevice_PCA9501 : II2CBusDevice, IBusDeviceGpioChannelProvider, IBusDeviceEEPROMChannelProvider
+   public class BusDevice_PCA9501 : II2CBusDevice, IChannelProvider, IGpioChannelProvider, IEepromChannelProvider
    {
+    
+      private I2cDevice m_i2cDevice;
+      private List<IIOPin> m_GpioPins = new List<IIOPin>(8);
+
+      public bool Initialised { get; private set; }  
+      
       /// <summary>
       /// PCA9685 register addresses
       /// </summary>
@@ -20,15 +27,20 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          READ_EEPROM = 0x41,  //b1xxxxxx1
       };
 
-      public uint NumberOfChannels
+      public I2cDevice Device
       {
-         get { return 0x08; }
+         get { return m_i2cDevice; }
       }
 
-      private I2cDevice m_i2cDevice;
-      private List<IIOPin> m_GpioPins;
+      public uint NumberOfChannels
+      {
+         get { return NumberOfGpioChannels; }
+      }
 
-      public bool Initialised { get; private set; }
+      public uint NumberOfGpioChannels
+      {
+         get { return (uint)m_GpioPins.Count; }
+      }
 
       public ushort EEPROMSize
       {
@@ -71,9 +83,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       /// </summary>
       public void InitialiseChannels()
       {
-         /* Create a list of GPIO objects */
-         m_GpioPins = new List<IIOPin>();
-
          /* Initialise GPIO channels */
          for (uint i = 0; i < NumberOfChannels; i++)
          {
