@@ -27,7 +27,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          READ_EEPROM = 0x41,  //b1xxxxxx1
       };
 
-      public I2cDevice Device
+      public I2cDevice _i2cDevice
       {
          get { return m_i2cDevice; }
       }
@@ -84,7 +84,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       public void InitialiseChannels()
       {
          /* Initialise GPIO channels */
-         for (uint i = 0; i < NumberOfChannels; i++)
+         for (uint i = 0; i < 8; i++)
          {
             m_GpioPins.Add(new IOPin_PCA9501(i));
          }

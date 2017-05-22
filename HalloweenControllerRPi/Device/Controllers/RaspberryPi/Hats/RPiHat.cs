@@ -92,6 +92,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
                   rpiHat = new RPiHat_RELAY_v1(host, (host as HWRaspberryPI2).I2CBusDevice, hatAddress);
                   break;
 
+               case SupportedHATs.DISPLAY_v1:
+                  rpiHat = new RPiHat_DISPLAY_v1(host, (host as HWRaspberryPI2).I2CBusDevice, hatAddress);
+                  break;
+
                case SupportedHATs.NoOfSupportedHATs:
                default:
                   break;
@@ -125,6 +129,16 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          {
             hat = SupportedHATs.RELAY_v1;
          }
+         /* PCA9501 - DISPLAY (0x3C or 0x3D) */
+         else if ((hatAddress == 0x3C) || (hatAddress == 0x3C))
+         {
+            hat = SupportedHATs.DISPLAY_v1;
+         }
+         /* PCA9501 - PUSH BUTTONS and EEPROM (0x30, 0x70 is EEPROM) */
+         //else if (hatAddress == 0x30)
+         //{
+         //   hat = SupportedHATs.DISPLAY_v1;
+         //}
          /* PCA9685 - PWM Driver */
          else if ((hatAddress >= 0x60) && (hatAddress <= 0x6F))
          {

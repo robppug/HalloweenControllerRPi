@@ -18,6 +18,7 @@ using Windows.Devices.I2c.Provider;
 using Windows.Devices.Pwm.Provider;
 using Windows.Media.Playback;
 using Windows.Storage;
+using Windows.System.Profile;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -73,13 +74,13 @@ namespace HalloweenControllerRPi
       {
          HWController HWController;
 
-         //if (LightningProvider.IsLightningEnabled == true)
+         if(AnalyticsInfo.VersionInfo.DeviceFamily == "Windows.IoT")
          {
             HWController = new HWRaspberryPI2();
          }
-         //else
+         else
          {
-            //HWController = new HWSimulated();
+            HWController = new HWSimulated();
          }
 
          HWController.CommandReceived += HWController_CommandReceived;

@@ -109,8 +109,9 @@
     <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\ICommsBusDeviceProvider.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Channels\IUartChannelProvider.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Channels\IChannelProvider.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\Catalex_YX5300.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\YX5300\Driver_CatalexYX5300.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\IDriverDisplayProvider.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\IDriverProvider.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\IDriverSoundProvider.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\I2C\IOPin_PCA9501.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\I2C\BusDevice_PCA9501.cs" />
@@ -120,12 +121,14 @@
     <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\I2C\BusDevice_SC16IS752.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\I2C\BusDevice_PCA9685.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\II2CBusDevice.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\SSD1306\DisplayFont.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\SSD1306\DisplayImage.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_DISPLAY_v1.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_INPUT_v1.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_RELAY_v1.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_MOSFET_v1.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_SOUND_v1.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\SSD1306.cs" />
+    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\SSD1306\Driver_SSD1306.cs" />
     <Compile Include="UI\Container\GroupContainer.xaml.cs">
       <DependentUpon>GroupContainer.xaml</DependentUpon>
     </Compile>

@@ -110,7 +110,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       public bool Initialised { get; private set; }
 
-      public I2cDevice Device
+      public I2cDevice _i2cDevice
       {
          get
          {

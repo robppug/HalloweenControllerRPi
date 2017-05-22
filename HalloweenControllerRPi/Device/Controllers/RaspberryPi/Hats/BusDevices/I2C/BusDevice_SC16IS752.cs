@@ -183,7 +183,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
 
       public uint CrystalFreq { get; set; } = 11059200; /* Default of 11.0592Mhz */
 
-      public I2cDevice Device
+      public I2cDevice _i2cDevice
       {
          get { return m_i2cDevice; }
       }

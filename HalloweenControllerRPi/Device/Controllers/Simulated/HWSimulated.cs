@@ -12,8 +12,6 @@ namespace HalloweenControllerRPi.Device.Controllers
    {
       HWSimulatedUI UIPanel;
 
-      event EventHandler Connected;
-
       public HWSimulated()
       {
          UIPanel = new HWSimulatedUI();
@@ -35,8 +33,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          {  new Command("DATA", 'C'),
             new List<Command>
             {
-               new Command("VERSION", 'S'),
-               new Command("FREERAM", 'F')
+               new Command("VERSION", 'S')
             }
          },
          /* Command : INPUT */
@@ -44,7 +41,8 @@ namespace HalloweenControllerRPi.Device.Controllers
             new List<Command>
             {
                new Command("GET", 'G'),
-               new Command("DEBTIME", 'D')
+               new Command("DEBTIME", 'D'),
+               new Command("POSTDEBTIME", 'P')
             }
          },
          /* Command : RELAY */
@@ -62,12 +60,12 @@ namespace HalloweenControllerRPi.Device.Controllers
                new Command("GET", 'G'),
                new Command("SET", 'S'),
                new Command("FUNCTION", 'F'),
+               new Command("MINLEVEL", 'N'),
                new Command("MAXLEVEL", 'M'),
                new Command("RATE", 'R')
             }
          }
       };
-      private bool _Connected;
 
       /// <summary>
       /// Dictionary containing available Functions and Sub-Functions.
@@ -172,13 +170,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       public override void Connect()
       {
-         _Connected = true;
-
-         if (this.Connected != null)
-         {
-
-            //this.Connected.EndInvoke(this.Connected.BeginInvoke(this, EventArgs.Empty, null, null));
-         }
+         OnControllerInitialised();
       }
 
       /// <summary>
@@ -217,7 +209,6 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       public override void Disconnect()
       {
-         _Connected = false;
       }
 
       public override void TransmitCommand(string cmd)

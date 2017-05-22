@@ -491,14 +491,14 @@ namespace HalloweenControllerRPi.Device.Controllers
             /* The the CHANNEL of the request */
             channel = UInt32.Parse(new string(decodedData).Substring(0, 2));
 
-            if ((channel <= lAllFunctions.Count) && (channel != 0))
+            if ((channel <= _lAllFunctions.Count) && (channel != 0))
             {
                switch (function.Value)
                {
                   #region /* INPUT HANDLING */
 
                   case 'I':
-                     ChannelFunction_INPUT cINPUT = (lAllFunctions[(int)channel - 1] as ChannelFunction_INPUT);
+                     ChannelFunction_INPUT cINPUT = (_lAllFunctions[(int)channel - 1] as ChannelFunction_INPUT);
 
                      if (cINPUT != null)
                      {
@@ -512,8 +512,8 @@ namespace HalloweenControllerRPi.Device.Controllers
                               break;
 
                            case 'P':
-                           cINPUT.PostTriggerTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
-                           break;
+                              cINPUT.PostTriggerTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
+                              break;
 
                            default:
                               break;
@@ -528,7 +528,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                   #region /* RELAY HANDLING */
 
                   case 'R':
-                     ChannelFunction_RELAY cRELAY = (lAllFunctions[(int)channel - 1] as ChannelFunction_RELAY);
+                     ChannelFunction_RELAY cRELAY = (_lAllFunctions[(int)channel - 1] as ChannelFunction_RELAY);
 
                      if (cRELAY != null)
                      {
@@ -539,7 +539,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                         {
                            case 'S':
                               cRELAY.Level = UInt32.Parse(new string(decodedData));
-                              UpdateChannel(cRELAY);
+                              cRELAY.HostHat.UpdateChannel(cRELAY);
                               break;
 
                            case 'G':
@@ -558,7 +558,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                   #region /* PWM HANDLING */
 
                   case 'T':
-                     ChannelFunction_PWM cPWM = (lAllFunctions[(int)channel - 1] as ChannelFunction_PWM);
+                     ChannelFunction_PWM cPWM = (_lAllFunctions[(int)channel - 1] as ChannelFunction_PWM);
 
                      if (cPWM != null)
                      {
@@ -571,7 +571,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                            {
                               case 'S':
                                  cPWM.Level = UInt32.Parse(new string(decodedData));
-                                 UpdateChannel(cPWM);
+                                 cPWM.HostHat.UpdateChannel(cPWM);
                                  break;
 
                               case 'G':

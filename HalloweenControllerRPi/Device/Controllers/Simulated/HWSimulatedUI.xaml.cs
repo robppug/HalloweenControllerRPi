@@ -67,6 +67,7 @@ namespace HalloweenControllerRPi.Device.Controllers
             case 'T':
                switch (subFunction.Value)
                {
+                  case 'N':
                   case 'M':
                      if (value >= 1)
                         lPwms[(int)index].Fill = new SolidColorBrush(Colors.Green);
