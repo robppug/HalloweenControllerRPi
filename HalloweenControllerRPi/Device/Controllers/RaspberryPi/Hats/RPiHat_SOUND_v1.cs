@@ -19,7 +19,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       public RPiHat_SOUND_v1(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress) : base(host)
       {
          HatType = SupportedHATs.SOUND_v1;
-         soundDrivers = new List<IDriverSoundProvider>((int)busDevice.NumberOfChannels);
          busDevice = new BusDevice_SC16IS752();
          address = hatAddress;
 
@@ -51,11 +50,15 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       {
          List<byte> data = new List<byte>();
 
-         foreach (IDriverSoundProvider snd in soundDrivers)
-         {
-            snd.InitialiseDriver();
+         soundDrivers = new List<IDriverSoundProvider>((int)busDevice.NumberOfSoundChannels);
 
-            (snd as Catalex_YX5300).BuildCommand(ref data, Catalex_YX5300.COMMANDS.SEL_DEV, 0x02);
+         for (int i = 0; i < busDevice.NumberOfChannels; i++)
+         {
+            soundDrivers.Add(new Catalex_YX5300());
+
+            soundDrivers[i].InitialiseDriver();
+
+            (soundDrivers[i] as Catalex_YX5300).BuildCommand(ref data, Catalex_YX5300.COMMANDS.SEL_DEV, 0x02);
 
             //busDevice.WriteBytes(0, data);
 

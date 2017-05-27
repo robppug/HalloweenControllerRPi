@@ -138,7 +138,7 @@ namespace HalloweenControllerRPi.Device.Drivers
          {
             for (int PixelX = 0; PixelX < SCREEN_WIDTH_PX; PixelX++)
             {
-               SerializedDisplayBuffer[Index] = 0xFF;// DisplayBuffer[PixelX, PageY];
+               SerializedDisplayBuffer[Index] = DisplayBuffer[PixelX, PageY];
                Index++;
             }
          }

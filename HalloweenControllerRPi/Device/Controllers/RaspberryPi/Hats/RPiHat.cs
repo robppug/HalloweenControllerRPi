@@ -96,6 +96,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
                   rpiHat = new RPiHat_DISPLAY_v1(host, (host as HWRaspberryPI2).I2CBusDevice, hatAddress);
                   break;
 
+               case SupportedHATs.SOUND_v1:
+                  rpiHat = new RPiHat_SOUND_v1(host, (host as HWRaspberryPI2).I2CBusDevice, hatAddress);
+                  break;
+
                case SupportedHATs.NoOfSupportedHATs:
                default:
                   break;
@@ -133,6 +137,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          else if ((hatAddress == 0x3C) || (hatAddress == 0x3C))
          {
             hat = SupportedHATs.DISPLAY_v1;
+         }
+         /* SC16IS752 - SOUND (0x48) */
+         else if (hatAddress == 0x48)
+         {
+            hat = SupportedHATs.SOUND_v1;
          }
          /* PCA9501 - PUSH BUTTONS and EEPROM (0x30, 0x70 is EEPROM) */
          //else if (hatAddress == 0x30)

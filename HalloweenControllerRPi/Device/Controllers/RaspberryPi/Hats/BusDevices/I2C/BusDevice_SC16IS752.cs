@@ -102,7 +102,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
    public class BusDevice_SC16IS752 : II2CBusDevice, IChannelProvider, IGpioChannelProvider
    {
       private I2cDevice m_i2cDevice;
-      private List<UartChannel_SC16IS752> _uartChannels = new List<UartChannel_SC16IS752>(2);
+      private List<UartChannel_SC16IS752> _uartChannels;
       private uint _preScaler = 1; /* Default of 1 (MCR[7] set to 0 - Divide-by-1 clock) */
 
       #region EVENTS
@@ -193,6 +193,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
          get { return (uint)_uartChannels.Count + NumberOfGpioChannels; }
       }
 
+      public uint NumberOfUARTChannels
+      {
+         get { return (uint)_uartChannels.Count; }
+      }
+
       public uint NumberOfGpioChannels
       {
          get { return 8; }
@@ -205,6 +210,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
       }
 
       #region PUBLIC Methods
+      public BusDevice_SC16IS752()
+      {
+          _uartChannels = new List<UartChannel_SC16IS752>(2);
+      }
+
       public void Open(I2cDevice i2cDevice)
       {
          if (Initialised == false)
@@ -224,31 +234,36 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
 
       public void InitialiseChannels()
       {
+         BaudRates baudRate = BaudRates.Baud_9600bps;
+         ushort divisor;
+
          //Channel A Setup
-         SetBaudRate(UartChannels.ChannelA, BaudRates.Baud_9600bps);
+         _uartChannels.Add(new UartChannel_SC16IS752());
+         _uartChannels[(int)UartChannels.ChannelA].BaudRate = baudRate;
+         divisor = CalculateDivisor(baudRate);
+         _uartChannels[(int)UartChannels.ChannelA].Divisor = divisor;
 
          //Prescaler in MCR defaults on MCU reset to the value of 1 
          WriteRegister(UartChannels.ChannelA, Registers.LCR, 0x80); // 0x80 to program baud rate divisor 
-         WriteRegister(UartChannels.ChannelA, Registers.DLL, 0x18); // 0x18=9600K, 0x06 =38,42K with X1=3.6864MHz 
-         WriteRegister(UartChannels.ChannelA, Registers.DLH, 0x00); // 
-                                                                    // 
+         WriteRegister(UartChannels.ChannelA, Registers.DLL, (byte)(divisor & 0xFF)); // 9600 with X1=11.0592MHz = 11059200/(9600*16) = 72 (0x0048)
+         WriteRegister(UartChannels.ChannelA, Registers.DLH, (byte)((divisor >> 8) & 0xFF)); // 
          WriteRegister(UartChannels.ChannelA, Registers.LCR, 0xBF); // access EFR register 
          WriteRegister(UartChannels.ChannelA, Registers.EFR, 0X10); // enable enhanced registers 
-                                                                    //  
          WriteRegister(UartChannels.ChannelA, Registers.LCR, 0x03); // 8 data bits, 1 stop bit, no parity 
          WriteRegister(UartChannels.ChannelA, Registers.FCR, 0x07); // reset TXFIFO, reset RXFIFO, enable FIFO mode 
 
          //Channel B Setup
-         SetBaudRate(UartChannels.ChannelB, BaudRates.Baud_9600bps);
+         _uartChannels.Add(new UartChannel_SC16IS752());
+         _uartChannels[(int)UartChannels.ChannelA].BaudRate = baudRate;
+         divisor = CalculateDivisor(baudRate);
+         _uartChannels[(int)UartChannels.ChannelA].Divisor = divisor;
 
          //Prescaler R defauin MClts on MCU reset to the value of 1 
          WriteRegister(UartChannels.ChannelB, Registers.LCR, 0x80); // 0x80 to program baud rate divisor 
-         WriteRegister(UartChannels.ChannelB, Registers.DLL, 0x18); // 0x18=9600K, 0x06 =38,42K with X1=3.6864MHz 
-         WriteRegister(UartChannels.ChannelB, Registers.DLH, 0x00); // 
-                                                                    // 
+         WriteRegister(UartChannels.ChannelA, Registers.DLL, (byte)(divisor & 0xFF)); // 9600 with X1=11.0592MHz = 11059200/(9600*16) = 72 (0x0048)
+         WriteRegister(UartChannels.ChannelA, Registers.DLH, (byte)((divisor >> 8) & 0xFF)); // 
          WriteRegister(UartChannels.ChannelB, Registers.LCR, 0xBF); // access EFR register 
          WriteRegister(UartChannels.ChannelB, Registers.EFR, 0X10); // enable enhanced registers 
-                                                                    //  
          WriteRegister(UartChannels.ChannelB, Registers.LCR, 0x03); // 8 data bits, 1 stop bit, no parity 
          WriteRegister(UartChannels.ChannelB, Registers.FCR, 0x07); // reset TXFIFO, reset RXFIFO, enable FIFO mode 
       }

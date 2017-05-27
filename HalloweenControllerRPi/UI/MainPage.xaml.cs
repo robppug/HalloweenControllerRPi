@@ -84,8 +84,6 @@ namespace HalloweenControllerRPi
          }
 
          HWController.CommandReceived += HWController_CommandReceived;
-         //HWDevice.VersionInfoUpdated += this.ev_VersionInfoUpdated;
-         //HWDevice.FunctionAdded += this.ev_FunctionAdded;
 
          try
          {

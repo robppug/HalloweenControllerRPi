@@ -40,11 +40,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
          // Row 0, and image
          displayDriver.WriteImage(DisplayImages.Connected, 0, 0);
-         displayDriver.WriteImage(DisplayImages.ClockUp, 60, 0);
 
          // Row 1 - 3
-         displayDriver.WriteLine("Hello", 0, 1);
-         displayDriver.WriteLine("World", 0, 2);
+         displayDriver.WriteLine("Halloween", 0, 1);
+         displayDriver.WriteLine("Controller RPi", 0, 2);
 
          displayDriver.Update();
 

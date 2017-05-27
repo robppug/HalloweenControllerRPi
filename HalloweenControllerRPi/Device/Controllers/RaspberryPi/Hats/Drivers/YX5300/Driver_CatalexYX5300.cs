@@ -41,7 +41,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
 
       public void InitialiseDriver()
       {
-         throw new NotImplementedException();
+         //throw new NotImplementedException();
       }
 
       public void BuildCommand(ref List<byte> buffer, COMMANDS command, uint dat = 0)
