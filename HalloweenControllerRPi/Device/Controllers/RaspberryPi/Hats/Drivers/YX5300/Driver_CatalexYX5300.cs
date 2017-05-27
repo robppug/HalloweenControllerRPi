@@ -44,7 +44,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
          //throw new NotImplementedException();
       }
 
-      public void BuildCommand(ref List<byte> buffer, COMMANDS command, uint dat = 0)
+      public void BuildCommand(ref List<byte> buffer, COMMANDS command, ushort dat = 0)
       {
          if (buffer != null)
          {
@@ -52,7 +52,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
             buffer.Add(0xff);   //
             buffer.Add(0x06);   // Len
             buffer.Add((byte)command);//
-            buffer.Add(0x01);   // 0x00 NO, 0x01 feedback
+            buffer.Add(0x00);   // 0x00 NO, 0x01 feedback
             buffer.Add((byte)(dat >> 8));  //datah
             buffer.Add((byte)(dat));       //datal
             buffer.Add(0xef);   //

@@ -4,6 +4,7 @@ using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Channels;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.BusDevices.SC16IS752.BusDevice_SC16IS752;
@@ -13,7 +14,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
    /// <summary>
    /// UART Settings Class
    /// </summary>
-   public class UartChannel : IUartChannelProvider, ICommsBusDeviceProvider
+   public class UartChannel : IUartChannelProvider
    {
       public UartChannels Channel { get; set; }
       public BaudRates BaudRate { get; set; } = BaudRates.Baud_9600bps;
@@ -21,25 +22,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
       public StopBits StopBits { get; set; } = StopBits.StopBits_ONE;
       public Parity Parity { get; set; } = Parity.Parity_NONE;
 
-      public byte ReadByte()
-      {
-         throw new NotImplementedException();
-      }
-
-      public List<byte> ReadBytes(ushort length)
-      {
-         throw new NotImplementedException();
-      }
-
-      public void WriteByte(byte data)
-      {
-         throw new NotImplementedException();
-      }
-
-      public void WriteBytes(List<byte> data)
-      {
-         throw new NotImplementedException();
-      }
+      
    }
 
    /// <summary>
@@ -94,15 +77,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
       }
    }
 
-   internal class UartChannel_SC16IS752 : UartChannel
-   {
-      public ushort Divisor { get; set; }
-   }
-
    public class BusDevice_SC16IS752 : II2CBusDevice, IChannelProvider, IGpioChannelProvider
    {
       private I2cDevice m_i2cDevice;
-      private List<UartChannel_SC16IS752> _uartChannels;
+      protected List<UartChannel> _uartChannels;
       private uint _preScaler = 1; /* Default of 1 (MCR[7] set to 0 - Divide-by-1 clock) */
 
       #region EVENTS
@@ -212,7 +190,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
       #region PUBLIC Methods
       public BusDevice_SC16IS752()
       {
-          _uartChannels = new List<UartChannel_SC16IS752>(2);
+          _uartChannels = new List<UartChannel>(2);
       }
 
       public void Open(I2cDevice i2cDevice)
@@ -238,10 +216,9 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
          ushort divisor;
 
          //Channel A Setup
-         _uartChannels.Add(new UartChannel_SC16IS752());
+         _uartChannels.Add(new UartChannel());
          _uartChannels[(int)UartChannels.ChannelA].BaudRate = baudRate;
          divisor = CalculateDivisor(baudRate);
-         _uartChannels[(int)UartChannels.ChannelA].Divisor = divisor;
 
          //Prescaler in MCR defaults on MCU reset to the value of 1 
          WriteRegister(UartChannels.ChannelA, Registers.LCR, 0x80); // 0x80 to program baud rate divisor 
@@ -250,13 +227,12 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
          WriteRegister(UartChannels.ChannelA, Registers.LCR, 0xBF); // access EFR register 
          WriteRegister(UartChannels.ChannelA, Registers.EFR, 0X10); // enable enhanced registers 
          WriteRegister(UartChannels.ChannelA, Registers.LCR, 0x03); // 8 data bits, 1 stop bit, no parity 
-         WriteRegister(UartChannels.ChannelA, Registers.FCR, 0x07); // reset TXFIFO, reset RXFIFO, enable FIFO mode 
+         WriteRegister(UartChannels.ChannelA, Registers.FCR, 0x06); // reset TXFIFO, reset RXFIFO, DISABLE FIFO mode 
 
          //Channel B Setup
-         _uartChannels.Add(new UartChannel_SC16IS752());
+         _uartChannels.Add(new UartChannel());
          _uartChannels[(int)UartChannels.ChannelA].BaudRate = baudRate;
          divisor = CalculateDivisor(baudRate);
-         _uartChannels[(int)UartChannels.ChannelA].Divisor = divisor;
 
          //Prescaler R defauin MClts on MCU reset to the value of 1 
          WriteRegister(UartChannels.ChannelB, Registers.LCR, 0x80); // 0x80 to program baud rate divisor 
@@ -265,7 +241,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
          WriteRegister(UartChannels.ChannelB, Registers.LCR, 0xBF); // access EFR register 
          WriteRegister(UartChannels.ChannelB, Registers.EFR, 0X10); // enable enhanced registers 
          WriteRegister(UartChannels.ChannelB, Registers.LCR, 0x03); // 8 data bits, 1 stop bit, no parity 
-         WriteRegister(UartChannels.ChannelB, Registers.FCR, 0x07); // reset TXFIFO, reset RXFIFO, enable FIFO mode 
+         WriteRegister(UartChannels.ChannelB, Registers.FCR, 0x06); // reset TXFIFO, reset RXFIFO, DISABLE FIFO mode 
       }
 
       public void RefreshChannel(IChannel chan)
@@ -304,9 +280,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
       public void SetBaudRate(UartChannels uartChan, BaudRates baudRate)
       {
          List<byte> data = new List<byte>();
+         ushort divisor;
 
          _uartChannels[(int)uartChan].BaudRate = baudRate;
-         _uartChannels[(int)uartChan].Divisor = CalculateDivisor(baudRate);
+         divisor = CalculateDivisor(baudRate);
 
          ReadRegister(uartChan, Registers.LCR, ref data);
 
@@ -314,11 +291,44 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
          WriteRegister(uartChan, Registers.LCR, (byte)(data[0] | 0x80));
 
          /* Write to DLL & DLH Registers */
-         WriteRegister(uartChan, Registers.DLL, (byte)(_uartChannels[(int)uartChan].Divisor & 0xFF));
-         WriteRegister(uartChan, Registers.DLH, (byte)((_uartChannels[(int)uartChan].Divisor >> 8) & 0xFF));
+         WriteRegister(uartChan, Registers.DLL, (byte)(divisor & 0xFF));
+         WriteRegister(uartChan, Registers.DLH, (byte)((divisor >> 8) & 0xFF));
 
          /* Set LCR[7] = 0 */
          WriteRegister(uartChan, Registers.LCR, (byte)(data[0] & ~0x80));
+      }
+      
+      public byte ReadByte(UartChannels chan)
+      {
+         List<byte> data = new List<byte>();
+
+         ReadRegister(chan, Registers.RHR, ref data);
+
+         return data[0];
+      }
+
+      public List<byte> ReadBytes(UartChannels chan, ushort length)
+      {
+         List<byte> data = new List<byte>();
+
+         ReadRegister(chan, Registers.RHR, ref data);
+
+         return data;
+      }
+
+      public void WriteByte(UartChannels chan, byte data)
+      {
+         WriteRegister(chan, Registers.THR, data);
+      }
+
+      public void WriteBytes(UartChannels chan, List<byte> data)
+      {
+         foreach (byte b in data)
+         {
+            WriteByte(chan, b);
+
+            Task.Delay(10);
+         }
       }
 
       public IIOPin GetPin(ushort pin)

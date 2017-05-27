@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.I2c;
+using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.BusDevices.SC16IS752.BusDevice_SC16IS752;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
@@ -50,9 +51,9 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       {
          List<byte> data = new List<byte>();
 
-         soundDrivers = new List<IDriverSoundProvider>((int)busDevice.NumberOfSoundChannels);
+         soundDrivers = new List<IDriverSoundProvider>((int)busDevice.NumberOfUARTChannels);
 
-         for (int i = 0; i < busDevice.NumberOfChannels; i++)
+         for (int i = 0; i < busDevice.NumberOfUARTChannels; i++)
          {
             soundDrivers.Add(new Catalex_YX5300());
 
@@ -60,9 +61,13 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
             (soundDrivers[i] as Catalex_YX5300).BuildCommand(ref data, Catalex_YX5300.COMMANDS.SEL_DEV, 0x02);
 
-            //busDevice.WriteBytes(0, data);
+            busDevice.WriteBytes((UartChannels)i, data);
 
             Task.Delay(500);
+
+            (soundDrivers[i] as Catalex_YX5300).BuildCommand(ref data, Catalex_YX5300.COMMANDS.PLAY_W_VOL, 0x0F01);
+
+            busDevice.WriteBytes((UartChannels)i, data);
          }
       }
 
