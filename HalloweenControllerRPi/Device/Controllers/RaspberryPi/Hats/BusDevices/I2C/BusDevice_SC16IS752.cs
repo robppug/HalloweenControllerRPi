@@ -227,7 +227,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
          WriteRegister(UartChannels.ChannelA, Registers.LCR, 0xBF); // access EFR register 
          WriteRegister(UartChannels.ChannelA, Registers.EFR, 0X10); // enable enhanced registers 
          WriteRegister(UartChannels.ChannelA, Registers.LCR, 0x03); // 8 data bits, 1 stop bit, no parity 
-         WriteRegister(UartChannels.ChannelA, Registers.FCR, 0x06); // reset TXFIFO, reset RXFIFO, DISABLE FIFO mode 
+         WriteRegister(UartChannels.ChannelA, Registers.FCR, 0x07); // reset TXFIFO, reset RXFIFO, ENABLE FIFO mode 
 
          //Channel B Setup
          _uartChannels.Add(new UartChannel());
@@ -241,7 +241,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
          WriteRegister(UartChannels.ChannelB, Registers.LCR, 0xBF); // access EFR register 
          WriteRegister(UartChannels.ChannelB, Registers.EFR, 0X10); // enable enhanced registers 
          WriteRegister(UartChannels.ChannelB, Registers.LCR, 0x03); // 8 data bits, 1 stop bit, no parity 
-         WriteRegister(UartChannels.ChannelB, Registers.FCR, 0x06); // reset TXFIFO, reset RXFIFO, DISABLE FIFO mode 
+         WriteRegister(UartChannels.ChannelB, Registers.FCR, 0x07); // reset TXFIFO, reset RXFIFO, ENABLE FIFO mode 
       }
 
       public void RefreshChannel(IChannel chan)
@@ -326,8 +326,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
          foreach (byte b in data)
          {
             WriteByte(chan, b);
-
-            Task.Delay(10);
          }
       }
 

@@ -29,7 +29,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          /* Initialise the BUS DEVICE */
          busDevice.InitialiseChannels();
 
-         InitialiseSoundDrivers();
+         InitialiseSoundDriversAsync();
 
          Channels = new List<IChannel>();
 
@@ -47,7 +47,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          }
       }
 
-      private void InitialiseSoundDrivers()
+      private async void InitialiseSoundDriversAsync()
       {
          List<byte> data = new List<byte>();
 
@@ -62,12 +62,14 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
             (soundDrivers[i] as Catalex_YX5300).BuildCommand(ref data, Catalex_YX5300.COMMANDS.SEL_DEV, 0x02);
 
             busDevice.WriteBytes((UartChannels)i, data);
+            data.Clear();
 
-            Task.Delay(500);
+            await Task.Delay(200);
 
             (soundDrivers[i] as Catalex_YX5300).BuildCommand(ref data, Catalex_YX5300.COMMANDS.PLAY_W_VOL, 0x0F01);
 
             busDevice.WriteBytes((UartChannels)i, data);
+            data.Clear();
          }
       }
 
