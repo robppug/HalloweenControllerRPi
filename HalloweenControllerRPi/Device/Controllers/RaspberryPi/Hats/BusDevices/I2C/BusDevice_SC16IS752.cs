@@ -4,26 +4,72 @@ using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Channels;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Threading.Tasks;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
-using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.BusDevices.SC16IS752.BusDevice_SC16IS752;
+using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.BusDevices.SC16IS752;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.BusDevices.SC16IS752
 {
-   /// <summary>
-   /// UART Settings Class
-   /// </summary>
-   public class UartChannel : IUartChannelProvider
-   {
-      public UartChannels Channel { get; set; }
-      public BaudRates BaudRate { get; set; } = BaudRates.Baud_9600bps;
-      public uint DataBits { get; set; } = 8;
-      public StopBits StopBits { get; set; } = StopBits.StopBits_ONE;
-      public Parity Parity { get; set; } = Parity.Parity_NONE;
 
-      
+   /// <summary>
+   /// SC16IS752 Access Type (Read/Write)
+   /// </summary>
+   public enum AccessType : byte
+   {
+      WRITE = 0x00,
+      READ = 0x01
    }
+
+   /// <summary>
+   /// SC16IS752 register sub-addresses
+   /// </summary>
+   public enum Registers
+   {
+      [AccessType("R")]
+      RHR = 0x00,  // Recv Holding Register is 0x00 in READ Mode 
+      [AccessType("W")]
+      THR = 0x00,  // Xmit Holding Register is 0x00 in WRITE Mode 
+      [AccessType("RW")]
+      DLL = 0x00,  // Divisor Latch LSB  0x00 
+      [AccessType("RW")]
+      DLH = 0x01,  // Divisor Latch MSB  0x01 
+      [AccessType("RW")]
+      IER = 0x01,  // Interrupt Enable Register 
+      [AccessType("RW")]
+      EFR = 0x02,  // Enhanced Function Register 
+      [AccessType("R")]
+      IIR = 0x02,  // Interrupt Identification Register in READ Mode 
+      [AccessType("W")]
+      FCR = 0x02,  // FIFO Control Register in WRITE Mode 
+      [AccessType("RW")]
+      LCR = 0x03,  // Line Control Register 
+      [AccessType("RW")]
+      MCR = 0x04,  // Modem Control Register 
+      [AccessType("R")]
+      LSR = 0x05,  // Line status Register 
+      [AccessType("R")]
+      MSR = 0x06,  // Modem Status Register 
+      [AccessType("RW")]
+      SPR = 0x07,  // ScratchPad Register 
+      [AccessType("RW")]
+      TCR = 0x06,  // Transmission Control Register 
+      [AccessType("RW")]
+      TLR = 0x07,  // Trigger Level Register (FIFO Interrupt Trigger)
+      [AccessType("R")]
+      TXLVL = 0x08,  // Xmit FIFO Level Register 
+      [AccessType("R")]
+      RXLVL = 0x09,  // Recv FIFO Level Register 
+      [AccessType("RW")]
+      IODir = 0x0A,  // I/O Pins Direction Register 
+      [AccessType("RW")]
+      IOState = 0x0B,  // I/O Pins State Register 
+      [AccessType("RW")]
+      IOIntEna = 0x0C,  // I/O Interrupt Enable Register 
+      [AccessType("RW")]
+      IOControl = 0x0E,  // I/O Pins Control Register 
+      [AccessType("RW")]
+      EFCR = 0x0F  // Extra Features Control Register 
+   };
 
    /// <summary>
    /// Enum Attribute - Read/Write Flags
@@ -77,10 +123,33 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
       }
    }
 
-   public class BusDevice_SC16IS752 : II2CBusDevice, IChannelProvider, IGpioChannelProvider
+   public class BusDeviceStream_SC16IS752 : DeviceComms_I2C
    {
-      private I2cDevice m_i2cDevice;
-      protected List<UartChannel> _uartChannels;
+      public int StreamIndex { get; set; }
+
+      public BusDeviceStream_SC16IS752(I2cDevice dev, int channel) : base(dev)
+      {
+         StreamIndex = channel;
+      }
+
+      public override int Read(byte[] buffer)
+      {
+         throw new NotImplementedException();
+      }
+
+      public override void Write(byte[] buffer)
+      {
+         foreach (byte b in buffer)
+         {
+            i2cDevice.Write(new byte[2] { (byte)(((byte)AccessType.WRITE << 7) | ((byte)Registers.THR << 3) | ((byte)StreamIndex << 1)), b });
+         }
+      }
+   }
+   
+   public class BusDevice_SC16IS752<T> : IDeviceCommsProvider<T>, IChannelProvider, IGpioChannelProvider where T : IDeviceComms
+   {
+      private T _stream;
+      private List<BusDeviceStream_SC16IS752> _uartStreams;
       private uint _preScaler = 1; /* Default of 1 (MCR[7] set to 0 - Divide-by-1 clock) */
 
       #region EVENTS
@@ -98,82 +167,28 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
          ChannelA = 0x00,
          ChannelB = 0x01
       }
-
-      /// <summary>
-      /// SC16IS752 Access Type (Read/Write)
-      /// </summary>
-      public enum AccessType : byte
+            
+      public uint CrystalFreq { get; set; } = 11059200; /* Default of 11.0592Mhz */
+      
+      public T BusDeviceComms
       {
-         WRITE = 0x00,
-         READ = 0x01
+         get { return _stream; }
+         private set { _stream = value; }
       }
 
-      /// <summary>
-      /// SC16IS752 register sub-addresses
-      /// </summary>
-      public enum Registers
+      public List<BusDeviceStream_SC16IS752> UARTStreams
       {
-         [AccessType("R")]
-         RHR = 0x00,  // Recv Holding Register is 0x00 in READ Mode 
-         [AccessType("W")]
-         THR = 0x00,  // Xmit Holding Register is 0x00 in WRITE Mode 
-         [AccessType("RW")]
-         DLL = 0x00,  // Divisor Latch LSB  0x00 
-         [AccessType("RW")]
-         DLH = 0x01,  // Divisor Latch MSB  0x01 
-         [AccessType("RW")]
-         IER = 0x01,  // Interrupt Enable Register 
-         [AccessType("RW")]
-         EFR = 0x02,  // Enhanced Function Register 
-         [AccessType("R")]
-         IIR = 0x02,  // Interrupt Identification Register in READ Mode 
-         [AccessType("W")]
-         FCR = 0x02,  // FIFO Control Register in WRITE Mode 
-         [AccessType("RW")]
-         LCR = 0x03,  // Line Control Register 
-         [AccessType("RW")]
-         MCR = 0x04,  // Modem Control Register 
-         [AccessType("R")]
-         LSR = 0x05,  // Line status Register 
-         [AccessType("R")]
-         MSR = 0x06,  // Modem Status Register 
-         [AccessType("RW")]
-         SPR = 0x07,  // ScratchPad Register 
-         [AccessType("RW")]
-         TCR = 0x06,  // Transmission Control Register 
-         [AccessType("RW")]
-         TLR = 0x07,  // Trigger Level Register (FIFO Interrupt Trigger)
-         [AccessType("R")]
-         TXLVL = 0x08,  // Xmit FIFO Level Register 
-         [AccessType("R")]
-         RXLVL = 0x09,  // Recv FIFO Level Register 
-         [AccessType("RW")]
-         IODir = 0x0A,  // I/O Pins Direction Register 
-         [AccessType("RW")]
-         IOState = 0x0B,  // I/O Pins State Register 
-         [AccessType("RW")]
-         IOIntEna = 0x0C,  // I/O Interrupt Enable Register 
-         [AccessType("RW")]
-         IOControl = 0x0E,  // I/O Pins Control Register 
-         [AccessType("RW")]
-         EFCR = 0x0F  // Extra Features Control Register 
-      };
-
-      public uint CrystalFreq { get; set; } = 11059200; /* Default of 11.0592Mhz */
-
-      public I2cDevice _i2cDevice
-      {
-         get { return m_i2cDevice; }
+         get { return _uartStreams; }
       }
 
       public uint NumberOfChannels
       {
-         get { return (uint)_uartChannels.Count + NumberOfGpioChannels; }
+         get { return (uint)_uartStreams.Count + NumberOfGpioChannels; }
       }
 
       public uint NumberOfUARTChannels
       {
-         get { return (uint)_uartChannels.Count; }
+         get { return (uint)_uartStreams.Count; }
       }
 
       public uint NumberOfGpioChannels
@@ -190,14 +205,15 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
       #region PUBLIC Methods
       public BusDevice_SC16IS752()
       {
-          _uartChannels = new List<UartChannel>(2);
+          _uartStreams = new List<BusDeviceStream_SC16IS752>(2);
       }
 
-      public void Open(I2cDevice i2cDevice)
+      public void Open(T stream)
       {
          if (Initialised == false)
          {
-            m_i2cDevice = i2cDevice;
+            _stream = stream;
+            Initialised = true;
          }
          else
          {
@@ -207,41 +223,47 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
 
       public void Close()
       {
-         throw new NotImplementedException();
+         Initialised = false;
+         _stream = default(T);
       }
 
-      public void InitialiseChannels()
+      public void InitialiseDriver(bool proceedOnFail = false)
       {
          BaudRates baudRate = BaudRates.Baud_9600bps;
          ushort divisor;
 
-         //Channel A Setup
-         _uartChannels.Add(new UartChannel());
-         _uartChannels[(int)UartChannels.ChannelA].BaudRate = baudRate;
-         divisor = CalculateDivisor(baudRate);
+         if (Initialised == true)
+         {
+            //Channel A Setup
+            _uartStreams.Add(new BusDeviceStream_SC16IS752((_stream as DeviceComms_I2C).i2cDevice, (int)UartChannels.ChannelA));
+            divisor = CalculateDivisor(baudRate);
 
-         //Prescaler in MCR defaults on MCU reset to the value of 1 
-         WriteRegister(UartChannels.ChannelA, Registers.LCR, 0x80); // 0x80 to program baud rate divisor 
-         WriteRegister(UartChannels.ChannelA, Registers.DLL, (byte)(divisor & 0xFF)); // 9600 with X1=11.0592MHz = 11059200/(9600*16) = 72 (0x0048)
-         WriteRegister(UartChannels.ChannelA, Registers.DLH, (byte)((divisor >> 8) & 0xFF)); // 
-         WriteRegister(UartChannels.ChannelA, Registers.LCR, 0xBF); // access EFR register 
-         WriteRegister(UartChannels.ChannelA, Registers.EFR, 0X10); // enable enhanced registers 
-         WriteRegister(UartChannels.ChannelA, Registers.LCR, 0x03); // 8 data bits, 1 stop bit, no parity 
-         WriteRegister(UartChannels.ChannelA, Registers.FCR, 0x07); // reset TXFIFO, reset RXFIFO, ENABLE FIFO mode 
+            //Prescaler in MCR defaults on MCU reset to the value of 1 
+            WriteRegister(UartChannels.ChannelA, Registers.LCR, 0x80); // 0x80 to program baud rate divisor 
+            WriteRegister(UartChannels.ChannelA, Registers.DLL, (byte)(divisor & 0xFF)); // 9600 with X1=11.0592MHz = 11059200/(9600*16) = 72 (0x0048)
+            WriteRegister(UartChannels.ChannelA, Registers.DLH, (byte)((divisor >> 8) & 0xFF)); // 
+            WriteRegister(UartChannels.ChannelA, Registers.LCR, 0xBF); // access EFR register 
+            WriteRegister(UartChannels.ChannelA, Registers.EFR, 0X10); // enable enhanced registers 
+            WriteRegister(UartChannels.ChannelA, Registers.LCR, 0x03); // 8 data bits, 1 stop bit, no parity 
+            WriteRegister(UartChannels.ChannelA, Registers.FCR, 0x07); // reset TXFIFO, reset RXFIFO, ENABLE FIFO mode 
 
-         //Channel B Setup
-         _uartChannels.Add(new UartChannel());
-         _uartChannels[(int)UartChannels.ChannelA].BaudRate = baudRate;
-         divisor = CalculateDivisor(baudRate);
+            //Channel B Setup
+            _uartStreams.Add(new BusDeviceStream_SC16IS752((_stream as DeviceComms_I2C).i2cDevice, (int)UartChannels.ChannelB));
+            divisor = CalculateDivisor(baudRate);
 
-         //Prescaler R defauin MClts on MCU reset to the value of 1 
-         WriteRegister(UartChannels.ChannelB, Registers.LCR, 0x80); // 0x80 to program baud rate divisor 
-         WriteRegister(UartChannels.ChannelA, Registers.DLL, (byte)(divisor & 0xFF)); // 9600 with X1=11.0592MHz = 11059200/(9600*16) = 72 (0x0048)
-         WriteRegister(UartChannels.ChannelA, Registers.DLH, (byte)((divisor >> 8) & 0xFF)); // 
-         WriteRegister(UartChannels.ChannelB, Registers.LCR, 0xBF); // access EFR register 
-         WriteRegister(UartChannels.ChannelB, Registers.EFR, 0X10); // enable enhanced registers 
-         WriteRegister(UartChannels.ChannelB, Registers.LCR, 0x03); // 8 data bits, 1 stop bit, no parity 
-         WriteRegister(UartChannels.ChannelB, Registers.FCR, 0x07); // reset TXFIFO, reset RXFIFO, ENABLE FIFO mode 
+            //Prescaler R defauin MClts on MCU reset to the value of 1 
+            WriteRegister(UartChannels.ChannelB, Registers.LCR, 0x80); // 0x80 to program baud rate divisor 
+            WriteRegister(UartChannels.ChannelB, Registers.DLL, (byte)(divisor & 0xFF)); // 9600 with X1=11.0592MHz = 11059200/(9600*16) = 72 (0x0048)
+            WriteRegister(UartChannels.ChannelB, Registers.DLH, (byte)((divisor >> 8) & 0xFF)); // 
+            WriteRegister(UartChannels.ChannelB, Registers.LCR, 0xBF); // access EFR register 
+            WriteRegister(UartChannels.ChannelB, Registers.EFR, 0X10); // enable enhanced registers 
+            WriteRegister(UartChannels.ChannelB, Registers.LCR, 0x03); // 8 data bits, 1 stop bit, no parity 
+            WriteRegister(UartChannels.ChannelB, Registers.FCR, 0x07); // reset TXFIFO, reset RXFIFO, ENABLE FIFO mode 
+         }
+         else
+         {
+            throw new Exception("Driver needs to be Opened first.");
+         }
       }
 
       public void RefreshChannel(IChannel chan)
@@ -264,40 +286,18 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
          if (reg.CanRead() == false)
             throw new Exception("Register " + reg.ToString() + " is WRITE only!");
 
-         m_i2cDevice.Write(new byte[1] { (byte)(((byte)AccessType.READ << 7) | ((byte)reg << 3) | ((byte)uartChan << 1)) });
+         _stream.Write(new byte[1] { (byte)(((byte)AccessType.READ << 7) | ((byte)reg << 3) | ((byte)uartChan << 1)) });
 
-         m_i2cDevice.Read(data.ToArray());
+         _stream.Read(data.ToArray());
       }
 
-      public void WriteRegister(UartChannels uartChan, Registers reg, byte data)
+      private void WriteRegister(UartChannels uartChan, Registers reg, byte data)
       {
          if (reg.CanWrite() == false)
             throw new Exception("Register " + reg.ToString() + " is READ only!");
 
-         m_i2cDevice.Write(new byte[2] { (byte)(((byte)AccessType.WRITE << 7) | ((byte)reg << 3) | ((byte)uartChan << 1)), (byte)data });
+         _stream.Write(new byte[2] { (byte)(((byte)AccessType.WRITE << 7) | ((byte)reg << 3) | ((byte)uartChan << 1)), (byte)data });
       }
-
-      public void SetBaudRate(UartChannels uartChan, BaudRates baudRate)
-      {
-         List<byte> data = new List<byte>();
-         ushort divisor;
-
-         _uartChannels[(int)uartChan].BaudRate = baudRate;
-         divisor = CalculateDivisor(baudRate);
-
-         ReadRegister(uartChan, Registers.LCR, ref data);
-
-         /* Set LCR[7] = 1 */
-         WriteRegister(uartChan, Registers.LCR, (byte)(data[0] | 0x80));
-
-         /* Write to DLL & DLH Registers */
-         WriteRegister(uartChan, Registers.DLL, (byte)(divisor & 0xFF));
-         WriteRegister(uartChan, Registers.DLH, (byte)((divisor >> 8) & 0xFF));
-
-         /* Set LCR[7] = 0 */
-         WriteRegister(uartChan, Registers.LCR, (byte)(data[0] & ~0x80));
-      }
-      
       public byte ReadByte(UartChannels chan)
       {
          List<byte> data = new List<byte>();
@@ -316,19 +316,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
          return data;
       }
 
-      public void WriteByte(UartChannels chan, byte data)
-      {
-         WriteRegister(chan, Registers.THR, data);
-      }
-
-      public void WriteBytes(UartChannels chan, List<byte> data)
-      {
-         foreach (byte b in data)
-         {
-            WriteByte(chan, b);
-         }
-      }
-
       public IIOPin GetPin(ushort pin)
       {
          throw new NotImplementedException();
@@ -343,6 +330,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
       {
          throw new NotImplementedException();
       }
+
       #endregion
    }
 }

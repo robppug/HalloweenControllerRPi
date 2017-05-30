@@ -6,7 +6,7 @@ using Windows.Devices.I2c;
 
 namespace HalloweenControllerRPi.Device.Drivers
 {
-   class Driver_SSD1306 : II2CBusDevice, IDriverProvider, IDriverDisplayProvider
+   class SSD1306<T> : IDeviceCommsProvider<T>, IDriverDisplayProvider where T : IDeviceComms
    {
       /* This driver is intended to be used with Driver_SSD1306 based OLED displays connected via I2c */
 
@@ -16,25 +16,27 @@ namespace HalloweenControllerRPi.Device.Drivers
       private byte[,] DisplayBuffer = new byte[SCREEN_WIDTH_PX, SCREEN_HEIGHT_PAGES];           /* A local buffer we use to store graphics data for the screen                    */
       private byte[] SerializedDisplayBuffer = new byte[SCREEN_WIDTH_PX * SCREEN_HEIGHT_PAGES]; /* A temporary buffer used to prepare graphics data for sending over i2c          */
       
-      private I2cDevice m_i2cDevice;
+      private T _stream;
 
       public bool Initialised { get; private set; }
 
-      public I2cDevice _i2cDevice
+      public T BusDeviceComms
       {
-         get { return m_i2cDevice; }
+         get { return _stream; }
+         private set { _stream = value; }
       }
 
-      public Driver_SSD1306()
+      public SSD1306()
       {
          Initialised = false;
       }
 
-      public void Open(I2cDevice i2cDevice)
+      public void Open(T stream)
       {
          if (Initialised == false)
          {
-            m_i2cDevice = i2cDevice;
+            _stream = stream;
+            Initialised = true;
          }
          else
          {
@@ -46,7 +48,7 @@ namespace HalloweenControllerRPi.Device.Drivers
       {
          if (Initialised == true)
          {
-            m_i2cDevice = null;
+            _stream = default(T);
 
             Initialised = false;
          }
@@ -116,7 +118,7 @@ namespace HalloweenControllerRPi.Device.Drivers
          Data.CopyTo(commandBuffer, 1);
          commandBuffer[0] = 0x40; // display buffer register
 
-         m_i2cDevice.Write(commandBuffer);
+         _stream.Write(commandBuffer);
       }
 
       /* Send commands to the screen */
@@ -126,7 +128,7 @@ namespace HalloweenControllerRPi.Device.Drivers
          Command.CopyTo(commandBuffer, 1);
          commandBuffer[0] = 0x00; // control register
 
-         m_i2cDevice.Write(commandBuffer);
+         _stream.Write(commandBuffer);
       }
 
       /* Writes the Display Buffer out to the physical screen for display */

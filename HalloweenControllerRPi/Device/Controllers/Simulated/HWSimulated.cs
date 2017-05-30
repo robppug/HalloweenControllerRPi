@@ -102,6 +102,13 @@ namespace HalloweenControllerRPi.Device.Controllers
          }
       }
 
+      public override uint SoundChannels
+      {
+         get
+         {
+            return 0;
+         }
+      }
       private Command GetSubFunctionCommand(Command function, string subFunc)
       {
          Command command = null;

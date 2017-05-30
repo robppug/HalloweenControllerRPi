@@ -6,7 +6,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Channels
    {
       uint NumberOfChannels { get; }
 
-      void InitialiseChannels();
       void RefreshChannel(IChannel chan);
    }
 }

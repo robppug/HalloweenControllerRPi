@@ -66,6 +66,7 @@ namespace HalloweenControllerRPi.Device
       public abstract uint Inputs { get; }
       public abstract uint PWMs { get; }
       public abstract uint Relays { get; }
+      public abstract uint SoundChannels { get; }
 
       public abstract string BuildCommand(string func, string subFunc, params string[] data);
       public abstract void DecodeCommand(List<char> fullCmd, out Command function, out Command subFunction, ref char[] data);
@@ -104,7 +105,7 @@ namespace HalloweenControllerRPi.Device
       {
          return false;
       }
-
+      
       public virtual UserControl GetUIPanel()
       {
          return null;

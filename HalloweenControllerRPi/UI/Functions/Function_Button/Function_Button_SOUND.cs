@@ -1,4 +1,5 @@
 ﻿using HalloweenControllerRPi.Functions;
+using HalloweenControllerRPi.UI.Functions.Function_Button;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,17 +9,17 @@ using Windows.UI;
 
 namespace HalloweenControllerRPi.Function_GUI
 {
-   class Function_Button_SOUND : Function_Button
+   public class Function_Button_SOUND : Function_Button
    {
       public Function_Button_SOUND(uint idx)
-         : base(typeof(Func_Sound_GUI), "SOUND", Colors.Lavender)
+         : base(typeof(Func_Sound_GUI), "SOUND", idx, Colors.Cornsilk)
       {
          IsRemoveable = false;
          OneOnly = false;
       }
 
       public Function_Button_SOUND(uint idx, Function.tenTYPE enType)
-         : base(typeof(Func_Sound_GUI), "SOUND", Colors.Lavender)
+         : base(typeof(Func_Sound_GUI), "SOUND", idx, Colors.Cornsilk)
       {
          IsRemoveable = false;
          OneOnly = false;

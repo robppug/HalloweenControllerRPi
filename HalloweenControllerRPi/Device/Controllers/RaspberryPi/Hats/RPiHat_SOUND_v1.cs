@@ -1,33 +1,31 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
+using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.BusDevices;
 using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.BusDevices.Drivers;
 using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.BusDevices.SC16IS752;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.I2c;
-using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.BusDevices.SC16IS752.BusDevice_SC16IS752;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
    public class RPiHat_SOUND_v1 : RPiHat
    {
       List<IDriverSoundProvider> soundDrivers;
-      BusDevice_SC16IS752 busDevice;
+      BusDevice_SC16IS752<DeviceComms_I2C> busDevice;
       public UInt16 address;
 
       public RPiHat_SOUND_v1(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress) : base(host)
       {
          HatType = SupportedHATs.SOUND_v1;
-         busDevice = new BusDevice_SC16IS752();
+         busDevice = new BusDevice_SC16IS752<DeviceComms_I2C>();
          address = hatAddress;
 
          /* Open the BUS DEVICE */
-         busDevice.Open(i2cDevice);
+         busDevice.Open(new DeviceComms_I2C(i2cDevice));
 
          /* Initialise the BUS DEVICE */
-         busDevice.InitialiseChannels();
+         busDevice.InitialiseDriver();
 
          InitialiseSoundDriversAsync();
 
@@ -47,7 +45,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          }
       }
 
-      private async void InitialiseSoundDriversAsync()
+      private void InitialiseSoundDriversAsync()
       {
          List<byte> data = new List<byte>();
 
@@ -55,21 +53,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
          for (int i = 0; i < busDevice.NumberOfUARTChannels; i++)
          {
-            soundDrivers.Add(new Catalex_YX5300());
-
-            soundDrivers[i].InitialiseDriver();
-
-            (soundDrivers[i] as Catalex_YX5300).BuildCommand(ref data, Catalex_YX5300.COMMANDS.SEL_DEV, 0x02);
-
-            busDevice.WriteBytes((UartChannels)i, data);
-            data.Clear();
-
-            await Task.Delay(200);
-
-            (soundDrivers[i] as Catalex_YX5300).BuildCommand(ref data, Catalex_YX5300.COMMANDS.PLAY_W_VOL, 0x0F01);
-
-            busDevice.WriteBytes((UartChannels)i, data);
-            data.Clear();
+            Catalex_YX5300<BusDeviceStream_SC16IS752> sndDrv = new Catalex_YX5300<BusDeviceStream_SC16IS752>();
+            sndDrv.Open(busDevice.UARTStreams[i]);
+            sndDrv.InitialiseDriver();
+            soundDrivers.Add(sndDrv);
          }
       }
 

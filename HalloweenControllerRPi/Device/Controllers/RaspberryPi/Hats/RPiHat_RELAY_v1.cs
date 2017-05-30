@@ -1,4 +1,5 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
+using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.BusDevices;
 using HalloweenControllerRPi.Functions;
 using System;
 using System.Collections.Generic;
@@ -13,20 +14,20 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
    /// </summary>
    public class RPiHat_RELAY_v1 : RPiHat
    {
-      BusDevice_PCA9501 busDevice;
+      BusDevice_PCA9501<DeviceComms_I2C> busDevice;
       public UInt16 address;
 
       public RPiHat_RELAY_v1(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress) : base(host)
       {
          HatType = SupportedHATs.RELAY_v1;
-         busDevice = new BusDevice_PCA9501();
+         busDevice = new BusDevice_PCA9501<DeviceComms_I2C>();
          address = hatAddress;
 
          /* Open the BUS DEVICE */
-         busDevice.Open(i2cDevice);
+         busDevice.Open(new DeviceComms_I2C(i2cDevice));
 
          /* Initialise the BUS DEVICE */
-         busDevice.InitialiseChannels();
+         busDevice.InitialiseDriver();
 
          Channels = new List<IChannel>();
 

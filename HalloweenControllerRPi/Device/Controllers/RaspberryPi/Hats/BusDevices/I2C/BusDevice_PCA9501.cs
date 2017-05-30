@@ -8,10 +8,9 @@ using Windows.Devices.I2c;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
-   public class BusDevice_PCA9501 : II2CBusDevice, IChannelProvider, IGpioChannelProvider, IEepromChannelProvider
+   public class BusDevice_PCA9501<T> : IDeviceCommsProvider<T>, IChannelProvider, IGpioChannelProvider, IEepromChannelProvider where T : IDeviceComms
    {
-    
-      private I2cDevice m_i2cDevice;
+      private T _stream;
       private List<IIOPin> m_GpioPins = new List<IIOPin>(8);
 
       public bool Initialised { get; private set; }  
@@ -26,11 +25,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          WRITE_EEPROM = 0x40, //b1xxxxxx0
          READ_EEPROM = 0x41,  //b1xxxxxx1
       };
-
-      public I2cDevice _i2cDevice
-      {
-         get { return m_i2cDevice; }
-      }
 
       public uint NumberOfChannels
       {
@@ -47,20 +41,23 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          get { return 256; }
       }
 
+      public T BusDeviceComms
+      {
+         get { return _stream; }
+         private set { _stream = value; }
+      }
+
       public BusDevice_PCA9501()
       {
          Initialised = false;
       }
 
-      /// <summary>
-      ///
-      /// </summary>
-      /// <param name="i2cDevice"></param>
-      public void Open(I2cDevice i2cDevice)
+      public void Open(T stream)
       {
          if (Initialised == false)
          {
-            m_i2cDevice = i2cDevice;
+            _stream = stream;
+            Initialised = true;
          }
          else
          {
@@ -72,7 +69,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       {
          if (Initialised == true)
          {
-            m_i2cDevice = null;
+            _stream = default(T);
 
             Initialised = false;
          }
@@ -81,7 +78,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       /// <summary>
       /// Initialises the available CHANNELS provided by the BusDevice.
       /// </summary>
-      public void InitialiseChannels()
+      public void InitialiseDriver(bool proceedOnFail = false)
       {
          /* Initialise GPIO channels */
          for (uint i = 0; i < 8; i++)
@@ -123,32 +120,18 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       public void WriteByte(ushort address, byte data)
       {
-         if (m_i2cDevice != null)
+         if (address < EEPROMSize)
          {
-            if (address < EEPROMSize)
-            {
-               /* Write the EEPROM_WRITE register, address and data */
-               m_i2cDevice.Write(new byte[3] { (byte)Registers.WRITE_EEPROM, (byte)address, data });
-            }
-         }
-         else
-         {
-            throw new Exception("I2C Device not initialised.");
+            /* Write the EEPROM_WRITE register, address and data */
+            _stream.Write(new byte[3] { (byte)Registers.WRITE_EEPROM, (byte)address, data });
          }
       }
 
       public void WriteBytes(ushort address, List<byte> data)
       {
-         if (m_i2cDevice != null)
+         foreach (byte b in data)
          {
-            foreach (byte b in data)
-            {
-               WriteByte((ushort)(address + data.IndexOf(b)), b);
-            }
-         }
-         else
-         {
-            throw new Exception("I2C Device not initialised.");
+            WriteByte((ushort)(address + data.IndexOf(b)), b);
          }
       }
 
@@ -207,17 +190,17 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
                }
 
                /* Write to the DEVICE - Address = b0xxxxxx0 */
-               m_i2cDevice.ConnectionSettings.SlaveAddress &= ~(byte)reg;
+               (_stream as DeviceComms_I2C).i2cDevice.ConnectionSettings.SlaveAddress &= ~(byte)reg;
 
-               m_i2cDevice.Write(data);
+               _stream.Write(data);
                break;
 
             /* READ FROM PIN */
             case Registers.READ_IO:
                /* Read from the DEVICE - Address = b0xxxxxx1 */
-               m_i2cDevice.ConnectionSettings.SlaveAddress |= (byte)reg;
+               (_stream as DeviceComms_I2C).i2cDevice.ConnectionSettings.SlaveAddress |= (byte)reg;
 
-               while (m_i2cDevice.ReadPartial(data).Status != I2cTransferStatus.FullTransfer) { }
+               while ((_stream as DeviceComms_I2C).i2cDevice.ReadPartial(data).Status != I2cTransferStatus.FullTransfer) { }
 
                //Debug.WriteLine(Convert.ToString(data[0], 2).PadLeft(8, '0'));
                foreach (IIOPin pin in m_GpioPins)
@@ -230,7 +213,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
                break;
          }
       }
-
       #endregion IO PIN Handling
    }
 }

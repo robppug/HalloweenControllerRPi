@@ -7,10 +7,10 @@ using Windows.Devices.I2c;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
-   public class BusDevice_PCA9685 : II2CBusDevice, IChannelProvider, IPwmChannelProvider
+   public class BusDevice_PCA9685<T> : IDeviceCommsProvider<T>, IChannelProvider, IPwmChannelProvider where T : IDeviceComms
    {
-      private I2cDevice m_i2cDevice;
-      
+      private T _stream;
+
       /// <summary>
       /// PCA9685 register addresses
       /// </summary>
@@ -110,12 +110,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       public bool Initialised { get; private set; }
 
-      public I2cDevice _i2cDevice
+      public T BusDeviceComms
       {
-         get
-         {
-            return m_i2cDevice;
-         }
+         get { return _stream; }
+         private set { _stream = value; }
       }
 
       public BusDevice_PCA9685()
@@ -123,11 +121,12 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          Initialised = false;
       }
 
-      public async void Open(I2cDevice i2cDevice)
+      public async void Open(T stream)
       {
          if (Initialised == false)
          {
-            m_i2cDevice = i2cDevice;
+            _stream = stream;
+            Initialised = true;
 
             /* Set MODE 1 Register - Change to NORMAL mode */
             SetRegister(Registers.MODE1, 0x00);
@@ -166,7 +165,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       /// <summary>
       /// Initialises the available CHANNELS provided by the BusDevice.
       /// </summary>
-      public void InitialiseChannels()
+      public void InitialiseDriver(bool proceedOnFail = false)
       {
          /* Initialise PWM channels */
          for (uint i = 0; i < NumberOfChannels; i++)
@@ -186,28 +185,23 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
          if (value == Resolution)
          {
-            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_L + ((byte)channel * 4)), (byte)((Resolution + 1) & 0xFF) });
-            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_H + ((byte)channel * 4)), (byte)(((Resolution + 1) >> 8) & 0xFF) });
-            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_L + ((byte)channel * 4)), 0x00 });
-            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_H + ((byte)channel * 4)), 0x00 });
+            _stream.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_L + ((byte)channel * 4)), (byte)((Resolution + 1) & 0xFF) });
+            _stream.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_H + ((byte)channel * 4)), (byte)(((Resolution + 1) >> 8) & 0xFF) });
+            _stream.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_L + ((byte)channel * 4)), 0x00 });
+            _stream.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_H + ((byte)channel * 4)), 0x00 });
          }
          else
          {
-            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_L + ((byte)channel * 4)), 0x00 });
-            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_H + ((byte)channel * 4)), 0x00 });
-            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_L + ((byte)channel * 4)), (byte)(value & 0xFF) });
-            m_i2cDevice.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_H + ((byte)channel * 4)), (byte)((value >> 8) & 0xFF) });
+            _stream.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_L + ((byte)channel * 4)), 0x00 });
+            _stream.Write(new byte[2] { (byte)((byte)Registers.PIN0_ON_H + ((byte)channel * 4)), 0x00 });
+            _stream.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_L + ((byte)channel * 4)), (byte)(value & 0xFF) });
+            _stream.Write(new byte[2] { (byte)((byte)Registers.PIN0_OFF_H + ((byte)channel * 4)), (byte)((value >> 8) & 0xFF) });
          }
-      }
-
-      public void SetRegister(Registers register, byte value)
-      {
-         m_i2cDevice.Write(new byte[2] { (byte)register, value });
       }
 
       public void SetPWMFrequency(byte value)
       {
-         m_i2cDevice.Write(new byte[2] { (byte)Registers.PRESCALE, value });
+         _stream.Write(new byte[2] { (byte)Registers.PRESCALE, value });
       }
 
       public void RefreshChannel(IChannel chan)
@@ -225,6 +219,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
                SetChannel((ushort)pwm.Index, 0x00);
             }
          }
+      }
+
+      public void SetRegister(Registers register, byte value)
+      {
+         _stream.Write(new byte[2] { (byte)register, value });
       }
    }
 }

@@ -3,6 +3,7 @@ using HalloweenControllerRPi.Device;
 using HalloweenControllerRPi.Device.Controllers;
 using HalloweenControllerRPi.Function_GUI;
 using HalloweenControllerRPi.Functions;
+using HalloweenControllerRPi.UI.Functions.Function_Button;
 using MathNet.Numerics;
 using MathNet.Numerics.Interpolation;
 using Microsoft.IoT.Lightning.Providers;
@@ -116,7 +117,7 @@ namespace HalloweenControllerRPi
          textControllerProgressBar.Visibility = Visibility.Collapsed;
 
          /* Populate the available Functions the HWDevice provides. */
-         this.Available_Statics.Items.Add(new Function_Button_SOUND(1));
+         //this.Available_Statics.Items.Add(new Function_Button_SOUND(1));
 
          for (uint i = 0; i < HWController.Inputs; i++)
          {
@@ -130,8 +131,12 @@ namespace HalloweenControllerRPi
          {
             this.Available_Board.Items.Add(new Function_Button_RELAY(i + 1));
          }
+         for (uint i = 0; i < HWController.SoundChannels; i++)
+         {
+            this.Available_Board.Items.Add(new Function_Button_SOUND(i + 1));
+         }
 
-         Func_SOUND.GetAvailableSounds();
+         //Func_SOUND.GetAvailableSounds();
 
          loadSettingsFile();
 

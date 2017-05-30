@@ -1,9 +1,9 @@
-﻿using HalloweenControllerRPi.Function_GUI;
-using HalloweenControllerRPi.Functions;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Xml;
 using System.Xml.Serialization;
@@ -17,12 +17,11 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
-// The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
+// The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
-namespace HalloweenControllerRPi
+namespace HalloweenControllerRPi.UI.Functions.Function_Button
 {
    /// <summary>
    /// Class handling the available FUNCTION GUI processes.
@@ -34,13 +33,31 @@ namespace HalloweenControllerRPi
       public bool IsRemoveable { get; set; }
       public bool OneOnly { get; set; }
       public uint Index { get; set; }
-      public string ToolTip { get; set; }
-      public Brush FillColour { get; set; }
+
+      public static readonly DependencyProperty ToolTipProperty =
+         DependencyProperty.Register("ToolTip", typeof(String), typeof(Function_Button), new PropertyMetadata(""));
+
+      public string ToolTip
+      {
+         get { return (String)GetValue(ToolTipProperty); }
+         set { SetValue(ToolTipProperty, value); }
+      }
+
+      public static readonly DependencyProperty FillColourProperty =
+         DependencyProperty.Register("FillColour", typeof(Brush), typeof(Function_Button), new PropertyMetadata(null));
+
+
+      public Brush FillColour
+      {
+         get { return (Brush)GetValue(FillColourProperty); }
+         set { SetValue(FillColourProperty, value); }
+      }
 
       public Function_Button()
       {
          this.InitializeComponent();
       }
+
 
       /// <summary>
       /// Function_Button Constructor
@@ -67,17 +84,12 @@ namespace HalloweenControllerRPi
       {
          Index = index;
 
-         ToolTip = text + " #" + index.ToString("00");
          FillColour = new SolidColorBrush(color);
+         ToolTip = text + " #" + index.ToString("00");
 
-         this.Loaded += Function_Button_Loaded;
-      }
-
-      private void Function_Button_Loaded(object sender, RoutedEventArgs e)
-      {
          /* Set BINDING of objects */
-         buttonText.DataContext = this;
-         rectBackground.DataContext = this;
+         FunctionButtonBackground.DataContext = this;
+         FunctionButtonText.DataContext = this;
       }
 
       public System.Xml.Schema.XmlSchema GetSchema()

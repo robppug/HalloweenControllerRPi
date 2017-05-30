@@ -7,7 +7,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.BusDevices
 {
    public interface II2CBusDevice
    {
-      I2cDevice _i2cDevice { get; }
+      I2cDevice I2CDevice { get; }
 
       void Open(I2cDevice i2cDevice);
       void Close();

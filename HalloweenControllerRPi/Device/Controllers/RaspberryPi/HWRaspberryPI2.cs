@@ -1,4 +1,5 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi;
+using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
 using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats;
 using HalloweenControllerRPi.Device.Drivers;
 using HalloweenControllerRPi.Functions;
@@ -64,6 +65,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       private static UInt16 _PWMs = 0;
       private static UInt16 _Inputs = 0;
       private static UInt16 _Relays = 0;
+      private static UInt16 _SoundChannels = 0;
       private static List<IChannel> _lAllFunctions = new List<IChannel>();
 
       #endregion /* PRIVATE */
@@ -192,6 +194,15 @@ namespace HalloweenControllerRPi.Device.Controllers
                new Command("MINLEVEL", 'N'),
                new Command("MAXLEVEL", 'M'),
                new Command("RATE", 'R')
+            }
+         },
+         /* Command : SOUND */
+         {  new Command("SOUND", 'S'),
+            new List<Command>
+            {
+               new Command("PLAY", 'P'),
+               new Command("STOP", 'S'),
+               new Command("VOLUME", 'V')
             }
          }
       };
@@ -325,6 +336,13 @@ namespace HalloweenControllerRPi.Device.Controllers
          }
       }
 
+      public override uint SoundChannels
+      {
+         get
+         {
+            return _SoundChannels;
+         }
+      }
       #endregion /* AVAILABLE FUNCTIONS */
 
       /// <summary>
@@ -347,6 +365,22 @@ namespace HalloweenControllerRPi.Device.Controllers
          }
 
          /* Initialise available channels (PWM, RELAY, INPUT) */
+         PopulateChannelList();
+
+         OnControllerInitialised();
+
+         //sWatch = new Stopwatch();
+         //sWatch.Start();
+
+         /* Create the Background Task handle */
+         DispatcherTimer dispatcher = new DispatcherTimer();
+         dispatcher.Tick += ControllerTask;
+         dispatcher.Interval = new TimeSpan(0, 0, 0, 0, 1);
+         dispatcher.Start();
+      }
+
+      private void PopulateChannelList()
+      {
          foreach (IChannel c in _lAllFunctions)
          {
             if (c is ChannelFunction_PWM)
@@ -361,18 +395,11 @@ namespace HalloweenControllerRPi.Device.Controllers
             {
                _Relays++;
             }
+            else if (c is ChannelFunction_SOUND)
+            {
+               _SoundChannels++;
+            }
          }
-
-         OnControllerInitialised();
-
-         //sWatch = new Stopwatch();
-         //sWatch.Start();
-
-         /* Create the Background Task handle */
-         DispatcherTimer dispatcher = new DispatcherTimer();
-         dispatcher.Tick += ControllerTask;
-         dispatcher.Interval = new TimeSpan(0, 0, 0, 0, 1);
-         dispatcher.Start();
       }
 
       /// <summary>

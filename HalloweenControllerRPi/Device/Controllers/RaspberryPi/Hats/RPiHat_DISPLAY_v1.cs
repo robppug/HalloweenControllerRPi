@@ -1,4 +1,5 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
+using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.BusDevices;
 using HalloweenControllerRPi.Device.Drivers;
 using HalloweenControllerRPi.Device.Drives;
 using System;
@@ -13,25 +14,25 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
    public class RPiHat_DISPLAY_v1 : RPiHat
    {
-      BusDevice_PCA9501 busDevice;
-      Driver_SSD1306 displayDriver;
+      BusDevice_PCA9501<DeviceComms_I2C> busDevice;
+      SSD1306<DeviceComms_I2C> displayDriver;
       UInt16 address;
 
       public RPiHat_DISPLAY_v1(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress) : base(host)
       {
          HatType = SupportedHATs.DISPLAY_v1;
-         busDevice = new BusDevice_PCA9501();
-         displayDriver = new Driver_SSD1306();
+         busDevice = new BusDevice_PCA9501<DeviceComms_I2C>();
+         displayDriver = new SSD1306<DeviceComms_I2C>();
          address = hatAddress;
 
          /* Open the BUS DEVICE */
-         busDevice.Open(i2cDevice);
+         busDevice.Open(new DeviceComms_I2C(i2cDevice));
 
          /* Initialise the BUS DEVICE */
-         busDevice.InitialiseChannels();
+         busDevice.InitialiseDriver();
 
          /* Open the DISPLAY driver */
-         displayDriver.Open(i2cDevice);
+         displayDriver.Open(new DeviceComms_I2C(i2cDevice));
 
          /* Initialise the DISPLAY DRIVER */
          displayDriver.InitialiseDriver();
