@@ -12,6 +12,7 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          IsRemoveable = false;
          OneOnly = true;
+         TriggerOnly = true;
       }
 
       public Function_Button_INPUT(uint idx, Function.tenTYPE enType)
@@ -19,6 +20,7 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          IsRemoveable = false;
          OneOnly = true;
+         TriggerOnly = true;
       }
    }
 }

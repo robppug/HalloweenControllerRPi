@@ -63,57 +63,38 @@ namespace HalloweenControllerRPi.Container
       /// </summary>
       /// <param name="sender"></param>
       /// <param name="e"></param>
-      private async void Panel_DragDrop(object sender, DragEventArgs e)
+      private void Panel_DragDrop(object sender, DragEventArgs e)
       {
          Control FuncGUI;
-         Function_Button draggedItem;
-         Type[] allowedTypes = new Type[] { typeof(Function_Button_RELAY),
-                                            typeof(Function_Button_PWM),
-                                            typeof(Function_Button_SOUND),
-                                            typeof(Function_Button_INPUT) };
+         Function_Button draggedItem = (e.DataView.Properties["Object"] as Function_Button);
 
          /* Check if the dragged item is one of the allowed dragged item TYPES. */
-         foreach (Type type in allowedTypes)
+         if (draggedItem != null)
          {
-            if (e.DataView.Contains("Type"))
+            /* Check if the dragged Function_Button has a count restriction. */
+            if (draggedItem.OneOnly)
             {
-               var items = await e.DataView.GetDataAsync("Type");
-
-               if (type.ToString() == items.ToString())
+               foreach (UIElement c in Container.Children)
                {
-                  bool onlyOne = (bool)await e.DataView.GetDataAsync("OnlyOne");
-                  uint idx = 0;
-
-                  if (e.DataView.Contains("Index"))
-                     idx = (uint)await e.DataView.GetDataAsync("Index");
-
-                  /* Check if the dragged Function_Button has a count restriction. */
-                  if (onlyOne == true)
-                  {
-                     foreach (UIElement c in Container.Children)
-                     {
-                        if (c is Func_Input_GUI)
-                           return;
-                     }
-                  }
-
-                  //RPUGLIESE - TODO
-                  /* If Function Button is not STATIC, remove from sending flow panel (availables). */
-                  //if (draggedItem.IsRemoveable == true)
-                  //   draggedItem.Dispose();
-
-                  /* Only allow ONE of each function in the Always Actives group */
-                  draggedItem = (Function_Button)Activator.CreateInstance(type, idx, Function.tenTYPE.TYPE_TRIGGER);
-
-                  //Container.Children.Add(draggedItem);
-
-                  /* Create an instance of the FUNCTION GUI */
-                  FuncGUI = (Control)Activator.CreateInstance(draggedItem.GUIType, MainPage.HostApp, draggedItem.Index, Function.tenTYPE.TYPE_TRIGGER);
-
-                  Container.Children.Add(FuncGUI);
-                  return;
+                  if (c.GetType() == draggedItem.GetType())
+                     return;
                }
             }
+
+            /* If Function Button is not STATIC, remove from sending flow panel (availables). */
+            //if (draggedItem.IsRemoveable == true)
+            //   draggedItem.Dispose();
+
+            /* Only allow ONE of each function in the Always Actives group */
+            draggedItem = (Function_Button)Activator.CreateInstance(draggedItem.GetType(), draggedItem.Index, Function.tenTYPE.TYPE_TRIGGER);
+
+            //Container.Children.Add(draggedItem);
+
+            /* Create an instance of the FUNCTION GUI */
+            FuncGUI = (Control)Activator.CreateInstance(draggedItem.GUIType, MainPage.HostApp, draggedItem.Index, Function.tenTYPE.TYPE_TRIGGER);
+
+            Container.Children.Add(FuncGUI);
+            return;
          }
       }
 
@@ -124,26 +105,21 @@ namespace HalloweenControllerRPi.Container
       /// </summary>
       /// <param name="sender"></param>
       /// <param name="e"></param>
-      private async void Panel_DragEnter(object sender, DragEventArgs e)
+      private void Panel_DragEnter(object sender, DragEventArgs e)
       {
-         if (e.DataView.Contains("Type"))
-         { 
-            var items = await e.DataView.GetTextAsync("Type");
+         Function_Button draggedObect = (e.DataView.Properties["Object"] as Function_Button);
 
-            if (Type.GetType(items).GetTypeInfo().IsSubclassOf(typeof(Function_Button)))
+         e.AcceptedOperation = DataPackageOperation.None;
+
+         if (draggedObect != null)
+         {
+            if (draggedObect.OneOnly)
             {
-               bool onlyOne = (bool)await e.DataView.GetDataAsync("OnlyOne");
-
-               /* Check if the dragged Function_Button has a count restriction. */
-               if (onlyOne == true)
+               foreach (UIElement c in Container.Children)
                {
-                  foreach (UIElement c in Container.Children)
+                  if (c is Func_Input_GUI)
                   {
-                     if (c is Func_Input_GUI)
-                     {
-                        e.AcceptedOperation = DataPackageOperation.None;
-                        return;
-                     }
+                     return;
                   }
                }
 

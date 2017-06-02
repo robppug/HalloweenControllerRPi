@@ -19,6 +19,11 @@ namespace HalloweenControllerRPi.Function_GUI
       private Func_SOUND _Func;
       private bool _boInitialised = false;
 
+      public List<String> Tracks
+      {
+         get; set;
+      }
+
       public Function Func
       {
          get { return _Func; }
@@ -28,14 +33,23 @@ namespace HalloweenControllerRPi.Function_GUI
       public Func_Sound_GUI()
       {
          this.InitializeComponent();
+         Tracks = new List<string>();
+         Tracks.Add("Track 1");
+         Tracks.Add("Track 2");
+         Tracks.Add("Track 3");
+         Tracks.Add("Track 4");
+         Tracks.Add("Track 5");
+         comboBox_Track.DataContext = this;
+         comboBox_Track.ItemsSource = Tracks;
 
          _boInitialised = true;
       }
 
       public Func_Sound_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
       {
-         _Func = new Func_SOUND(host, entype, mediaElement);
+         _Func = new Func_SOUND(host, entype);
          _Func.Index = index;
+         _Func.Volume = (uint)slider_Volume.Value;
 
          //this.textTitle.MouseClick += gb_FunctionName_MouseClick;
          textTitle.Text = "Sound";
@@ -44,40 +58,13 @@ namespace HalloweenControllerRPi.Function_GUI
          {
             slider_Duration.IsEnabled = false;
             slider_StartDelay.IsEnabled = false;
-            slider_Repeats.IsEnabled = false;
-            checkBox_Loop.IsChecked = true;
-            checkBox_Loop.IsEnabled = false;
             textBlock_Duration.Visibility = Visibility.Collapsed;
             textBlock_StartDelay.Visibility = Visibility.Collapsed;
-            textBlock_Repeats.Visibility = Visibility.Collapsed;
          }
 
          _Func.FuncButtonType = typeof(Function_Button_SOUND);
-
-         GetListofSounds();
-
-         _Func.TimerTick += UpdatePosition;
       }
       
-      private void GetListofSounds()
-      {
-         int noOfSounds;
-
-         noOfSounds = Func_SOUND.lSoundFiles.Count;
-
-         if(noOfSounds > 0)
-         {
-            foreach (StorageFile file in Func_SOUND.lSoundFiles)
-            {
-               comboBox_Sounds.Items.Add(file.DisplayName + " (" + file.DisplayType + ")");
-            }
-         }
-         else
-         {
-            comboBox_Sounds.Items.Add("No sound files found");
-         }
-      }
-
       //private void gb_FunctionName_MouseClick(object sender, MouseEventArgs e)
       //{
       //if (e.Button == System.Windows.Forms.MouseButtons.Right)
@@ -85,12 +72,6 @@ namespace HalloweenControllerRPi.Function_GUI
       //   this.SetCustomName();
       //}
       //}
-
-      private void UpdatePosition(object sender, EventArgs e)
-      {
-         progressBar_Position.Maximum = _Func.SoundDuration_ms;
-         progressBar_Position.Value = (int)_Func.activePlaybackDevice.Position.TotalMilliseconds;
-      }
 
       private void slider_Duration_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
       {
@@ -110,31 +91,20 @@ namespace HalloweenControllerRPi.Function_GUI
          }
       }
 
-      private void checkBox_Loop_Checked(object sender, RoutedEventArgs e)
-      {
-         _Func.Loop = (sender as CheckBox).IsChecked;
-
-         if ((_Func.Loop == true) && (_Func.Type != Function.tenTYPE.TYPE_CONSTANT))
-            slider_Repeats.IsEnabled = true;
-         else
-            slider_Repeats.IsEnabled = false;
-      }
-
-      private void slider_Repeats_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-      {
-         if (_boInitialised == true)
-         {
-            _Func.Repeats = (uint)(sender as Slider).Value;
-            textBlock_Repeats.Text = "Repeats: " + _Func.Repeats.ToString();
-         }
-      }
-
       private void slider_Volume_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
       {
          if (_boInitialised == true)
          {
-            _Func.activePlaybackDevice.Volume = (float)((sender as Slider).Value / 100f);
+            _Func.Volume = (uint)(sender as Slider).Value;
             textBlock_Volume.Text = "Volume: " + (sender as Slider).Value.ToString() + " (%)";
+         }
+      }
+
+      private void comboBox_Track_SelectionChanged(object sender, SelectionChangedEventArgs e)
+      {
+         if (_boInitialised == true)
+         {
+            _Func.Track = (uint)(sender as ComboBox).SelectedIndex + 1;
          }
       }
 
@@ -147,24 +117,19 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          _Func.Delay_ms = Convert.ToUInt16(reader.GetAttribute("Delay"));
          _Func.Duration_ms = Convert.ToUInt16(reader.GetAttribute("Duration"));
-         _Func.Repeats = Convert.ToUInt16(reader.GetAttribute("Repeats"));
-         _Func.activePlaybackDevice.Volume = Convert.ToSingle(reader.GetAttribute("Volume"));
-         checkBox_Loop.IsChecked = Convert.ToBoolean(reader.GetAttribute("Loop"));
+         _Func.Volume = Convert.ToUInt32(reader.GetAttribute("Volume"));
          textTitle.Text = reader.GetAttribute("CustomName");
-         checkBox_Loop_Checked(checkBox_Loop, null);
 
-         textBlock_Volume.Text = "Volume: " + (_Func.activePlaybackDevice.Volume * 100f).ToString() + " (%)";
+         textBlock_Volume.Text = "Volume: " + (_Func.Volume * 100f).ToString() + " (%)";
          textBlock_StartDelay.Text = "Start Delay: " + _Func.Delay_ms.ToString() + " (ms)";
          textBlock_Duration.Text = "Duration: " + _Func.Duration_ms.ToString() + " (ms)";
-         textBlock_Repeats.Text = "Repeats: " + _Func.Repeats.ToString();
 
          /* Ignore MIN/MAX limits. */
          try
          {
             slider_Duration.Value = _Func.Duration_ms;
             slider_StartDelay.Value = _Func.Delay_ms;
-            slider_Volume.Value = _Func.activePlaybackDevice.Volume * 100;
-            comboBox_Sounds.SelectedIndex = Convert.ToInt32(reader.GetAttribute("Sound"));
+            slider_Volume.Value = _Func.Volume * 100;
          }
          catch { }
       }
@@ -173,7 +138,6 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          writer.WriteAttributeString("Type", GetType().ToString());
          writer.WriteAttributeString("CustomName", this.textTitle.Text);
-         writer.WriteAttributeString("Sound", this.comboBox_Sounds.SelectedIndex.ToString());
          
          this._Func.WriteXml(writer);
       }
@@ -183,12 +147,5 @@ namespace HalloweenControllerRPi.Function_GUI
          //new PopupTextBox().SetCustomName(gb_FunctionName);
       }
 
-      private async void comboBox_Sounds_SelectionChanged(object sender, SelectionChangedEventArgs e)
-      {
-         if (Func_SOUND.lSoundFiles.Count > 0)
-         {
-            await _Func.OpenFile((sender as ComboBox).SelectedIndex);
-         }
-      }
    }
 }

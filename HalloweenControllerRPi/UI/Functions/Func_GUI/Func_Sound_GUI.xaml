@@ -4,7 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="using:HalloweenControllerRPi.Function_GUI"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DesignHeight="245"
+             d:DesignHeight="215"
              d:DesignWidth="240"
              mc:Ignorable="d">
 
@@ -14,68 +14,46 @@
                  Foreground="Black"
                  Text="SOUND (#)" />
       <Slider x:Name="slider_Duration"
-              Margin="5,60,5,0"
+              Margin="5,82,5,0"
               VerticalAlignment="Top"
               Maximum="60000"
               Minimum="10"
               ValueChanged="slider_Duration_ValueChanged"
               Value="500" TickPlacement="None" />
       <Slider x:Name="slider_Volume"
-              Margin="121,102,5,0"
+              Margin="5,124,5,0"
               VerticalAlignment="Top"
               TickFrequency="5"
               ValueChanged="slider_Volume_ValueChanged"
               Value="100" />
       <Slider x:Name="slider_StartDelay"
-              Margin="5,144,5,0"
+              Margin="5,166,5,0"
               VerticalAlignment="Top"
               Maximum="10000"
               TickFrequency="1000"
               ValueChanged="slider_StartDelay_ValueChanged"
               Value="0" />
-      <Slider x:Name="slider_Repeats"
-              Margin="5,102,124,0"
-              VerticalAlignment="Top"
-              Maximum="10"
-              TickFrequency="1"
-              ValueChanged="slider_Repeats_ValueChanged"
-              Value="0" />
-      <ComboBox x:Name="comboBox_Sounds"
-                Width="220"
-                Margin="10,30,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                SelectionChanged="comboBox_Sounds_SelectionChanged" />
       <TextBlock x:Name="textBlock_Duration"
                  Width="109"
-                 Margin="121,91,0,0"
+                 Margin="121,113,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  FontSize="10"
                  Text="Duration: 500 (ms)" />
       <TextBlock x:Name="textBlock_Volume"
                  Width="109"
-                 Margin="121,135,0,0"
+                 Margin="121,157,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  FontSize="10"
                  Text="Volume: 100 (%)" />
       <TextBlock x:Name="textBlock_StartDelay"
                  Width="109"
-                 Margin="121,175,0,0"
+                 Margin="121,197,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  FontSize="10"
                  Text="Start Delay: 0 (ms)" />
-      <TextBlock x:Name="textBlock_Repeats"
-                 Width="109"
-                 Margin="12,135,0,0"
-                 HorizontalAlignment="Left"
-                 VerticalAlignment="Top"
-                 FontSize="10"
-                 Text="Repeats: 0" />
-      <CheckBox x:Name="checkBox_Loop" Content="Loop" HorizontalAlignment="Left" Margin="10,188,0,0" VerticalAlignment="Top" FontSize="14" Checked="checkBox_Loop_Checked" Width="125"/>
-      <ProgressBar x:Name="progressBar_Position" HorizontalAlignment="Left" Height="10" Margin="12,225,0,0" VerticalAlignment="Top" Width="218"/>
-      <MediaElement x:Name="mediaElement" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="240" Margin="0,220,0,0" AutoPlay="False" Visibility="Collapsed"/>
+      <ComboBox x:Name="comboBox_Track" HorizontalAlignment="Left" Margin="5,32,0,0" VerticalAlignment="Top" Width="230" SelectionChanged="comboBox_Track_SelectionChanged"/>
    </Grid>
 </UserControl>

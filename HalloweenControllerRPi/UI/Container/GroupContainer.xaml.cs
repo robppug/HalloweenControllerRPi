@@ -74,59 +74,40 @@ namespace HalloweenControllerRPi.Container
       /// </summary>
       /// <param name="sender"></param>
       /// <param name="e"></param>
-      private async void Panel_DragDrop(object sender, DragEventArgs e)
+      private void Panel_DragDrop(object sender, DragEventArgs e)
       {
          Control FuncGUI;
-         Function_Button draggedItem;
-         Type[] allowedTypes = new Type[] { typeof(Function_Button_RELAY),
-                                            typeof(Function_Button_PWM),
-                                            typeof(Function_Button_SOUND)};
-
-
+         Function_Button draggedItem = (e.DataView.Properties["Object"] as Function_Button);
 
          /* Check if the dragged item is one of the allowed dragged item TYPES. */
-         foreach (Type type in allowedTypes)
+         if (draggedItem != null)
          {
-            if (e.DataView.Contains("Type"))
+            if (draggedItem.TriggerOnly == false)
             {
-               var items = await e.DataView.GetDataAsync("Type");
+               /* Only allow ONE of each function in the Always Actives group */
+               draggedItem = (Function_Button)Activator.CreateInstance(draggedItem.GetType(), draggedItem.Index, Function.tenTYPE.TYPE_CONSTANT);
 
-               if (type.ToString() == items.ToString())
-               {
-                  uint idx = 0;
+               //Container.Children.Add(draggedItem);
 
-                  if(e.DataView.Contains("Index"))
-                     idx = (uint)await e.DataView.GetDataAsync("Index");
+               /* Create an instance of the FUNCTION GUI */
+               FuncGUI = (Control)Activator.CreateInstance(draggedItem.GUIType, MainPage.HostApp, draggedItem.Index, Function.tenTYPE.TYPE_CONSTANT);
 
-                  /* Only allow ONE of each function in the Always Actives group */
-                  draggedItem = (Function_Button)Activator.CreateInstance(type, idx, Function.tenTYPE.TYPE_CONSTANT);
-
-                  //Container.Children.Add(draggedItem);
-                  
-                  /* Create an instance of the FUNCTION GUI */
-                  FuncGUI = (Control)Activator.CreateInstance(draggedItem.GUIType, MainPage.HostApp, draggedItem.Index, Function.tenTYPE.TYPE_CONSTANT);
-
-                  Container.Children.Add(FuncGUI); 
-                  return;
-               }
+               Container.Children.Add(FuncGUI);
+               return;
             }
          }
       }
 
-      private async void Panel_DragEnter(object sender, DragEventArgs e)
+      private void Panel_DragEnter(object sender, DragEventArgs e)
       {
-         if (e.DataView.Contains("Type"))
-         {
-            var items = await e.DataView.GetTextAsync("Type");
+         Function_Button draggedObect = (e.DataView.Properties["Object"] as Function_Button);
 
-            if (items.ToString() != typeof(Function_Button_INPUT).ToString())
-            {
+         e.AcceptedOperation = DataPackageOperation.None;
+
+         if (draggedObect != null)
+         {
+            if(draggedObect.TriggerOnly == false)
                e.AcceptedOperation = DataPackageOperation.Copy;
-            }
-            else
-            {
-               e.AcceptedOperation = DataPackageOperation.None;
-            }
          }
       }
 

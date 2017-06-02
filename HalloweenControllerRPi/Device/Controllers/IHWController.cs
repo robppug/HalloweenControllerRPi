@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.ChannelFunction_INPUT;
+﻿using static HalloweenControllerRPi.Device.Controllers.Channels.ChannelFunction_INPUT;
 
-namespace HalloweenControllerRPi.Device
+namespace HalloweenControllerRPi.Device.Controllers
 {
    public interface IHWController : ISupportedFunctions
    {

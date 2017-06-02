@@ -1,9 +1,6 @@
 ﻿using HalloweenControllerRPi.Device;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -15,54 +12,20 @@ namespace HalloweenControllerRPi.Functions
 {
    public class Func_SOUND : Function
    {
-      public static List<StorageFile> lSoundFiles;
-
-      private string _fileSound;
-      private int _SoundDuration_s;
-      private uint _Repeats = 0;
-      private uint RepeatCount;
-      private bool? _Looping = false;
-      public MediaElement activePlaybackDevice;
-      public IRandomAccessStream sSoundStream;
       public EventHandler TimerTick;
 
       private DispatcherTimer tickTimer;
 
       #region Parameters
-      public int SoundDuration_ms
-      {
-         get { return _SoundDuration_s; }
-         set { _SoundDuration_s = value; }
-      }
+      public uint Volume { get; set; }
 
-      public bool? Loop
-      {
-         get { return _Looping; }
-         set { _Looping = value; }
-      }
-
-      public uint Repeats
-      {
-         get { return _Repeats; }
-         set { _Repeats = value; }
-      }
-
-      public string fileSOUND
-      {
-         get { return _fileSound; }
-         set { _fileSound = value; }
-      }
+      public uint Track { get; set; }
       #endregion
-
 
       public Func_SOUND() { }
 
-      public Func_SOUND(IHostApp host, tenTYPE entype, MediaElement mediaE) : base(host, entype)
+      public Func_SOUND(IHostApp host, tenTYPE entype) : base(host, entype)
       {
-         activePlaybackDevice = mediaE;
-         activePlaybackDevice.RealTimePlayback = true;
-         activePlaybackDevice.MediaEnded += ActivePlaybackDevice_Ended;
-
          FunctionKeyCommand = new Command("SOUND", 'S');
 
          evOnDelayEnd += OnTrigger;
@@ -71,6 +34,8 @@ namespace HalloweenControllerRPi.Functions
          tickTimer = new DispatcherTimer();
          tickTimer.Tick += tickTimer_Elapsed;
          vSetTimerInterval(tickTimer, 1000);
+
+         Track = 1;
       }
 
       void vSetTimerInterval(DispatcherTimer t, uint value)
@@ -91,90 +56,23 @@ namespace HalloweenControllerRPi.Functions
          tickTimer.Start();
       }
 
-      public async static void GetAvailableSounds()
-      {
-         if (lSoundFiles == null)
-         {
-            lSoundFiles = new List<StorageFile>();
-         }
-
-         var files = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFilesAsync();
-
-         lSoundFiles.Clear();
-
-         foreach (StorageFile file in files)
-         {
-            if (file.DisplayType.Contains("WAV File") || file.DisplayType.Contains("MP3 File"))
-            {
-               lSoundFiles.Add(file);
-            }
-         }
-      }
-
-      public async Task OpenFile(int index)
-      {
-         if (activePlaybackDevice != null)
-         {
-            CloseFile();
-
-            sSoundStream = await lSoundFiles[index].OpenAsync(Windows.Storage.FileAccessMode.Read);
-
-            activePlaybackDevice.AutoPlay = false;
-            activePlaybackDevice.SetSource(sSoundStream, lSoundFiles[index].ContentType);
-
-            await Task.Delay(10000);
-         }
-      }
-
-      public void CloseFile()
-      {
-         if (sSoundStream != null)
-         {
-            sSoundStream.Dispose();
-            sSoundStream = null;
-         }
-      }
-
       public void Play()
       {
-         if (activePlaybackDevice != null && sSoundStream != null && activePlaybackDevice.CurrentState != MediaElementState.Playing)
+         if (TimerTick != null)
          {
-            activePlaybackDevice.Play();
-            
-            SoundDuration_ms = (int)activePlaybackDevice.NaturalDuration.TimeSpan.TotalMilliseconds;
-
-            if (TimerTick != null)
-            {
-               TimerTick.Invoke(this, EventArgs.Empty);
-            }
-
-            tickTimer.Start();
+            TimerTick.Invoke(this, EventArgs.Empty);
          }
-      }
 
-      private void ActivePlaybackDevice_Ended(object sender, RoutedEventArgs e)
-      {
-         if ((this as Function).Type == tenTYPE.TYPE_CONSTANT)
-         {
-            if (base.evOnDurationEnd != null)
-            {
-               base.evOnDurationEnd.Invoke(this, EventArgs.Empty);
-            }
-         }
+         tickTimer.Start();
       }
 
       public void Stop()
       {
-         if (activePlaybackDevice != null)
+         tickTimer.Stop();
+
+         if (TimerTick != null)
          {
-            activePlaybackDevice.Stop();
-
-            tickTimer.Stop();
-
-            if (TimerTick != null)
-            {
-               TimerTick.Invoke(this, EventArgs.Empty);
-            }
+            TimerTick.Invoke(this, EventArgs.Empty);
          }
       }
 
@@ -185,22 +83,35 @@ namespace HalloweenControllerRPi.Functions
       /// <param name="e"></param>
       private void OnTrigger(object sender, EventArgs e)
       {
-         if (activePlaybackDevice.CurrentState != MediaElementState.Playing)
-         {
-            Play();
+         List<string> data = new List<string>();
 
-            RepeatCount = _Repeats;
-         }
-         else if ((_Looping == true) || (RepeatCount > 0))
-         {
-            if(RepeatCount > 0)
-               RepeatCount--;
-            Play();
-         }
+         data.Add(Index.ToString("00"));
+         data.Add(Volume.ToString());
+
+         this.SendCommand("VOLUME", data.ToArray());
+
+         data.Clear();
+
+         data.Add(Index.ToString("00"));
+         data.Add(Track.ToString());
+
+         this.SendCommand("TRACK", data.ToArray());
+
+         data.Clear();
+
+         data.Add(Index.ToString("00"));
+         data.Add(" 0");
+         this.SendCommand("PLAY", data.ToArray());
       }
 
       private void OnDurationEnd(object sender, EventArgs e)
       {
+         List<string> data = new List<string>();
+
+         data.Add(Index.ToString("00"));
+         data.Add(" 0");
+         this.SendCommand("STOP", data.ToArray());
+
          if ((e as ProcessFunctionArgs) != null)
          {
             if ((e as ProcessFunctionArgs).UserStopped == true)
@@ -210,14 +121,7 @@ namespace HalloweenControllerRPi.Functions
          }
          else
          {
-            if ((_Looping == true) || (RepeatCount > 0))
-            {
-               base.evOnTrigger.Invoke(sender, EventArgs.Empty);
-            }
-            else
-            {
-               Stop();
-            }
+            Stop();
          }
       }
 
@@ -227,9 +131,7 @@ namespace HalloweenControllerRPi.Functions
 
          writer.WriteAttributeString("Duration", Duration_ms.ToString());
          writer.WriteAttributeString("Delay", Duration_ms.ToString());
-         writer.WriteAttributeString("Loop", Loop.ToString());
-         writer.WriteAttributeString("Repeats", Repeats.ToString());
-         writer.WriteAttributeString("Volume", (activePlaybackDevice != null ? activePlaybackDevice.Volume.ToString() : "1"));
+         writer.WriteAttributeString("Volume", Volume.ToString());
       }
    }
 }

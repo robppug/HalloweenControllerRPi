@@ -1,13 +1,9 @@
-﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi;
-using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
+﻿using HalloweenControllerRPi.Device.Controllers.Channels;
 using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats;
-using HalloweenControllerRPi.Device.Drivers;
 using HalloweenControllerRPi.Functions;
 using Microsoft.IoT.Lightning.Providers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,8 +13,6 @@ using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 using Windows.Devices.Spi;
 using Windows.UI.Xaml;
-using static HalloweenControllerRPi.Device.Controllers.RaspberryPi.ChannelFunction_INPUT;
-using static HalloweenControllerRPi.Functions.Func_RELAY;
 
 namespace HalloweenControllerRPi.Device.Controllers
 {
@@ -201,6 +195,7 @@ namespace HalloweenControllerRPi.Device.Controllers
             new List<Command>
             {
                new Command("PLAY", 'P'),
+               new Command("TRACK", 'T'),
                new Command("STOP", 'S'),
                new Command("VOLUME", 'V')
             }
@@ -523,7 +518,6 @@ namespace HalloweenControllerRPi.Device.Controllers
                switch (function.Value)
                {
                   #region /* INPUT HANDLING */
-
                   case 'I':
                      ChannelFunction_INPUT cINPUT = (_lAllFunctions[(int)channel - 1] as ChannelFunction_INPUT);
 
@@ -549,11 +543,9 @@ namespace HalloweenControllerRPi.Device.Controllers
                         return;
                      }
                      break;
-
                   #endregion /* INPUT HANDLING */
 
                   #region /* RELAY HANDLING */
-
                   case 'R':
                      ChannelFunction_RELAY cRELAY = (_lAllFunctions[(int)channel - 1] as ChannelFunction_RELAY);
 
@@ -566,7 +558,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                         {
                            case 'S':
                               cRELAY.Level = UInt32.Parse(new string(decodedData));
-                              cRELAY.HostHat.UpdateChannel(cRELAY);
+                              cRELAY.ChannelHost.UpdateChannel(cRELAY);
                               break;
 
                            case 'G':
@@ -579,11 +571,9 @@ namespace HalloweenControllerRPi.Device.Controllers
                         return;
                      }
                      break;
-
                   #endregion /* RELAY HANDLING */
 
                   #region /* PWM HANDLING */
-
                   case 'T':
                      ChannelFunction_PWM cPWM = (_lAllFunctions[(int)channel - 1] as ChannelFunction_PWM);
 
@@ -598,7 +588,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                            {
                               case 'S':
                                  cPWM.Level = UInt32.Parse(new string(decodedData));
-                                 cPWM.HostHat.UpdateChannel(cPWM);
+                                 cPWM.ChannelHost.UpdateChannel(cPWM);
                                  break;
 
                               case 'G':
@@ -628,11 +618,45 @@ namespace HalloweenControllerRPi.Device.Controllers
                         }
                      }
                      break;
-
                   #endregion /* PWM HANDLING */
 
-                  case 'A': /* ADC */
+                  #region /* SOUND HANDLING */
+                  case 'S':
+                     ChannelFunction_SOUND cSOUND = (_lAllFunctions[(int)channel - 1] as ChannelFunction_SOUND);
+
+                     if (cSOUND != null)
+                     {
+                        /* Remove the Function and Channel from the string */
+                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+
+                        switch (subFunction.Value)
+                        {
+                           case 'P':
+                              cSOUND.Play();
+                              //cSOUND.ChannelHost.UpdateChannel(cSOUND);
+                              break;
+
+                           case 'S':
+                              cSOUND.Stop();
+                              //cSOUND.ChannelHost.UpdateChannel(cSOUND);
+                              break;
+
+                           case 'T':
+                              cSOUND.Track = Byte.Parse(new string(decodedData));
+                              break;
+
+                           case 'V':
+                              cSOUND.Volume = Byte.Parse(new string(decodedData));
+                              break;
+
+                           default:
+                              break;
+                        }
+
+                        return;
+                     }
                      break;
+                  #endregion /* SOUND HANDLING */
 
                   case 'C':
                      break;

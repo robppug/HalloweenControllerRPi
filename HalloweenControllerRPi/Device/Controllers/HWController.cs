@@ -1,9 +1,7 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Device.Controllers;
+using HalloweenControllerRPi.Device.Controllers.Channels;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HalloweenControllerRPi.Device.Controllers.RaspberryPi;
 using Windows.UI.Xaml.Controls;
 
 namespace HalloweenControllerRPi.Device
@@ -90,10 +88,7 @@ namespace HalloweenControllerRPi.Device
       public virtual void TriggerCommandReceived(CommandEventArgs args)
       {
          /* Execute TRIGGER command */
-         if (this.CommandReceived != null)
-         {
-            this.CommandReceived.Invoke(this, args);
-         }
+         CommandReceived?.Invoke(this, args);
       }
 
       /// <summary>

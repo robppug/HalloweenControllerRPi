@@ -103,33 +103,35 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Device\Controllers\RaspberryPi\Function\ChannelFunction_SOUND.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Function\IIOPin.cs" />
-    <Compile Include="Device\Controllers\IDisplayProvider.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\IDeviceComms.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\DeviceComms_I2C.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\II2CBusDevice.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Channels\IUartChannelProvider.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Channels\IChannelProvider.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\YX5300\CatalexYX5300.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\IDriverDisplayProvider.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\IDeviceCommsProvider.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\IDriverSoundProvider.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\I2C\IOPin_PCA9501.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\I2C\BusDevice_PCA9501.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Channels\IEepromChannelProvider.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Channels\IGpioChannelProvider.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Channels\IPwmChannelProvider.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\I2C\BusDevice_SC16IS752.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\BusDevices\I2C\BusDevice_PCA9685.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\SSD1306\DisplayFont.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\SSD1306\DisplayImage.cs" />
+    <Compile Include="Attributes\AccessTypeAttribute.cs" />
+    <Compile Include="Extentions\EnumExtension.cs" />
+    <Compile Include="Device\Controllers\Channels\ChannelFunction_SOUND.cs" />
+    <Compile Include="Device\Controllers\Channels\IIOPin.cs" />
+    <Compile Include="Device\Controllers\Providers\IDisplayProvider.cs" />
+    <Compile Include="Device\Controllers\BusDevices\IDeviceComms.cs" />
+    <Compile Include="Device\Controllers\BusDevices\DeviceComms_I2C.cs" />
+    <Compile Include="Device\Controllers\Providers\IUartChannelProvider.cs" />
+    <Compile Include="Device\Controllers\Providers\IChannelProvider.cs" />
+    <Compile Include="Device\Controllers\Drivers\YX5300\CatalexYX5300.cs" />
+    <Compile Include="Device\Controllers\Providers\IDriverDisplayProvider.cs" />
+    <Compile Include="Device\Controllers\Providers\IDeviceCommsProvider.cs" />
+    <Compile Include="Device\Controllers\Providers\ISoundProvider.cs" />
+    <Compile Include="Device\Controllers\BusDevices\I2C\IOPin_PCA9501.cs" />
+    <Compile Include="Device\Controllers\BusDevices\I2C\BusDevice_PCA9501.cs" />
+    <Compile Include="Device\Controllers\Providers\IEepromChannelProvider.cs" />
+    <Compile Include="Device\Controllers\Providers\IGpioChannelProvider.cs" />
+    <Compile Include="Device\Controllers\Providers\IPwmChannelProvider.cs" />
+    <Compile Include="Device\Controllers\BusDevices\I2C\BusDevice_SC16IS752.cs" />
+    <Compile Include="Device\Controllers\BusDevices\I2C\BusDevice_PCA9685.cs" />
+    <Compile Include="Device\Controllers\Drivers\SSD1306\DisplayFont.cs" />
+    <Compile Include="Device\Controllers\Drivers\SSD1306\DisplayImage.cs" />
+    <Compile Include="Device\Controllers\Channels\IChannelHost.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_DISPLAY_v1.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_INPUT_v1.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_RELAY_v1.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_MOSFET_v1.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_SOUND_v1.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Hats\Drivers\SSD1306\SSD1306.cs" />
+    <Compile Include="Device\Controllers\Drivers\SSD1306\SSD1306.cs" />
     <Compile Include="UI\Container\GroupContainer.xaml.cs">
       <DependentUpon>GroupContainer.xaml</DependentUpon>
     </Compile>
@@ -141,18 +143,18 @@
     </Compile>
     <Compile Include="Device\Command.cs" />
     <Compile Include="Device\CommandEventArgs.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Function\IChannel.cs" />
+    <Compile Include="Device\Controllers\Channels\IChannel.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\IHat.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\HWRaspberryPI2.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Function\ChannelFunction_RELAY.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Function\ChannelFunction_INPUT.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\IProcessTick.cs" />
+    <Compile Include="Device\Controllers\Channels\ChannelFunction_RELAY.cs" />
+    <Compile Include="Device\Controllers\Channels\ChannelFunction_INPUT.cs" />
+    <Compile Include="Device\Controllers\IProcessTick.cs" />
     <Compile Include="Device\Controllers\Simulated\HWSimulatedUI.xaml.cs">
       <DependentUpon>HWSimulatedUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="Device\Controllers\Simulated\HWSimulated.cs" />
-    <Compile Include="Device\Controllers\RaspberryPi\Function\ChannelFunction_PWM.cs" />
+    <Compile Include="Device\Controllers\Channels\ChannelFunction_PWM.cs" />
     <Compile Include="Device\Controllers\HWController.cs" />
     <Compile Include="Device\Controllers\IHWController.cs" />
     <Compile Include="Device\Controllers\ISupportedFunctions.cs" />
@@ -161,6 +163,7 @@
     <Compile Include="UI\Functions\Function_Button\Function_Button.xaml.cs">
       <DependentUpon>Function_Button.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\Functions\Func_SOUND_Old.cs" />
     <Compile Include="UI\Functions\Func_SOUND.cs" />
     <Compile Include="UI\Functions\Func_INPUT.cs" />
     <Compile Include="UI\Functions\Func_Relay.cs" />

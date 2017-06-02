@@ -32,6 +32,7 @@ namespace HalloweenControllerRPi.UI.Functions.Function_Button
 
       public bool IsRemoveable { get; set; }
       public bool OneOnly { get; set; }
+      public bool TriggerOnly { get; set; }
       public uint Index { get; set; }
 
       public static readonly DependencyProperty ToolTipProperty =
@@ -39,8 +40,8 @@ namespace HalloweenControllerRPi.UI.Functions.Function_Button
 
       public string ToolTip
       {
-         get { return (String)GetValue(ToolTipProperty); }
-         set { SetValue(ToolTipProperty, value); }
+         get;// { return (String)GetValue(ToolTipProperty); }
+         set;// { SetValue(ToolTipProperty, value); }
       }
 
       public static readonly DependencyProperty FillColourProperty =
@@ -49,8 +50,8 @@ namespace HalloweenControllerRPi.UI.Functions.Function_Button
 
       public Brush FillColour
       {
-         get { return (Brush)GetValue(FillColourProperty); }
-         set { SetValue(FillColourProperty, value); }
+         get;// { return (Brush)GetValue(FillColourProperty); }
+         set;// { SetValue(FillColourProperty, value); }
       }
 
       public Function_Button()
@@ -110,10 +111,7 @@ namespace HalloweenControllerRPi.UI.Functions.Function_Button
       internal void OnDragStarting(object sender, DragItemsStartingEventArgs args)
       {
          args.Data.RequestedOperation = DataPackageOperation.Copy;
-         args.Data.SetData("Type", this.GetType().ToString());
-         args.Data.SetData("Index", this.Index);
-         args.Data.SetData("OnlyOne", this.OneOnly);
-         args.Data.SetData("IsRemovable", this.IsRemoveable);
+         args.Data.Properties.Add("Object", this);
       }
    }
 }

@@ -1,18 +1,17 @@
-﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
-using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.BusDevices;
-using HalloweenControllerRPi.Functions;
+﻿using HalloweenControllerRPi.Device.Controllers.Channels;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Windows.Devices.Gpio;
-using Windows.Devices.I2c;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
+   public interface IHatChannel
+   {
+
+   }
    /// <summary>
    /// Raspberry Pi HAT class for the Raspberry Pi 2/3
    /// </summary>
-   public abstract class RPiHat : IHat
+   public abstract class RPiHat : IHat, IChannelHost
    {
       #region /* ENUMS */
 

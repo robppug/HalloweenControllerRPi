@@ -1,12 +1,8 @@
-﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
-using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.BusDevices;
+﻿using HalloweenControllerRPi.Device.Controllers.BusDevices;
+using HalloweenControllerRPi.Device.Controllers.Channels;
 using HalloweenControllerRPi.Device.Drivers;
-using HalloweenControllerRPi.Device.Drives;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 

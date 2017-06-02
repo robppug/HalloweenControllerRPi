@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HalloweenControllerRPi.Device
+﻿namespace HalloweenControllerRPi.Device.Controllers
 {
    public interface ISupportedFunctions
    {
       uint Inputs { get; }
       uint PWMs { get; }
       uint Relays { get; }
+      uint SoundChannels { get; }
    }
 }
