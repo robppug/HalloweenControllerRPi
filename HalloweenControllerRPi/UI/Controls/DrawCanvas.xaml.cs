@@ -42,23 +42,26 @@ namespace HalloweenControllerRPi.UI.Controls
       {
          if (e.Pointer.IsInContact == true)
          {
-            Line line = new Line();
+            if (e.GetCurrentPoint(mouseDraw).Position.X > currentPoint.Position.X)
+            {
+               Line line = new Line();
 
-            line.Stroke = new SolidColorBrush(Colors.Black);
-            line.X1 = currentPoint.Position.X;
-            line.Y1 = currentPoint.Position.Y;
-            line.X2 = e.GetCurrentPoint(this).Position.X;
-            line.Y2 = e.GetCurrentPoint(this).Position.Y;
+               line.Stroke = new SolidColorBrush(Colors.Black);
+               line.X1 = currentPoint.Position.X;
+               line.Y1 = currentPoint.Position.Y;
+               line.X2 = e.GetCurrentPoint(mouseDraw).Position.X;
+               line.Y2 = e.GetCurrentPoint(mouseDraw).Position.Y;
 
-            currentPoint = e.GetCurrentPoint(this);
+               currentPoint = e.GetCurrentPoint(mouseDraw);
 
-            mouseDraw.Children.Add(line);
+               mouseDraw.Children.Add(line);
+            }
          }
       }
 
       private void mouseDraw_PointerPressed(object sender, PointerRoutedEventArgs e)
       {
-         currentPoint = e.GetCurrentPoint(this);
+         currentPoint = e.GetCurrentPoint(mouseDraw);
       }
    }
 }

@@ -3,6 +3,8 @@ using HalloweenControllerRPi.Device;
 using HalloweenControllerRPi.Device.Controllers;
 using HalloweenControllerRPi.Function_GUI;
 using HalloweenControllerRPi.Functions;
+using HalloweenControllerRPi.UI.Controls;
+using HalloweenControllerRPi.UI.Functions.Function_Button;
 using System;
 using System.Collections.Generic;
 using Windows.System.Profile;
@@ -41,9 +43,9 @@ namespace HalloweenControllerRPi
 
          buttonStart.Background = new SolidColorBrush(Colors.Red);
 
-         //DrawCanvas mouseDraw = new DrawCanvas();
+         DrawCanvas mouseDraw = new DrawCanvas();
 
-         //mouseDraw.ShowAsync();
+         mouseDraw.ShowAsync();
 
          Loaded += OnLoaded;
          Unloaded += OnUnloaded;

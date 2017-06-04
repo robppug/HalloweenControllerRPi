@@ -14,6 +14,6 @@
     PrimaryButtonClick="ContentDialog_DoneClick"
     SecondaryButtonClick="ContentDialog_CancelClick">
 
-   <Canvas x:Name="mouseDraw" PointerMoved="mouseDraw_PointerMoved" PointerPressed="mouseDraw_PointerPressed" />
+   <Canvas x:Name="mouseDraw" Background="LightGray" PointerMoved="mouseDraw_PointerMoved" PointerPressed="mouseDraw_PointerPressed" MinHeight="200" Height="200" />
    
 </ContentDialog>
