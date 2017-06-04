@@ -138,6 +138,9 @@
     <Compile Include="UI\Container\GroupContainerTriggered.xaml.cs">
       <DependentUpon>GroupContainerTriggered.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\Controls\DrawCanvas.xaml.cs">
+      <DependentUpon>DrawCanvas.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\Controls\RangeSlider.xaml.cs">
       <DependentUpon>RangeSlider.xaml</DependentUpon>
     </Compile>
@@ -223,6 +226,10 @@
     <Page Include="UI\Container\GroupContainerTriggered.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Controls\DrawCanvas.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\Controls\RangeSlider.xaml">
       <SubType>Designer</SubType>

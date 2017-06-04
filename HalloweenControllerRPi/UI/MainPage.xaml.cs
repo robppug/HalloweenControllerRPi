@@ -3,27 +3,12 @@ using HalloweenControllerRPi.Device;
 using HalloweenControllerRPi.Device.Controllers;
 using HalloweenControllerRPi.Function_GUI;
 using HalloweenControllerRPi.Functions;
-using HalloweenControllerRPi.UI.Functions.Function_Button;
-using MathNet.Numerics;
-using MathNet.Numerics.Interpolation;
-using Microsoft.IoT.Lightning.Providers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using Windows.Devices;
-using Windows.Devices.Gpio;
-using Windows.Devices.Gpio.Provider;
-using Windows.Devices.I2c;
-using Windows.Devices.I2c.Provider;
-using Windows.Devices.Pwm.Provider;
-using Windows.Media.Playback;
-using Windows.Storage;
 using Windows.System.Profile;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Media;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -55,6 +40,10 @@ namespace HalloweenControllerRPi
          lGroupContainers.Add(groupContainer_Triggered);
 
          buttonStart.Background = new SolidColorBrush(Colors.Red);
+
+         //DrawCanvas mouseDraw = new DrawCanvas();
+
+         //mouseDraw.ShowAsync();
 
          Loaded += OnLoaded;
          Unloaded += OnUnloaded;
