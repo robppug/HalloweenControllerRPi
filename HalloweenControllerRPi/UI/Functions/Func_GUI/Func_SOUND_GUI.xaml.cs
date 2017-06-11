@@ -34,15 +34,24 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          this.InitializeComponent();
          Tracks = new List<string>();
-         Tracks.Add("Track 1");
-         Tracks.Add("Track 2");
-         Tracks.Add("Track 3");
-         Tracks.Add("Track 4");
-         Tracks.Add("Track 5");
+         Tracks.Add("N/A");
          comboBox_Track.DataContext = this;
          comboBox_Track.ItemsSource = Tracks;
 
          _boInitialised = true;
+      }
+
+      private void TextTitle_Tapped(object sender, TappedRoutedEventArgs e)
+      {
+         this.SetCustomName();
+      }
+
+      private void TextTitle_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+      {
+         if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
+         {
+            SetCustomName();
+         }
       }
 
       public Func_Sound_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
@@ -50,12 +59,15 @@ namespace HalloweenControllerRPi.Function_GUI
          _Func = new Func_SOUND(host, entype);
          _Func.Index = index;
          _Func.Volume = (uint)slider_Volume.Value;
+         _Func.evOnFunctionUpdated += UpdateGUI;
+         _Func.Loop = false;
 
-         //this.textTitle.MouseClick += gb_FunctionName_MouseClick;
-         textTitle.Text = "Sound";
+         textTitle.DoubleTapped += TextTitle_DoubleTapped;
+         textTitle.Text = "Sound #" + index;
 
          if(entype == Function.tenTYPE.TYPE_CONSTANT)
          {
+            _Func.Loop = true;
             slider_Duration.IsEnabled = false;
             slider_StartDelay.IsEnabled = false;
             textBlock_Duration.Visibility = Visibility.Collapsed;
@@ -64,14 +76,16 @@ namespace HalloweenControllerRPi.Function_GUI
 
          _Func.FuncButtonType = typeof(Function_Button_SOUND);
       }
-      
-      //private void gb_FunctionName_MouseClick(object sender, MouseEventArgs e)
-      //{
-      //if (e.Button == System.Windows.Forms.MouseButtons.Right)
-      //{
-      //   this.SetCustomName();
-      //}
-      //}
+
+      private void UpdateGUI(object sender, EventArgs e)
+      {
+         Tracks.Clear();
+
+         for (uint i = _Func.AvailableTracks; i > 0; i--)
+         {
+            Tracks.Add("Track #" + i.ToString());
+         }
+      }
 
       private void slider_Duration_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
       {
@@ -142,10 +156,27 @@ namespace HalloweenControllerRPi.Function_GUI
          this._Func.WriteXml(writer);
       }
 
-      public void SetCustomName()
+      public async void SetCustomName()
       {
-         //new PopupTextBox().SetCustomName(gb_FunctionName);
+         ContentDialog cd = new ContentDialog();
+         StackPanel panel = new StackPanel();
+         TextBox tb = new TextBox() { Text = this.textTitle.Text };
+         panel.Orientation = Orientation.Vertical;
+         panel.Children.Add(tb);
+
+         cd.Title = "Enter Custom Name";
+         cd.PrimaryButtonText = "OK";
+         cd.PrimaryButtonClick += (sender, e) =>
+            {
+               this.textTitle.Text = tb.Text;
+            };
+         cd.Content = panel;
+         await cd.ShowAsync();
       }
 
+      public void Initialise()
+      {
+         _Func.Initialise();
+      }
    }
 }

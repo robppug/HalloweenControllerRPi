@@ -1,8 +1,11 @@
-﻿using HalloweenControllerRPi.Device.Controllers;
+﻿using HalloweenControllerRPi.Attributes;
+using HalloweenControllerRPi.Device.Controllers;
 using HalloweenControllerRPi.Device.Controllers.Channels;
+using HalloweenControllerRPi.Extentions;
 using System;
 using System.Collections.Generic;
 using Windows.UI.Xaml.Controls;
+using static HalloweenControllerRPi.Device.HWController;
 
 namespace HalloweenControllerRPi.Device
 {
@@ -12,20 +15,10 @@ namespace HalloweenControllerRPi.Device
       public delegate void DataEventHandler<T>(T data);
 
       public event HostedMessageDelegate CommandReceived;
-      public event DataEventHandler<Type> FunctionAdded;
-      public event DataEventHandler<string> VersionInfoUpdated;
       public event DataEventHandler<uint> DiscoveryProgress;
       public event EventHandler ControllerInitialised;
 
       public class HWInterfaceException : Exception { public HWInterfaceException(String msg) : base(msg) { } }
-
-      private UInt16 devicePID = 0x0000;
-
-      public UInt16 DevicePID
-      {
-         get { return devicePID; }
-         set { devicePID = value; }
-      }
 
       public const char commandTerminator = '\n';
       #endregion
@@ -35,30 +28,17 @@ namespace HalloweenControllerRPi.Device
          CommandReceived?.Invoke(this, args);
       }
 
-      protected virtual void OnFunctionAdded(Type funcType)
-      {
-         FunctionAdded?.Invoke(funcType);
-      }
-
-      protected virtual void OnVersionInfoUpdated(string sVersion)
-      {
-         this.VersionInfoUpdated?.Invoke(sVersion);
-      }
-
       protected virtual void OnControllerInitialised()
       {
-         this.ControllerInitialised?.Invoke(this, EventArgs.Empty);
+         ControllerInitialised?.Invoke(this, EventArgs.Empty);
       }
 
       protected virtual void OnDiscoveryProgressUpdated(uint percentage)
       {
-         this.DiscoveryProgress?.Invoke(percentage);
+         DiscoveryProgress?.Invoke(percentage);
       }
 
-      public void OnInputChannelNotification(object sender, ChannelFunction_INPUT.EventArgsINPUT e)
-      {
-         this.TriggerCommandReceived(new CommandEventArgs('I', e.Index + 1, (uint)e.TriggerLevel));
-      }
+      public abstract void OnChannelNotification(object sender, CommandEventArgs e);
 
       public abstract Dictionary<Command, List<Command>> Commands { get; }
       public abstract uint Inputs { get; }
@@ -85,7 +65,7 @@ namespace HalloweenControllerRPi.Device
       /// </summary>
       public abstract void Disconnect();
 
-      public virtual void TriggerCommandReceived(CommandEventArgs args)
+      public virtual void TransmitCommand(CommandEventArgs args)
       {
          /* Execute TRIGGER command */
          CommandReceived?.Invoke(this, args);

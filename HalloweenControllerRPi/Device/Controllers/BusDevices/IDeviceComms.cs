@@ -5,12 +5,22 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
 {
    public interface IDeviceComms
    {
-      List<byte> rxData { get; }
+      event EventHandler<DeviceCommsEventArgs> DataReceived;
 
-      event EventHandler<EventArgs> DataReceived;
-
-      byte[] Read(ushort bytes);
+      byte[] Read(int bytes = 1);
 
       void Write(byte[] buffer);
+
+      byte[] WriteRead(byte[] txBuffer);
+   }
+
+   public class DeviceCommsEventArgs : EventArgs
+   {
+      public byte[] Data { get; }
+
+      public DeviceCommsEventArgs(byte[] data)
+      {
+         Data = data;
+      }
    }
 }

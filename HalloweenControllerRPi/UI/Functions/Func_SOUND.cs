@@ -12,14 +12,25 @@ namespace HalloweenControllerRPi.Functions
 {
    public class Func_SOUND : Function
    {
-      public EventHandler TimerTick;
-
-      private DispatcherTimer tickTimer;
+      private uint _volume;
 
       #region Parameters
-      public uint Volume { get; set; }
+      public uint AvailableTracks { get; set; }
+
+      public uint Volume
+      {
+         get { return _volume; }
+         set
+         {
+            _volume = value;
+            SendCommand("VOLUME", Volume);
+         }
+      }
 
       public uint Track { get; set; }
+
+      public bool Loop { get; set; }
+
       #endregion
 
       public Func_SOUND() { }
@@ -31,11 +42,7 @@ namespace HalloweenControllerRPi.Functions
          evOnDelayEnd += OnTrigger;
          evOnDurationEnd += OnDurationEnd;
 
-         tickTimer = new DispatcherTimer();
-         tickTimer.Tick += tickTimer_Elapsed;
-         vSetTimerInterval(tickTimer, 1000);
-
-         Track = 1;
+         Track = 0;
       }
 
       void vSetTimerInterval(DispatcherTimer t, uint value)
@@ -46,34 +53,9 @@ namespace HalloweenControllerRPi.Functions
          }
       }
 
-      void tickTimer_Elapsed(object sender, object e)
+      internal void Initialise()
       {
-         if (TimerTick != null)
-         {
-            TimerTick.Invoke(sender, EventArgs.Empty);
-         }
-
-         tickTimer.Start();
-      }
-
-      public void Play()
-      {
-         if (TimerTick != null)
-         {
-            TimerTick.Invoke(this, EventArgs.Empty);
-         }
-
-         tickTimer.Start();
-      }
-
-      public void Stop()
-      {
-         tickTimer.Stop();
-
-         if (TimerTick != null)
-         {
-            TimerTick.Invoke(this, EventArgs.Empty);
-         }
+         SendCommand("AVAILABLE TRACKS");
       }
 
       /// <summary>
@@ -83,46 +65,14 @@ namespace HalloweenControllerRPi.Functions
       /// <param name="e"></param>
       private void OnTrigger(object sender, EventArgs e)
       {
-         List<string> data = new List<string>();
-
-         data.Add(Index.ToString("00"));
-         data.Add(Volume.ToString());
-
-         this.SendCommand("VOLUME", data.ToArray());
-
-         data.Clear();
-
-         data.Add(Index.ToString("00"));
-         data.Add(Track.ToString());
-
-         this.SendCommand("TRACK", data.ToArray());
-
-         data.Clear();
-
-         data.Add(Index.ToString("00"));
-         data.Add(" 0");
-         this.SendCommand("PLAY", data.ToArray());
+         SendCommand("TRACK", Track);
+         SendCommand("LOOP", Loop);
+         SendCommand("PLAY");
       }
 
       private void OnDurationEnd(object sender, EventArgs e)
       {
-         List<string> data = new List<string>();
-
-         data.Add(Index.ToString("00"));
-         data.Add(" 0");
-         this.SendCommand("STOP", data.ToArray());
-
-         if ((e as ProcessFunctionArgs) != null)
-         {
-            if ((e as ProcessFunctionArgs).UserStopped == true)
-            {
-               Stop();
-            }
-         }
-         else
-         {
-            Stop();
-         }
+         SendCommand("STOP");
       }
 
       public override void WriteXml(System.Xml.XmlWriter writer)
@@ -132,6 +82,44 @@ namespace HalloweenControllerRPi.Functions
          writer.WriteAttributeString("Duration", Duration_ms.ToString());
          writer.WriteAttributeString("Delay", Duration_ms.ToString());
          writer.WriteAttributeString("Volume", Volume.ToString());
+         writer.WriteAttributeString("Track", Track.ToString());
+         writer.WriteAttributeString("Loop", Loop.ToString());
+      }
+
+      public override bool boProcessRequest(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue)
+      {
+         if(cFunc == (char)0)
+            return base.boProcessRequest(cFunc, subFunc, cFuncIndex, u32FuncValue);
+         else 
+         {
+            switch (subFunc)
+            {
+               case 'I':
+                  if (cFuncIndex == Index)
+                  {
+                     return base.boProcessRequest(cFunc, subFunc, cFuncIndex, u32FuncValue);
+                  }
+                  break;
+
+               case 'A':
+                  AvailableTracks = u32FuncValue;
+                  evOnFunctionUpdated?.Invoke(this, EventArgs.Empty);
+                  break;
+
+               case 'F':
+                  if (Loop == true)
+                  {
+                     SendCommand("PLAY");
+                     return true;
+                  }
+                  break;
+
+               default:
+                  break;
+            }
+         }
+
+         return false;
       }
    }
 }

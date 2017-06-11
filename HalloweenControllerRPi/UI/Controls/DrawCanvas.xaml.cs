@@ -61,7 +61,54 @@ namespace HalloweenControllerRPi.UI.Controls
 
       private void mouseDraw_PointerPressed(object sender, PointerRoutedEventArgs e)
       {
-         currentPoint = e.GetCurrentPoint(mouseDraw);
+         bool found = false;
+         Line[] currentCurve = new Line[mouseDraw.Children.Count];
+
+         mouseDraw.Children.CopyTo(currentCurve, 0);
+
+         if (e.Pointer.IsInContact)
+         {
+            currentPoint = e.GetCurrentPoint(mouseDraw);
+
+            foreach (Line l in currentCurve)
+            {
+               if (found)
+               {
+                  mouseDraw.Children.Remove(l);
+               }
+               else if ((currentPoint.Position.X >= l.X1) && (currentPoint.Position.X <= l.X2))
+               {
+                  l.X2 = currentPoint.Position.X;
+                  l.Y2 = currentPoint.Position.Y;
+
+                  found = true;
+               }
+            }
+
+            //This is to prevent GAPS
+            if((found == false) && ( mouseDraw.Children.Count != 0))
+            {
+               Line lastLine = (Line)mouseDraw.Children.Last();
+               if (currentPoint.Position.X > lastLine.X2)
+               {
+                  lastLine.X2 = currentPoint.Position.X;
+                  lastLine.Y2 = currentPoint.Position.Y;
+               }
+            }
+         }
+      }
+
+      private void mouseDraw_PointerReleased(object sender, PointerRoutedEventArgs e)
+      {
+      }
+
+      private void mouseDraw_PointerEntered(object sender, PointerRoutedEventArgs e)
+      {
+         if(e.GetCurrentPoint(mouseDraw).Position.X < 1)
+         {
+            mouseDraw.Children.Clear();
+         }
+         mouseDraw_PointerPressed(sender, e);
       }
    }
 }

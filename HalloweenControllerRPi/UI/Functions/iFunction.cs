@@ -17,8 +17,9 @@ namespace HalloweenControllerRPi.Functions
       EventHandler evOnTrigger { get; set; }
       EventHandler evOnDelayEnd { get; set; }
       EventHandler evOnDurationEnd { get; set; }
+      EventHandler evOnFunctionUpdated { get; set; }
 
-      bool boProcessRequest(char cFunc, char cFuncIndex, uint u32FuncValue);
+      bool boProcessRequest(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue);
       bool boCheckTriggerConditions(uint u32FuncValue);
    }
 }

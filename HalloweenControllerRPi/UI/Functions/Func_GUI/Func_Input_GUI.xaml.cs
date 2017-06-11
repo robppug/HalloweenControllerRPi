@@ -37,7 +37,7 @@ namespace HalloweenControllerRPi.Function_GUI
          this.textTitle.DoubleTapped += TextTitle_DoubleTapped;
 
          this.comboBox_TrigEdge.Items.Add("Low (GND)");
-         this.comboBox_TrigEdge.Items.Add("High (3.3V)");
+         this.comboBox_TrigEdge.Items.Add("High (VCC)");
          this.comboBox_TrigEdge.SelectedIndex = 0;
       }
 
@@ -102,18 +102,36 @@ namespace HalloweenControllerRPi.Function_GUI
          writer.WriteAttributeString("CustomName", this.textTitle.Text);
 
          this._Func.WriteXml(writer);
-      } 
+      }
       #endregion
 
-      public void SetCustomName()
+      public async void SetCustomName()
       {
-         //new PopupTextBox().SetCustomName(gb_FunctionName);
+         ContentDialog cd = new ContentDialog();
+         StackPanel panel = new StackPanel();
+         TextBox tb = new TextBox() { Text = this.textTitle.Text };
+         panel.Orientation = Orientation.Vertical;
+         panel.Children.Add(tb);
+
+         cd.Title = "Enter Custom Name";
+         cd.PrimaryButtonText = "OK";
+         cd.PrimaryButtonClick += (sender, e) =>
+         {
+            this.textTitle.Text = tb.Text;
+         };
+         cd.Content = panel;
+         await cd.ShowAsync();
       }
 
       private void UserControl_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
       {
          //this._Func.TriggerLevel = (Func_INPUT.tenTriggerLvl)(sender as ComboBox).SelectedIndex;
          //this._Func.DebounceTime_ms = (uint)(sender as Slider).Value;
+      }
+
+      public void Initialise()
+      {
+         throw new NotImplementedException();
       }
    }
 }

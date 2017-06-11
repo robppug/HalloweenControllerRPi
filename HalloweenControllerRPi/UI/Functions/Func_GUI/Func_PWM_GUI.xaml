@@ -10,7 +10,7 @@
              d:DesignWidth="240"
              mc:Ignorable="d">
 
-   <Grid Background="LightGray">
+   <Grid Background="LightGray" BorderThickness="2" >
       <TextBlock x:Name="textTitle"
                  Margin="2,2,0,0"
                  Foreground="Black"
@@ -25,9 +25,8 @@
               ValueChanged="slider_Duration_ValueChanged"
               Value="500" />
       <Controls:RangeSlider x:Name="slider_MaxLevel"
-                            Width="241"
-                            Margin="0,104,0,0"
-                            HorizontalAlignment="Left"
+                            Margin="5,106,5,0"
+                            HorizontalAlignment="Stretch"
                             VerticalAlignment="Top"
                             Maximum="100"
                             Minimum="0"

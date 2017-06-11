@@ -41,13 +41,18 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
             chan = new ChannelFunction_INPUT(this, i, pin);
 
-            chan.InputLevelChanged += HostController.OnInputChannelNotification;
+            chan.InputLevelChanged += Chan_InputLevelChanged;
                
             if (chan != null)
             {
                Channels.Add(chan);
             }
          }
+      }
+
+      private void Chan_InputLevelChanged(object sender, ChannelFunction_INPUT.EventArgsINPUT e)
+      {
+         HostController.OnChannelNotification(this, new CommandEventArgs('I', 'G', e.Index + 1, (uint)e.TriggerLevel));
       }
 
       public override void RefreshChannel(IChannel chan)

@@ -23,6 +23,7 @@ namespace HalloweenControllerRPi.Functions
          FUNC_FLICKER_ON,
          FUNC_RANDOM,
          FUNC_STROBE,
+         FUNC_CUSTOM,
          FUNC_NO_OF_FUNCTIONS
       };
 
@@ -77,26 +78,25 @@ namespace HalloweenControllerRPi.Functions
       /// <param name="e"></param>
       private void OnDurationEnd(object sender, EventArgs e)
       {
-         List<string> data = new List<string>();
 
-         data.Add(Index.ToString("00"));
          if (base.Type == tenTYPE.TYPE_TRIGGER)
          {
             if (this._Function == tenFUNCTION.FUNC_OFF)
             {
-               data.Add(" 0");
-               this.SendCommand("SET", data.ToArray());
+               SendCommand("SET");
             }
             else
             {
+               List<string> data = new List<string>();
+
+               data.Add(Index.ToString("00"));
                data.Add("0");
-               this.SendCommand("FUNCTION", data.ToArray());
+               this.SendCommandToHost("FUNCTION", data.ToArray());
             }
          }
          else
          {
-            data.Add(" 0");
-            this.SendCommand("FUNCTION", data.ToArray());
+            SendCommand("FUNCTION");
          }
       }
 
@@ -111,31 +111,10 @@ namespace HalloweenControllerRPi.Functions
 
          if (this._Function != tenFUNCTION.FUNC_OFF)
          {
-            data.Add(Index.ToString("00"));
-            data.Add(MinLevel.ToString());
-
-            this.SendCommand("MINLEVEL", data.ToArray());
-
-            data.Clear();
-
-            data.Add(Index.ToString("00"));
-            data.Add(MaxLevel.ToString());
-
-            this.SendCommand("MAXLEVEL", data.ToArray());
-
-            data.Clear();
-
-            data.Add(Index.ToString("00"));
-            data.Add(UpdateRate.ToString());
-
-            this.SendCommand("RATE", data.ToArray());
-
-            data.Clear();
-
-            data.Add(Index.ToString("00"));
-            data.Add(((uint)_Function).ToString());
-
-            this.SendCommand("FUNCTION", data.ToArray());
+            SendCommand("MINLEVEL", MinLevel);
+            SendCommand("MAXLEVEL", MaxLevel);
+            SendCommand("RATE", UpdateRate);
+            SendCommand("FUNCTION", (uint)_Function);
          }
       }
 

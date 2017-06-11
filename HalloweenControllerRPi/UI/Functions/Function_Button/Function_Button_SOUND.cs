@@ -15,16 +15,16 @@ namespace HalloweenControllerRPi.Function_GUI
          : base(typeof(Func_Sound_GUI), "SOUND", idx, Colors.Orchid)
       {
          IsRemoveable = false;
-         OneOnly = false;
-         TriggerOnly = true;
+         OneOnly = true;
+         TriggerOnly = false;//RPUGLIESE - true;
       }
 
       public Function_Button_SOUND(uint idx, Function.tenTYPE enType)
          : base(typeof(Func_Sound_GUI), "SOUND", idx, Colors.Orchid)
       {
          IsRemoveable = false;
-         OneOnly = false;
-         TriggerOnly = true;
+         OneOnly = true;
+         TriggerOnly = false;//RPUGLIESE - true;
       }
    }
 }

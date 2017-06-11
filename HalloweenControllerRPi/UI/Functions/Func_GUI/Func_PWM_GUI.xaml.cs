@@ -1,5 +1,6 @@
 ﻿using HalloweenControllerRPi.Controls;
 using HalloweenControllerRPi.Functions;
+using HalloweenControllerRPi.UI.Controls;
 using System;
 using System.Xml.Serialization;
 using Windows.UI.Xaml;
@@ -122,6 +123,12 @@ namespace HalloweenControllerRPi.Function_GUI
          if (_boInitialised == true)
          {
             this._Func.Function = (Func_PWM.tenFUNCTION)(sender as ComboBox).SelectedIndex;
+
+            if (this._Func.Function == Func_PWM.tenFUNCTION.FUNC_CUSTOM)
+            {
+               DrawCanvas mouseDraw = new DrawCanvas();
+               mouseDraw.ShowAsync();
+            }
          }
       }
 
@@ -163,13 +170,30 @@ namespace HalloweenControllerRPi.Function_GUI
          writer.WriteAttributeString("CustomName", this.textTitle.Text);
 
          this._Func.WriteXml(writer);
-      } 
+      }
       #endregion
 
-      public void SetCustomName()
+      public async void SetCustomName()
       {
-         //new PopupTextBox().SetCustomName(gb_FunctionName);
+         ContentDialog cd = new ContentDialog();
+         StackPanel panel = new StackPanel();
+         TextBox tb = new TextBox() { Text = this.textTitle.Text };
+         panel.Orientation = Orientation.Vertical;
+         panel.Children.Add(tb);
+
+         cd.Title = "Enter Custom Name";
+         cd.PrimaryButtonText = "OK";
+         cd.PrimaryButtonClick += (sender, e) =>
+         {
+            this.textTitle.Text = tb.Text;
+         };
+         cd.Content = panel;
+         await cd.ShowAsync();
       }
 
+      public void Initialise()
+      {
+         throw new NotImplementedException();
+      }
    }
 }

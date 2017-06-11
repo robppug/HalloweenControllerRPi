@@ -21,7 +21,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
       private void UIPanel_OnInputTrigger(object sender, EventArgs e)
       {
-         TriggerCommandReceived(new CommandEventArgs('I', UInt32.Parse((sender as string)), 1));
+         TransmitCommand(new CommandEventArgs('I', 'G', UInt32.Parse((sender as string)), 1));
       }
 
       /// <summary>
@@ -338,7 +338,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                      data.RemoveRange(0, 8);
 
                      //Packet received, allow active groups to process.
-                     TriggerCommandReceived(new CommandEventArgs(function.Value, cInputIdx, cInputLevel));
+                     TransmitCommand(new CommandEventArgs(function.Value, subFunction.Value, cInputIdx, cInputLevel));
                      l_Result = true;
                   }
                   break;
@@ -398,6 +398,11 @@ namespace HalloweenControllerRPi.Device.Controllers
       public override UserControl GetUIPanel()
       {
          return UIPanel;
+      }
+
+      public override void OnChannelNotification(object sender, CommandEventArgs e)
+      {
+         throw new NotImplementedException();
       }
    }
 }

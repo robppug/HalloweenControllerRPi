@@ -93,6 +93,8 @@ namespace HalloweenControllerRPi.Container
                FuncGUI = (Control)Activator.CreateInstance(draggedItem.GUIType, MainPage.HostApp, draggedItem.Index, Function.tenTYPE.TYPE_CONSTANT);
 
                Container.Children.Add(FuncGUI);
+
+               (FuncGUI as IFunctionGUI).Initialise();
                return;
             }
          }
@@ -126,9 +128,9 @@ namespace HalloweenControllerRPi.Container
             Function func = (c as IFunctionGUI).Func;
 
             if (boStart)
-               func.boProcessRequest((char)0, (char)0, (uint)0);
+               func.boProcessRequest((char)0, (char)0, (char)0, (uint)0);
             else
-               func.vStopFunction((char)0, (char)0, (uint)0);
+               func.vStopFunction((char)0, (char)0, (char)0, (uint)0);
          }
          else
          {
@@ -187,16 +189,32 @@ namespace HalloweenControllerRPi.Container
       }
 
       /// <summary>
-      /// Trigger received, parse through all Trigger groups and fire the trigger command.
+      /// Command received, parse through all FUNCTIONS to allow for processing.
       /// </summary>
-      /// <param name="cFunc"></param>
-      /// <param name="cIndex"></param>
-      /// <param name="u32Value"></param>
-      public void ProcessTrigger(CommandEventArgs args)
+      public void ProcessCommandEvent(CommandEventArgs args)
       {
-         foreach (GroupContainerTriggered gt in this.Container.Children)
+         switch(args.Commamd)
          {
-            gt.boProcessRequest(args.Commamd, args.Index, args.Value);
+            case 'I':
+               foreach (GroupContainerTriggered gt in this.Container.Children)
+               {
+                  gt.boProcessRequest(args.Commamd, args.SubCommamd, args.Index, args.Value);
+               }
+               break;
+
+            default:
+               foreach(Control c in Container.Children)
+               {
+                  if(c is IFunctionGUI)
+                  {
+                     if ((c as IFunctionGUI).Func.boProcessRequest(args.Commamd, args.SubCommamd, Convert.ToChar(args.Index), args.Value) == true)
+                     {
+                        //Target Function found, we can EXIT
+                        return;
+                     }
+                  }
+               }
+               break;
          }
       }
 

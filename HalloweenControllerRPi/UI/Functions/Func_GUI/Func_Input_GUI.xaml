@@ -9,7 +9,7 @@
              Loaded="UserControl_Loaded"
              mc:Ignorable="d">
 
-   <Grid Background="LightGray">
+   <Grid Background="LightGray" BorderThickness="2" >
       <TextBlock x:Name="textTitle"
                  Margin="5,0,0,0"
                  Foreground="Black"

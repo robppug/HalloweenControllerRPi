@@ -11,7 +11,7 @@
 
 
    <Grid Margin="0,0,0,10" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-      <Border Width="640"
+      <Border Width="745"
               Height="150"
               Margin="10,42,0,0"
               HorizontalAlignment="Left"
@@ -21,44 +21,38 @@
               CornerRadius="2"
               ScrollViewer.VerticalScrollBarVisibility="Disabled">
          <GridView x:Name="Available_Board"
-                   Width="640"
-                   Height="150"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Top"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
                    CanDragItems="True"
                    DragItemsStarting="DragItemsStarting"
                    ScrollViewer.VerticalScrollBarVisibility="Auto" />
       </Border>
-      <Border Width="400"
+      <Border
               Height="150"
-              Margin="650,42,0,0"
-              HorizontalAlignment="Left"
+              Margin="760,42,475,0"
+              HorizontalAlignment="Stretch"
               VerticalAlignment="Top"
               BorderBrush="Black"
               BorderThickness="1"
               CornerRadius="2">
          <GridView x:Name="Available_Statics"
-                   Width="400"
-                   Height="150"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Top"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
                    CanDragItems="True"
                    DragItemsStarting="DragItemsStarting"
                    ScrollViewer.VerticalScrollBarVisibility="Disabled" />
       </Border>
       <Border Width="460"
               Height="150"
-              Margin="1050,42,0,0"
-              HorizontalAlignment="Left"
+              Margin="0,42,10,0"
+              HorizontalAlignment="Right"
               VerticalAlignment="Top"
               BorderBrush="Black"
               BorderThickness="1"
               CornerRadius="2">
          <GridView x:Name="HWSimulatedGrid"
-                   Width="460"
-                   Height="150"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Top"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
                    ScrollViewer.VerticalScrollBarVisibility="Disabled" />
       </Border>
       <Pivot x:Name="pivotContainer"
@@ -159,7 +153,7 @@
                 Content="Load 'saved' file on startup."
                 Unchecked="checkBox_LoadOnStart_Unchecked" />
       <ProgressBar x:Name="ControllerProgressBar"
-                   Width="631"
+                   Width="741"
                    Height="28"
                    Margin="14,160,0,0"
                    HorizontalAlignment="Left"
@@ -172,9 +166,9 @@
                    IsRightTapEnabled="False"
                    IsTapEnabled="False" />
       <TextBlock x:Name="textControllerProgressBar"
-                 Width="631"
+                 Width="741"
                  Height="28"
-                 Margin="14,160,1275,0"
+                 Margin="14,160,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  Canvas.ZIndex="1"

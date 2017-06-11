@@ -1,37 +1,34 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.Providers;
 using System;
-using static HalloweenControllerRPi.Device.Controllers.Channels.SoundEventArgs;
+using static HalloweenControllerRPi.Device.Controllers.Channels.SoundChannelEventArgs;
 
 namespace HalloweenControllerRPi.Device.Controllers.Channels
 {
 
-   public class SoundEventArgs
+   public class SoundChannelEventArgs
    {
-      public enum State
+      public enum SoundState
       {
          Play,
-         Stop
+         Stop, 
+         Volume
       };
 
-      public State NewState { get; set; }
-      public byte? Track { get; set; }
-      public byte? Volume { get; set; }
+      public SoundState NewState { get; set; }
 
-      public SoundEventArgs(State state, byte? track, byte? volume)
+      public SoundChannelEventArgs(SoundState state)
       {
          NewState = state;
-         Track = track;
-         Volume = volume;
       }
    }
 
    public class ChannelFunction_SOUND : IChannel
    {
       private IChannelHost _channelHost;
-      private State _state;
       private uint _channelIdx;
+      private byte _volume;
 
-      public event EventHandler<SoundEventArgs> StateChange;
+      public event EventHandler<SoundChannelEventArgs> ChannelUpdated;
 
       public IChannelHost ChannelHost
       {
@@ -39,8 +36,17 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          private set { _channelHost = value; }
       }
 
-      public byte? Track { get; set; }
-      public byte? Volume { get; set; }
+      public byte Track { get; set; }
+      public bool Loop { get; set; }
+      public byte Volume
+      {
+         get { return _volume; }
+         set
+         {
+            _volume = value;
+            ChannelUpdated?.Invoke(this, new SoundChannelEventArgs(SoundState.Volume));
+         }
+      }
 
       public uint Index
       {
@@ -48,10 +54,17 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          get { return _channelIdx; }
       }
 
+      public ushort AvailableTracks
+      {
+         get;
+         set;
+      }
+
       public ChannelFunction_SOUND(IChannelHost host, uint chan)
       {
          Index = chan;
          ChannelHost = host;
+         Loop = false;
       }
 
       public void Tick()
@@ -61,15 +74,12 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
 
       public void Play()
       {
-         StateChange?.Invoke(this, new SoundEventArgs(State.Play, Track, Volume));
+         ChannelUpdated?.Invoke(this, new SoundChannelEventArgs(SoundState.Play));
       }
 
       public void Stop()
       {
-         Track = null;
-         Volume = null;
-
-         StateChange?.Invoke(this, new SoundEventArgs(State.Stop, null, null));
+         ChannelUpdated?.Invoke(this, new SoundChannelEventArgs(SoundState.Stop));
       }
 
       public object GetValue()

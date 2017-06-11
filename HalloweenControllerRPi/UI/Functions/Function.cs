@@ -30,18 +30,21 @@ namespace HalloweenControllerRPi.Functions
       private EventHandler _evOnTrigger;
       private EventHandler _evOnDelayEnd;
       private EventHandler _evOnDurationEnd;
+      private EventHandler _evOnFunctionUpdated;
 
       public Type FuncButtonType;
       
       public class ProcessFunctionArgs : EventArgs
       {
-         char  _cFunc;
-         char  _cFuncIndex;
+         char _cFunc;
+         char _cSubFunc;
+         char _cFuncIndex;
          uint  _u32FuncValue;
 
-         public ProcessFunctionArgs(char cFunc, char cFuncIndex, uint u32FuncValue)
+         public ProcessFunctionArgs(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue)
          {
             _cFunc = cFunc;
+            _cSubFunc = subFunc;
             _cFuncIndex = cFuncIndex;
             _u32FuncValue = u32FuncValue;
          }
@@ -108,6 +111,11 @@ namespace HalloweenControllerRPi.Functions
          get { return _evOnDurationEnd; }
          set { _evOnDurationEnd = value; }
       }
+      public EventHandler evOnFunctionUpdated
+      {
+         get { return _evOnFunctionUpdated; }
+         set { _evOnFunctionUpdated = value; }
+      }
       public tenTYPE Type
       {
          get { return _enType; }
@@ -131,7 +139,7 @@ namespace HalloweenControllerRPi.Functions
       }
       #endregion
 
-      void vSetTimerInterval(DispatcherTimer t, uint value)
+      private void vSetTimerInterval(DispatcherTimer t, uint value)
       {
          if (value > 0)
          {
@@ -139,12 +147,25 @@ namespace HalloweenControllerRPi.Functions
          }
       }
 
+      public void SendCommand(string cmd, object val = null)
+      {
+         List<string> data = new List<string>();
+
+         data.Add(Index.ToString("00"));
+         if (val == null)
+            data.Add(" 0");
+         else
+            data.Add(val.ToString());
+
+         SendCommandToHost(cmd, data.ToArray());
+      }
+
       /// <summary>
       /// Checks the requested COMMAND and then sends it to the HWInterface for processing and transmission.
       /// </summary>
       /// <param name="commandKey"></param>
       /// <param name="lData"></param>
-      protected void SendCommand(string commandKey, params string[] lData)
+      protected void SendCommandToHost(string commandKey, params string[] lData)
       {
          string data;
 
@@ -205,21 +226,21 @@ namespace HalloweenControllerRPi.Functions
       /// <param name="cFuncIndex"></param>
       /// <param name="value"></param>
       /// <returns></returns>
-      virtual public bool boProcessRequest(char cFunc, char cFuncIndex, uint value)
+      virtual public bool boProcessRequest(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue)
       {
          if (evOnTrigger != null)
          {
-            evOnTrigger.Invoke(this, new ProcessFunctionArgs(cFunc, cFuncIndex, value));
+            evOnTrigger.Invoke(this, new ProcessFunctionArgs(cFunc, subFunc, cFuncIndex, u32FuncValue));
          }
 
          return true;
       }
 
-      public void vStopFunction(char cFunc, char cFuncIndex, uint value)
+      public void vStopFunction(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue)
       {
          if (evOnDurationEnd != null)
          {
-            evOnDurationEnd.Invoke(this, new ProcessFunctionArgs(cFunc, cFuncIndex, value));
+            evOnDurationEnd.Invoke(this, new ProcessFunctionArgs(cFunc, subFunc, cFuncIndex, u32FuncValue));
          }
       }
 

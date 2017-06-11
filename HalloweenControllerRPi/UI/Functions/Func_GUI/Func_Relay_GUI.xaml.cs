@@ -107,9 +107,27 @@ namespace HalloweenControllerRPi.Function_GUI
       }
 
       #endregion
-      public void SetCustomName()
+      public async void SetCustomName()
       {
-         //new PopupTextBox().SetCustomName(gb_FunctionName);
+         ContentDialog cd = new ContentDialog();
+         StackPanel panel = new StackPanel();
+         TextBox tb = new TextBox() { Text = this.textTitle.Text };
+         panel.Orientation = Orientation.Vertical;
+         panel.Children.Add(tb);
+
+         cd.Title = "Enter Custom Name";
+         cd.PrimaryButtonText = "OK";
+         cd.PrimaryButtonClick += (sender, e) =>
+         {
+            this.textTitle.Text = tb.Text;
+         };
+         cd.Content = panel;
+         await cd.ShowAsync();
+      }
+
+      public void Initialise()
+      {
+         throw new NotImplementedException();
       }
    }
 }

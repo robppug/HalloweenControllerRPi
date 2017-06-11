@@ -13,6 +13,11 @@ namespace HalloweenControllerRPi.Device
          get;
          private set;
       }
+      public char SubCommamd
+      {
+         get;
+         private set;
+      }
 
       public uint Index
       {
@@ -26,9 +31,10 @@ namespace HalloweenControllerRPi.Device
          private set;
       }
 
-      public CommandEventArgs(char cmd, uint par1, uint par2)
+      public CommandEventArgs(char cmd, char subcmd, uint par1, uint par2)
       {
          this.Commamd = cmd;
+         this.SubCommamd = subcmd;
          this.Index = par1;
          this.Value = par2;
       }

@@ -103,6 +103,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Attributes\RxLengthAttribute.cs" />
     <Compile Include="Attributes\AccessTypeAttribute.cs" />
     <Compile Include="Extentions\EnumExtension.cs" />
     <Compile Include="Device\Controllers\Channels\ChannelFunction_SOUND.cs" />
@@ -169,7 +170,7 @@
     <Compile Include="UI\Functions\Func_SOUND_Old.cs" />
     <Compile Include="UI\Functions\Func_SOUND.cs" />
     <Compile Include="UI\Functions\Func_INPUT.cs" />
-    <Compile Include="UI\Functions\Func_Relay.cs" />
+    <Compile Include="UI\Functions\Func_RELAY.cs" />
     <Compile Include="UI\Functions\Func_PWM.cs" />
     <Compile Include="UI\Functions\Func_GUI\Func_Sound_GUI.xaml.cs">
       <DependentUpon>Func_Sound_GUI.xaml</DependentUpon>

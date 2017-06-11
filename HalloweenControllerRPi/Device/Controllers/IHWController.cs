@@ -1,4 +1,4 @@
-﻿using static HalloweenControllerRPi.Device.Controllers.Channels.ChannelFunction_INPUT;
+﻿using System;
 
 namespace HalloweenControllerRPi.Device.Controllers
 {
@@ -7,6 +7,6 @@ namespace HalloweenControllerRPi.Device.Controllers
       void Connect();
       void Disconnect();
 
-      void OnInputChannelNotification(object sender, EventArgsINPUT e);
+      void OnChannelNotification(object sender, CommandEventArgs e);
    }
 }

@@ -6,14 +6,29 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    VerticalAlignment="Stretch"
-    HorizontalAlignment="Stretch"
     Title="Draw custom sequence"
     PrimaryButtonText="Done"
     SecondaryButtonText="Cancel"
+    MinWidth="800"
     PrimaryButtonClick="ContentDialog_DoneClick"
     SecondaryButtonClick="ContentDialog_CancelClick">
 
-   <Canvas x:Name="mouseDraw" Background="LightGray" PointerMoved="mouseDraw_PointerMoved" PointerPressed="mouseDraw_PointerPressed" MinHeight="200" Height="200" />
-   
+   <Canvas x:Name="grid"
+         MinHeight="200" 
+         Height="200">
+      <Canvas 
+         x:Name="mouseDraw"
+         Background="LightGray"
+         PointerMoved="mouseDraw_PointerMoved" 
+         PointerPressed="mouseDraw_PointerPressed" 
+         PointerReleased="mouseDraw_PointerReleased" 
+         PointerEntered="mouseDraw_PointerEntered" Width="700" Height="160" Canvas.Left="30" Canvas.Top="20" />
+      <Rectangle HorizontalAlignment="Left" Height="1" Margin="29,180,0,0" Stroke="Black" StrokeThickness="1" VerticalAlignment="Top" Width="701"/>
+      <Rectangle HorizontalAlignment="Left" Height="160" Margin="29,20,0,0" Stroke="Black" StrokeThickness="1" VerticalAlignment="Top" Width="1"/>
+      <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="100%" FontSize="10" VerticalAlignment="Top" Margin="3,16,0,0"/>
+      <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="0%" FontSize="10" VerticalAlignment="Top" Margin="3,174,0,0" RenderTransformOrigin="0.333,0.769"/>
+      <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Start" FontSize="10" VerticalAlignment="Top" Margin="29,185,0,0"/>
+      <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="End" FontSize="10" VerticalAlignment="Top" Margin="717,185,0,0"/>
+   </Canvas>
+
 </ContentDialog>

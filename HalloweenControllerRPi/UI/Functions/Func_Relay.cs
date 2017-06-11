@@ -35,22 +35,12 @@ namespace HalloweenControllerRPi.Functions
       /// <param name="e"></param>
       private void OnTrigger(object sender, EventArgs e)
       {
-         List<string> lData = new List<string>();
-
-         lData.Add(Index.ToString("00"));
-         lData.Add(((uint)tenOutputLevel.tHigh).ToString());
-
-         this.SendCommand("SET", lData.ToArray());
+         SendCommand("SET", (uint)tenOutputLevel.tHigh);
       }
 
       private void OnDurationEnd(object sender, EventArgs e)
       {
-         List<string> lData = new List<string>();
-
-         lData.Add(Index.ToString("00"));
-         lData.Add(((uint)tenOutputLevel.tLow).ToString());
-
-         this.SendCommand("SET", lData.ToArray());
+         SendCommand("SET", (uint)tenOutputLevel.tLow);
       }
 
       public override void WriteXml(System.Xml.XmlWriter writer)

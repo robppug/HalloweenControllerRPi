@@ -154,13 +154,6 @@ namespace HalloweenControllerRPi.Device.Controllers
       /// </summary>
       private Dictionary<Command, List<Command>> _Commands = new Dictionary<Command, List<Command>>
       {
-         /* Command : DATA */
-         {  new Command("DATA", 'C'),
-            new List<Command>
-            {
-               new Command("VERSION", 'S')
-            }
-         },
          /* Command : INPUT */
          {  new Command("INPUT", 'I'),
             new List<Command>
@@ -197,7 +190,10 @@ namespace HalloweenControllerRPi.Device.Controllers
                new Command("PLAY", 'P'),
                new Command("TRACK", 'T'),
                new Command("STOP", 'S'),
-               new Command("VOLUME", 'V')
+               new Command("LOOP", 'L'),
+               new Command("VOLUME", 'V'),
+               new Command("FEEDBACK", 'F'),
+               new Command("AVAILABLE TRACKS", 'A')
             }
          }
       };
@@ -406,7 +402,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          //sWatch.Restart();
 
-         foreach(IHat hat in _lHats)
+         foreach (IHat hat in _lHats)
          {
             hat.HatTask();
          }
@@ -465,7 +461,7 @@ namespace HalloweenControllerRPi.Device.Controllers
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - Device found (UNSUPPORTED).");
+               System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - Device found (UNSUPPORTED).");
             }
 
             Address++;
@@ -633,12 +629,10 @@ namespace HalloweenControllerRPi.Device.Controllers
                         {
                            case 'P':
                               cSOUND.Play();
-                              //cSOUND.ChannelHost.UpdateChannel(cSOUND);
                               break;
 
                            case 'S':
                               cSOUND.Stop();
-                              //cSOUND.ChannelHost.UpdateChannel(cSOUND);
                               break;
 
                            case 'T':
@@ -647,6 +641,14 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                            case 'V':
                               cSOUND.Volume = Byte.Parse(new string(decodedData));
+                              break;
+
+                           case 'L':
+                              cSOUND.Loop = bool.Parse(new string(decodedData));
+                              break;
+
+                           case 'A':
+                              TransmitCommand(new CommandEventArgs(function.Value, subFunction.Value, channel, cSOUND.AvailableTracks));
                               break;
 
                            default:
@@ -658,9 +660,6 @@ namespace HalloweenControllerRPi.Device.Controllers
                      break;
                   #endregion /* SOUND HANDLING */
 
-                  case 'C':
-                     break;
-
                   default:
                      break;
                }
@@ -670,6 +669,59 @@ namespace HalloweenControllerRPi.Device.Controllers
          {
             /* COMMAND not supported */
          }
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="data"></param>
+      /// <returns>True if COMMAND was successfully handled</returns>
+      public override bool ReceivedCommand(List<char> data)
+      {
+         bool l_Result = false;
+         Command function;
+         Command subFunction;
+         char[] decodedData = new char[20];
+
+         if (data.Count > 0)
+         {
+            while (data[0] == 0x00) { data.RemoveAt(0); }
+
+            DecodeCommand(data, out function, out subFunction, ref decodedData);
+
+            switch (function.Value)
+            {
+               case 'I':
+                  if (data.Count >= 8)
+                  {
+                     char cInputIdx = (char)(data[3] - 0x30);
+                     char cInputLevel = (char)(data[5] - 0x30);
+                     data.RemoveRange(0, 8);
+
+                     //Packet received, allow active groups to process.
+                     TransmitCommand(new CommandEventArgs(function.Value, subFunction.Value, cInputIdx, cInputLevel));
+                     l_Result = true;
+                  }
+                  break;
+               case 'R':
+                  break;
+               case 'P':
+                  break;
+               case 'A':
+                  break;
+               case 'C':
+                  break;
+               default:
+                  break;
+            }
+         }
+         return l_Result;
+
+      }
+
+      public override void OnChannelNotification(object sender, CommandEventArgs e)
+      {
+         TransmitCommand(e);
       }
    }
 }

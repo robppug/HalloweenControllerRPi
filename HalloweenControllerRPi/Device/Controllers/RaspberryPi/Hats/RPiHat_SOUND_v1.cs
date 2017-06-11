@@ -5,7 +5,7 @@ using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.BusD
 using System;
 using System.Collections.Generic;
 using Windows.Devices.I2c;
-using static HalloweenControllerRPi.Device.Controllers.Channels.SoundEventArgs;
+using static HalloweenControllerRPi.Device.Controllers.Channels.SoundChannelEventArgs;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
@@ -32,49 +32,61 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          Channels = new List<IChannel>();
 
          /* Initialise availble channels on attached HAT */
-         for (uint i = 0; i < soundDrivers.Count; i++)
+         for (int i = 0; i < soundDrivers.Count; i++)
          {
-            ChannelFunction_SOUND chan = null;
+            ChannelFunction_SOUND chan;
 
-            chan = new ChannelFunction_SOUND(this, i);
-            chan.StateChange += Chan_StateChange;
+            chan = new ChannelFunction_SOUND(this, (uint)i);
+            chan.ChannelUpdated += Chan_ChannelUpdated;
 
-            if (chan != null)
-            {
-               Channels.Add(chan);
-            }
+            chan.AvailableTracks = (soundDrivers[i] as Catalex_YX5300<BusDeviceStream_SC16IS752>).GetNumberOfTracks();
+
+            Channels.Add(chan);
          }
       }
 
-      private void Chan_StateChange(object sender, SoundEventArgs e)
+      private void Chan_ChannelUpdated(object sender, SoundChannelEventArgs e)
       {
-         switch(e.NewState)
+         ChannelFunction_SOUND sndChan = (sender as ChannelFunction_SOUND);
+
+         switch (e.NewState)
          {
-            case State.Play:
-               soundDrivers[(int)(sender as ChannelFunction_SOUND).Index].Play(e.Track, e.Volume);
+            case SoundState.Play:
+               soundDrivers[(int)sndChan.Index].Play(sndChan.Track, sndChan.Loop);
                break;
 
-            case State.Stop:
+            case SoundState.Volume:
+               soundDrivers[(int)sndChan.Index].Volume(sndChan.Volume);
+               break;
+
+            case SoundState.Stop:
             default:
-               soundDrivers[(int)(sender as ChannelFunction_SOUND).Index].Stop();
+               soundDrivers[(int)sndChan.Index].Stop();
                break;
          }
       }
 
       private void InitialiseSoundDrivers()
       {
-         List<byte> data = new List<byte>();
-
          soundDrivers = new List<ISoundProvider>((int)busDevice.NumberOfUARTChannels);
 
-         //for (int i = 0; i < busDevice.NumberOfUARTChannels; i++)
-         int i = 0;
+         for (int i = 0; i < busDevice.NumberOfUARTChannels; i++)
          {
             Catalex_YX5300<BusDeviceStream_SC16IS752> sndDrv = new Catalex_YX5300<BusDeviceStream_SC16IS752>();
             sndDrv.Open(busDevice.UARTStreams[i]);
             sndDrv.InitialiseDriver();
-            //sndDrv.GetNumberOfTracks();
+            sndDrv.StateChanged += SndDrv_StateChanged;
             soundDrivers.Add(sndDrv);
+         }
+      }
+
+      private void SndDrv_StateChanged(object sender, SoundProviderEventArgs e)
+      {
+         switch (e.NewState)
+         {
+            case SoundProviderEventArgs.State.SoundFinished:
+               HostController.OnChannelNotification(sender, new CommandEventArgs('S', 'F', (uint)soundDrivers.IndexOf((sender as ISoundProvider)), (uint)e.NewState ));
+               break;
          }
       }
 

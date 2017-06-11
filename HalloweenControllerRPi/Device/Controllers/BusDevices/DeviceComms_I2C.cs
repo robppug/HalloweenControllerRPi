@@ -1,30 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
 using Windows.Devices.I2c;
+using Windows.UI.Xaml;
 
 namespace HalloweenControllerRPi.Device.Controllers.BusDevices
 {
    public class DeviceComms_I2C : IDeviceComms
    {
-      private I2cDevice _i2cDevice;
-      private List<byte> _rxData;
+      protected object _Lock = new object();
+      protected I2cDevice _i2cDevice;
+      protected DispatcherTimer bgRxTask;
 
-      public event EventHandler<EventArgs> DataReceived;
+      public virtual event EventHandler<DeviceCommsEventArgs> DataReceived;
 
       public I2cDevice i2cDevice
       {
          get { return _i2cDevice; }
       }
 
-      public List<byte> rxData
-      {
-         get { return _rxData; }
-      }
+      public bool DeviceReady { get; set; }
 
       public DeviceComms_I2C(I2cDevice dev)
       {
          _i2cDevice = dev;
-         _rxData = new List<byte>();
+
+         bgRxTask = new DispatcherTimer();
+         bgRxTask.Tick += BgRxTask_Tick;
+         bgRxTask.Interval = TimeSpan.FromMilliseconds(10);
+         bgRxTask.Start();
+      }
+
+      protected virtual void BgRxTask_Tick(object sender, object e)
+      {
+         byte[] rxData;
+
+         lock (_Lock)
+         {
+            if (DeviceReady)
+            {
+               rxData = Read();
+
+               if (rxData != null)
+               {
+                  DataReceived?.Invoke(this, new DeviceCommsEventArgs(rxData));
+               }
+            }
+         }
       }
 
       public virtual void Write(byte[] buffer)
@@ -32,24 +53,20 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
          _i2cDevice.Write(buffer);
       }
 
-      public virtual byte[] Read(ushort bytes)
+      public virtual byte[] Read(int bytes = 1)
       {
-         byte[] rxData = new byte[bytes];
+         byte[] rx = new byte[bytes];
 
-         _rxData.Clear();
+         _i2cDevice.Read(rx);
 
-         _i2cDevice.Read(rxData);
-
-         _rxData.AddRange(rxData);
-
-         OnDataReceivedEvent(this, EventArgs.Empty);
-
-         return rxData;
+         return rx;
       }
 
-      public void OnDataReceivedEvent(object sender, EventArgs e)
+      public virtual byte[] WriteRead(byte[] txBuffer)
       {
-         DataReceived?.Invoke(sender, e);
+         _i2cDevice.Write(txBuffer);
+
+         return null;
       }
    }
 }

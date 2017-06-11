@@ -27,8 +27,6 @@ namespace HalloweenControllerRPi
 
       static public IHostApp HostApp;
 
-      public static MainPage Current;
-
       public MainPage()
       {
          this.InitializeComponent();
@@ -42,10 +40,6 @@ namespace HalloweenControllerRPi
          lGroupContainers.Add(groupContainer_Triggered);
 
          buttonStart.Background = new SolidColorBrush(Colors.Red);
-
-         DrawCanvas mouseDraw = new DrawCanvas();
-
-         mouseDraw.ShowAsync();
 
          Loaded += OnLoaded;
          Unloaded += OnUnloaded;
@@ -75,7 +69,7 @@ namespace HalloweenControllerRPi
             HWController = new HWSimulated();
          }
 
-         HWController.CommandReceived += HWController_CommandReceived;
+         HWController.CommandReceived += ReceiveCommandFromDevice;
 
          try
          {
@@ -87,13 +81,15 @@ namespace HalloweenControllerRPi
 
             HWController.Connect();
 
-            HWController.DevicePID = 0xAAAA;
-
             lHWControllers.Add(HWController);
          }
          catch { }
       }
 
+      /// <summary>
+      /// Discovery of available functions progress bar.
+      /// </summary>
+      /// <param name="data"></param>
       private void HWController_DiscoveryProgress(uint data)
       {
          textControllerProgressBar.Text = "Loading... " + data.ToString() + "%";
@@ -145,10 +141,11 @@ namespace HalloweenControllerRPi
       /// </summary>
       /// <param name="sender"></param>
       /// <param name="args"></param>
-      private void HWController_CommandReceived(object sender, CommandEventArgs args)
+      private void ReceiveCommandFromDevice(object sender, CommandEventArgs args)
       {
-         /* HW Device has received a COMMAND that needs processing */
-         groupContainer_Triggered.ProcessTrigger(args);
+         /* HW Device has received a COMMAND that needs processing, inform all Functions */
+         groupContainer_AlwaysActive.ProcessCommandEvent(args);
+         groupContainer_Triggered.ProcessCommandEvent(args);
       }
 
       /// <summary>
@@ -197,7 +194,7 @@ namespace HalloweenControllerRPi
 
       private void buttonTrigger_Click(object sender, RoutedEventArgs e)
       {
-         this.groupContainer_Triggered.ProcessTrigger(new CommandEventArgs('I', 1, 1));
+         this.groupContainer_Triggered.ProcessCommandEvent(new CommandEventArgs('I', 'G', 1, 1));
       }
 
       private void buttonStart_Click(object sender, RoutedEventArgs e)

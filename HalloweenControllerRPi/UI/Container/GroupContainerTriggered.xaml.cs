@@ -135,7 +135,7 @@ namespace HalloweenControllerRPi.Container
       /// <param name="cFuncIndex"></param>
       /// <param name="u32FuncValue"></param>
       /// <returns></returns>
-      public bool boProcessRequest(char func, uint index, uint value)
+      public bool boProcessRequest(char func, char subFunc, uint index, uint value)
       {
          bool boValidTrigger = false;
 
@@ -175,7 +175,7 @@ namespace HalloweenControllerRPi.Container
       /// <param name="c">Triggering FUNCTION.</param>
       private void TriggerFunctions(IFunctionGUI c)
       {
-         c.Func.boProcessRequest((char)0, (char)0, (uint)0);
+         c.Func.boProcessRequest((char)0, (char)0, (char)0, (uint)0);
       }
 
       /// <summary>

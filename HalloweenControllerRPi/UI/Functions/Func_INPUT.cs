@@ -30,15 +30,8 @@ namespace HalloweenControllerRPi.Functions
          get { return _debounceTime_ms; }
          set
          {
-            List<string> data = new List<string>();
-
             _debounceTime_ms = value;
-
-            data.Add(Index.ToString("00"));
-            data.Add(_debounceTime_ms.ToString());
-
-            /* Notify the HW to configure its input debouncing time */
-            this.SendCommand("DEBTIME", data.ToArray());
+            SendCommand("DEBTIME", _debounceTime_ms);
          }
       }
 
@@ -47,15 +40,9 @@ namespace HalloweenControllerRPi.Functions
          get { return _postTriggerDelay_ms; }
          set
          {
-            List<string> data = new List<string>();
-
             _postTriggerDelay_ms = value;
 
-            data.Add(Index.ToString("00"));
-            data.Add(_postTriggerDelay_ms.ToString());
-
-            /* Notify the HW to configure its input post-debouncing time */
-            this.SendCommand("POSTDEBTIME", data.ToArray());
+            SendCommand("POSTDEBTIME", _debounceTime_ms);
          }
       }
       public Func_INPUT()
@@ -90,13 +77,13 @@ namespace HalloweenControllerRPi.Functions
          writer.WriteAttributeString("PostTriggerTime", _postTriggerDelay_ms.GetHashCode().ToString());
       }
 
-      public override bool boProcessRequest(char cFunc, char cFuncIndex, uint u32FuncValue)
+      public override bool boProcessRequest(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue)
       {
          bool boValid = false;
 
          if (boCheckTriggerConditions(u32FuncValue))
          {
-            boValid = base.boProcessRequest(cFunc, cFuncIndex, u32FuncValue);
+            boValid = base.boProcessRequest(cFunc, subFunc, cFuncIndex, u32FuncValue);
          }
 
          return boValid;

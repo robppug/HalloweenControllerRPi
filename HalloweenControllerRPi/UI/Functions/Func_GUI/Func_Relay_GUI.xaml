@@ -9,7 +9,7 @@
     d:DesignHeight="120"
     d:DesignWidth="240">
 
-   <Grid Background="LightGray">
+   <Grid Background="LightGray" BorderThickness="2" >
       <TextBlock x:Name="textTitle" TextWrapping="Wrap" Text="Relay (#)" Foreground="Black" Margin="2,2,0,0"/>
       <Slider x:Name="slider_Duration" VerticalAlignment="Stretch" Margin="5,27,5,49" Tag="Amount of time the RELAY will be active when triggered." TickFrequency="1000" Maximum="20000" Minimum="10" ValueChanged="slider_Duration_ValueChanged"/>
       <Slider x:Name="slider_StartDelay" VerticalAlignment="Top" Margin="5,69,5,0" Tag="Time to wait before starting the RELAY when triggered." TickFrequency="1000" Value="0" ValueChanged="slider_StartDelay_ValueChanged" Maximum="10000"/>

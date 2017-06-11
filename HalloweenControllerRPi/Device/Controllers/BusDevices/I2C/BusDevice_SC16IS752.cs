@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
+using Windows.UI.Xaml;
 
 namespace HalloweenControllerRPi.Device.Controllers.BusDevices
 {
@@ -75,6 +76,14 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
       REG_VAL_MASK = 0x0F
    };
 
+   public static class Helpers
+   {
+      public static int GetUARTCommsTimeinMs(int noOfBytes)
+      {
+         return (100000 / (9600 / (8 + 1 + 1)));
+      }
+   }
+
    /// <summary>
    /// Register ENUM extension class
    /// </summary>
@@ -119,36 +128,93 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
 
    public class BusDeviceStream_SC16IS752 : DeviceComms_I2C
    {
+      public override event EventHandler<DeviceCommsEventArgs> DataReceived;
+
       public int StreamIndex { get; set; }
 
       public BusDeviceStream_SC16IS752(I2cDevice dev, int channel) : base(dev)
       {
          StreamIndex = channel;
+         DeviceReady = false;
       }
 
-      public override byte[] Read(ushort bytes)
+      protected override void BgRxTask_Tick(object sender, object e)
       {
-         byte[] data = new byte[bytes];
+         byte[] rxData;
 
-         rxData.Clear();
+         lock (_Lock)
+         {
+            if (DeviceReady)
+            {
+               rxData = Read();
 
-         i2cDevice.WriteRead(new byte[1] { (byte)(((byte)AccessType.READ << 7) | (Registers.RHR.GetRegisterValue() << 3) | ((byte)StreamIndex << 1)) }, data);
+               if (rxData != null)
+               {
+                  DataReceived?.Invoke(this, new DeviceCommsEventArgs(rxData));
+               }
+            }
+         }
+      }
 
-         rxData.AddRange(data);
+      public override byte[] Read(int bytes = 1)
+      {
+         byte[] data = new byte[1];
 
-         OnDataReceivedEvent(this, EventArgs.Empty);
+         lock (_Lock)
+         {
+            i2cDevice.WriteRead(new byte[1] { (byte)(((byte)AccessType.READ << 7) | (Registers.LSR.GetRegisterValue() << 3) | ((byte)StreamIndex << 1)) }, data);
 
-         return data;
+            if ((data[0] & 0x01) == 0x01)
+            {
+               //There is some data in the RHR Register
+               i2cDevice.WriteRead(new byte[1] { (byte)(((byte)AccessType.READ << 7) | (Registers.RXLVL.GetRegisterValue() << 3) | ((byte)StreamIndex << 1)) }, data);
+
+               if (data[0] > 0)
+               {
+                  byte fifoBytes = data[0];
+                  byte[] readData = new byte[fifoBytes];
+
+                  i2cDevice.Write(new byte[1] { (byte)(((byte)AccessType.READ << 7) | (Registers.RHR.GetRegisterValue() << 3) | ((byte)StreamIndex << 1)) });
+
+                  Task.Delay(Helpers.GetUARTCommsTimeinMs(fifoBytes) + 1).Wait();
+
+                  i2cDevice.Read(readData);
+
+                  return readData;
+               }
+            }
+         }
+
+         return null;
       }
 
       public override void Write(byte[] buffer)
       {
-         List<byte> data = new List<byte>();
+         lock (_Lock)
+         {
+            List<byte> data = new List<byte>();
 
-         data.Add((byte)(((byte)AccessType.WRITE << 7) | Registers.THR.GetRegisterValue() << 3 | ((byte)StreamIndex << 1)));
-         data.AddRange(buffer);
+            data.Add((byte)(((byte)AccessType.WRITE << 7) | Registers.THR.GetRegisterValue() << 3 | ((byte)StreamIndex << 1)));
+            data.AddRange(buffer);
 
-         i2cDevice.Write(data.ToArray());
+            i2cDevice.Write(data.ToArray());
+         }
+      }
+
+      public override byte[] WriteRead(byte[] txBuffer)
+      {
+         byte[] retData;
+
+         lock (_Lock)
+         {
+            Write(txBuffer);
+
+            Task.Delay(Helpers.GetUARTCommsTimeinMs(txBuffer.Length) + 1).Wait();
+
+            retData = Read();
+         }
+
+         return retData;
       }
    }
 
@@ -158,7 +224,6 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
       private T _stream;
       private List<BusDeviceStream_SC16IS752> _uartStreams;
       private uint _preScaler = 1; /* Default of 1 (MCR[7] set to 0 - Divide-by-1 clock) */
-      private BackgroundWorker bgRxTask;
       private ObservableCollection<BusDeviceStreamEventArgs_SC16IS752> _rxDataFifo;
 
       #region EVENTS
@@ -217,34 +282,6 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
          _uartStreams = new List<BusDeviceStream_SC16IS752>(2);
          _rxDataFifo = new ObservableCollection<BusDeviceStreamEventArgs_SC16IS752>();
          //_rxDataFifo.CollectionChanged += _rxDataFifo_CollectionChanged;
-         bgRxTask = new BackgroundWorker();
-      }
-
-      private async void BgRxTask_DoWork(object sender, DoWorkEventArgs e)
-      {
-         List<byte> rxData = new List<byte>();
-
-         while(Initialised)
-         {
-            foreach(BusDeviceStream_SC16IS752 bus in _uartStreams)
-            {
-               ReadRegister(bus, Registers.LSR, ref rxData);
-
-               if((rxData[0] & 0x01) == 0x01)
-               {
-                  rxData.Clear();
-                  //There is some data in the RHR Register
-                  ReadRegister(bus, Registers.RXLVL, ref rxData);
-
-                  rxData = ReadBytes(bus, rxData[0]);
-
-                  _rxDataFifo.Add(new BusDeviceStreamEventArgs_SC16IS752(bus.StreamIndex, rxData));
-               }
-               rxData.Clear();
-            }
-
-            await Task.Delay(10);
-         }
       }
 
 
@@ -265,7 +302,6 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
       {
          Initialised = false;
          _stream = default(T);
-         bgRxTask.CancelAsync();
       }
 
       public void InitialiseDriver(bool proceedOnFail = false)
@@ -290,6 +326,7 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
             WriteRegister(streamBusDevice, Registers.EFR, 0X10); // enable enhanced registers 
             WriteRegister(streamBusDevice, Registers.LCR, 0x03); // 8 data bits, 1 stop bit, no parity 
             WriteRegister(streamBusDevice, Registers.FCR, 0x07); // reset TXFIFO, reset RXFIFO, ENABLE FIFO mode 
+            streamBusDevice.DeviceReady = true;
 
             //Channel B Setup
             streamBusDevice = new BusDeviceStream_SC16IS752((_stream as DeviceComms_I2C).i2cDevice, (int)UartChannels.ChannelB);
@@ -305,9 +342,7 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
             WriteRegister(streamBusDevice, Registers.EFR, 0X10); // enable enhanced registers 
             WriteRegister(streamBusDevice, Registers.LCR, 0x03); // 8 data bits, 1 stop bit, no parity 
             WriteRegister(streamBusDevice, Registers.FCR, 0x07); // reset TXFIFO, reset RXFIFO, ENABLE FIFO mode 
-
-            bgRxTask.DoWork += BgRxTask_DoWork;
-            bgRxTask.RunWorkerAsync();
+            streamBusDevice.DeviceReady = true;
          }
          else
          {
@@ -318,17 +353,17 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
 
       public void RefreshChannel(IChannel chan)
       {
-         List<byte> data = new List<byte>();
+         //List<byte> data = new List<byte>();
 
-         ReadRegister(_uartStreams[(int)chan.Index], Registers.LSR, ref data);
+         //ReadRegister(_uartStreams[(int)chan.Index], Registers.LSR, ref data);
 
-         /* Is DATA waiting? */
-         if ((byte)(data[0] & 0x01) == 0x01)
-         {
-            ReadRegister(_uartStreams[(int)chan.Index], Registers.RHR, ref data);
+         ///* Is DATA waiting? */
+         //if ((byte)(data[0] & 0x01) == 0x01)
+         //{
+         //   ReadRegister(_uartStreams[(int)chan.Index], Registers.RHR, ref data);
 
-            //DataReceived?.Invoke(this, EventArgs.Empty);
-         }
+         //   //DataReceived?.Invoke(this, EventArgs.Empty);
+         //}
       }
 
       private void ReadRegister(BusDeviceStream_SC16IS752 bus, Registers reg, ref List<byte> data)
@@ -338,9 +373,12 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
          if (reg.CanRead() == false)
             throw new Exception("Register " + reg.ToString() + " is WRITE only!");
 
-         bus.Write(new byte[1] { (byte)(((byte)AccessType.READ << 7) | ((byte)reg.GetRegisterValue() << 3) | ((byte)bus.StreamIndex << 1)) });
+         _stream.Write(new byte[1] { (byte)(((byte)AccessType.READ << 7) | ((byte)reg.GetRegisterValue() << 3) | ((byte)bus.StreamIndex << 1)) });
 
-         data.AddRange(bus.Read(1));
+         Task.Delay(Helpers.GetUARTCommsTimeinMs(1) + 1).Wait();
+
+         rxData = _stream.Read(1);
+         data.AddRange(rxData);
       }
 
       private void WriteRegister(BusDeviceStream_SC16IS752 bus, Registers reg, byte data)
@@ -348,28 +386,7 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
          if (reg.CanWrite() == false)
             throw new Exception("Register " + reg.ToString() + " is READ only!");
 
-         bus.Write(new byte[2] { (byte)(((byte)AccessType.WRITE << 7) | ((byte)reg.GetRegisterValue() << 3) | ((byte)bus.StreamIndex << 1)), (byte)data });
-      }
-
-      public byte ReadByte(BusDeviceStream_SC16IS752 bus)
-      {
-         List<byte> data = new List<byte>();
-
-         ReadRegister(bus, Registers.RHR, ref data);
-
-         return data[0];
-      }
-
-      public List<byte> ReadBytes(BusDeviceStream_SC16IS752 bus, ushort length)
-      {
-         List<byte> data = new List<byte>();
-
-         for (int i = 0; i < length; i++)
-         {
-            ReadRegister(bus, Registers.RHR, ref data);
-         }
-
-         return data;
+         _stream.Write(new byte[2] { (byte)(((byte)AccessType.WRITE << 7) | ((byte)reg.GetRegisterValue() << 3) | ((byte)bus.StreamIndex << 1)), (byte)data });
       }
 
       public IIOPin GetPin(ushort pin)
