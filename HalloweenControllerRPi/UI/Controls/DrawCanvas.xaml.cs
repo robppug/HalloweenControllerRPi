@@ -23,6 +23,7 @@ namespace HalloweenControllerRPi.UI.Controls
    public sealed partial class DrawCanvas : ContentDialog
    {
       private PointerPoint currentPoint;
+      private TextBlock coordsText;
 
       public double Resolution { get; set; } = 10.0;
 
@@ -43,6 +44,72 @@ namespace HalloweenControllerRPi.UI.Controls
          this.InitializeComponent();
 
          CapturedPoints = new List<Line>();
+         coordsText = new TextBlock()
+         {
+            FontSize = 8,
+         };
+
+         grid.Children.Add(coordsText);
+         PointerMoved += DrawCanvas_PointerMoved;
+      }
+
+      private void DrawCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
+      {
+         Point p = e.GetCurrentPoint(mouseDraw).Position;
+         int x, y;
+
+         x = (int)p.X;
+         y = (int)p.Y;
+
+         if (x > (int)mouseDraw.ActualWidth)
+            x = (int)mouseDraw.ActualWidth;
+         else if (x < 0)
+            x = 0;
+         if (y > (int)mouseDraw.ActualHeight)
+            y = (int)mouseDraw.ActualHeight;
+         else if (y < 0)
+            y = 0;
+
+         coordsText.Text = "(" + x + "," + ((int)mouseDraw.ActualHeight - y) + ")";
+
+         Canvas.SetLeft(coordsText, p.X + 30);
+         Canvas.SetTop(coordsText, p.Y - 5);
+      }
+
+      private bool CheckPosition()
+      {
+         bool found = false;
+         Line[] currentLines = new Line[CapturedPoints.Count];
+
+         CapturedPoints.CopyTo(currentLines);
+
+         foreach (Line l in currentLines)
+         {
+            if (found)
+            {
+               RemovePoint(l);
+            }
+            else if ((currentPoint.Position.X >= l.X1) && (currentPoint.Position.X <= l.X2))
+            {
+               l.X2 = currentPoint.Position.X;
+               l.Y2 = currentPoint.Position.Y;
+
+               found = true;
+            }
+         }
+
+         return found;
+      }
+
+      private void AddPoint(Line line)
+      {
+         CapturedPoints.Add(line);
+         mouseDraw.Children.Add(line);
+      }
+      private void RemovePoint(Line line)
+      {
+         CapturedPoints.Remove(line);
+         mouseDraw.Children.Remove(line);
       }
 
       private void mouseDraw_PointerMoved(object sender, PointerRoutedEventArgs e)
@@ -73,16 +140,6 @@ namespace HalloweenControllerRPi.UI.Controls
          }
       }
 
-      private void AddPoint(Line line)
-      {
-         CapturedPoints.Add(line);
-         mouseDraw.Children.Add(line);
-      }
-      private void RemovePoint(Line line)
-      {
-         CapturedPoints.Remove(line);
-         mouseDraw.Children.Remove(line);
-      }
 
       private void mouseDraw_PointerPressed(object sender, PointerRoutedEventArgs e)
       {
@@ -111,31 +168,6 @@ namespace HalloweenControllerRPi.UI.Controls
          }
       }
 
-      private bool CheckPosition()
-      {
-         bool found = false;
-         Line[] currentLines = new Line[CapturedPoints.Count];
-
-         CapturedPoints.CopyTo(currentLines);
-
-         foreach (Line l in currentLines)
-         {
-            if (found)
-            {
-               RemovePoint(l);
-            }
-            else if ((currentPoint.Position.X >= l.X1) && (currentPoint.Position.X <= l.X2))
-            {
-               l.X2 = currentPoint.Position.X;
-               l.Y2 = currentPoint.Position.Y;
-
-               found = true;
-            }
-         }
-
-         return found;
-      }
-
       private void mouseDraw_PointerReleased(object sender, PointerRoutedEventArgs e)
       {
       }
@@ -144,45 +176,48 @@ namespace HalloweenControllerRPi.UI.Controls
       {
          Line line = null;
 
-         if (e.GetCurrentPoint(mouseDraw).Position.X <= Resolution)
+         if (e.Pointer.IsInContact == true)
          {
-            //Left
-            mouseDraw.Children.Clear();
-            CapturedPoints.Clear();
+            if (e.GetCurrentPoint(mouseDraw).Position.X <= Resolution)
+            {
+               //Left
+               mouseDraw.Children.Clear();
+               CapturedPoints.Clear();
 
-            line = new Line();
+               line = new Line();
 
-            line.X1 = 0;
-            line.Y1 = e.GetCurrentPoint(mouseDraw).Position.Y;
-         }
-         else if (e.GetCurrentPoint(mouseDraw).Position.Y >= mouseDraw.ActualHeight - Resolution)
-         {
-            line = new Line();
+               line.X1 = 0;
+               line.Y1 = e.GetCurrentPoint(mouseDraw).Position.Y;
+            }
+            else if (e.GetCurrentPoint(mouseDraw).Position.Y >= mouseDraw.ActualHeight - Resolution)
+            {
+               line = new Line();
 
-            //Bottom
-            line.X1 = e.GetCurrentPoint(mouseDraw).Position.X;
-            line.Y1 = mouseDraw.ActualHeight;
-         }
-         else if (e.GetCurrentPoint(mouseDraw).Position.Y <= Resolution)
-         {
-            line = new Line();
+               //Bottom
+               line.X1 = e.GetCurrentPoint(mouseDraw).Position.X;
+               line.Y1 = mouseDraw.ActualHeight;
+            }
+            else if (e.GetCurrentPoint(mouseDraw).Position.Y <= Resolution)
+            {
+               line = new Line();
 
-            //Top
-            line.X1 = e.GetCurrentPoint(mouseDraw).Position.X;
-            line.Y1 = 0;
-         }
+               //Top
+               line.X1 = e.GetCurrentPoint(mouseDraw).Position.X;
+               line.Y1 = 0;
+            }
 
-         if (line != null)
-         {
-            currentPoint = e.GetCurrentPoint(mouseDraw);
+            if (line != null)
+            {
+               currentPoint = e.GetCurrentPoint(mouseDraw);
 
-            line.Stroke = new SolidColorBrush(Colors.Red);
-            line.X2 = currentPoint.Position.X;
-            line.Y2 = currentPoint.Position.Y;
+               line.Stroke = new SolidColorBrush(Colors.Red);
+               line.X2 = currentPoint.Position.X;
+               line.Y2 = currentPoint.Position.Y;
 
-            AddPoint(line);
+               AddPoint(line);
 
-            bool found = CheckPosition();
+               bool found = CheckPosition();
+            }
          }
 
          //mouseDraw_PointerPressed(sender, e);
@@ -192,42 +227,44 @@ namespace HalloweenControllerRPi.UI.Controls
       {
          Line line = null;
 
-
-         //Detect where the mouse left
-         if (e.GetCurrentPoint(mouseDraw).Position.X >= mouseDraw.ActualWidth - Resolution)
+         if (e.Pointer.IsInContact == true)
          {
-            line = new Line();
+            //Detect where the mouse left
+            if (e.GetCurrentPoint(mouseDraw).Position.X >= mouseDraw.ActualWidth - Resolution)
+            {
+               line = new Line();
 
-            //Right
-            line.X2 = mouseDraw.ActualWidth;
-            line.Y2 = e.GetCurrentPoint(mouseDraw).Position.Y;
-         }
-         else if (e.GetCurrentPoint(mouseDraw).Position.Y >= mouseDraw.ActualHeight - Resolution)
-         {
-            line = new Line();
+               //Right
+               line.X2 = mouseDraw.ActualWidth;
+               line.Y2 = e.GetCurrentPoint(mouseDraw).Position.Y;
+            }
+            else if (e.GetCurrentPoint(mouseDraw).Position.Y >= mouseDraw.ActualHeight - Resolution)
+            {
+               line = new Line();
 
-            //Bottom
-            line.X2 = e.GetCurrentPoint(mouseDraw).Position.X;
-            line.Y2 = mouseDraw.ActualHeight;
-         }
-         else if (e.GetCurrentPoint(mouseDraw).Position.Y <= Resolution)
-         {
-            line = new Line();
+               //Bottom
+               line.X2 = e.GetCurrentPoint(mouseDraw).Position.X;
+               line.Y2 = mouseDraw.ActualHeight;
+            }
+            else if (e.GetCurrentPoint(mouseDraw).Position.Y <= Resolution)
+            {
+               line = new Line();
 
-            //Top
-            line.X2 = e.GetCurrentPoint(mouseDraw).Position.X;
-            line.Y2 = 0;
-         }
+               //Top
+               line.X2 = e.GetCurrentPoint(mouseDraw).Position.X;
+               line.Y2 = 0;
+            }
 
-         if (line != null)
-         {
-            line.Stroke = new SolidColorBrush(Colors.Red);
-            line.X1 = currentPoint.Position.X;
-            line.Y1 = currentPoint.Position.Y;
+            if (line != null)
+            {
+               line.Stroke = new SolidColorBrush(Colors.Red);
+               line.X1 = currentPoint.Position.X;
+               line.Y1 = currentPoint.Position.Y;
 
-            currentPoint = e.GetCurrentPoint(mouseDraw);
+               currentPoint = e.GetCurrentPoint(mouseDraw);
 
-            AddPoint(line);
+               AddPoint(line);
+            }
          }
       }
    }
