@@ -575,43 +575,40 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                      if (cPWM != null)
                      {
-                        //if (channel == chan.Index + 1)
+                        /* Remove the Function and Channel from the string */
+                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+
+                        switch (subFunction.Value)
                         {
-                           /* Remove the Function and Channel from the string */
-                           new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+                           case 'S':
+                              cPWM.Level = UInt32.Parse(new string(decodedData));
+                              cPWM.ChannelHost.UpdateChannel(cPWM);
+                              break;
 
-                           switch (subFunction.Value)
-                           {
-                              case 'S':
-                                 cPWM.Level = UInt32.Parse(new string(decodedData));
-                                 cPWM.ChannelHost.UpdateChannel(cPWM);
-                                 break;
+                           case 'G':
+                              break;
 
-                              case 'G':
-                                 break;
+                           case 'F':
+                              cPWM.Function = (Func_PWM.tenFUNCTION)UInt32.Parse(new string(decodedData));
+                              break;
 
-                              case 'F':
-                                 cPWM.Function = (Func_PWM.tenFUNCTION)UInt32.Parse(new string(decodedData));
-                                 break;
+                           case 'N':
+                              cPWM.MinLevel = UInt32.Parse(new string(decodedData));
+                              break;
 
-                              case 'N':
-                                 cPWM.MinLevel = UInt32.Parse(new string(decodedData));
-                                 break;
+                           case 'M':
+                              cPWM.MaxLevel = UInt32.Parse(new string(decodedData));
+                              break;
 
-                              case 'M':
-                                 cPWM.MaxLevel = UInt32.Parse(new string(decodedData));
-                                 break;
+                           case 'R':
+                              cPWM.UpdateCount = UInt32.Parse(new string(decodedData));
+                              break;
 
-                              case 'R':
-                                 cPWM.UpdateCount = UInt32.Parse(new string(decodedData));
-                                 break;
-
-                              default:
-                                 break;
-                           }
-
-                           return;
+                           default:
+                              break;
                         }
+
+                        return;
                      }
                      break;
                   #endregion /* PWM HANDLING */

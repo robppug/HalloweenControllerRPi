@@ -240,7 +240,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                   case 'S':
                      new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
 
-                     value = UInt32.Parse(decodedData[0].ToString());
+                     value = UInt32.Parse(decodedData.ToString());
                      break;
                   case 'G':
                      break;
@@ -283,6 +283,14 @@ namespace HalloweenControllerRPi.Device.Controllers
                         case Func_PWM.tenFUNCTION.FUNC_SWEEP_DOWN:
                            break;
                         case Func_PWM.tenFUNCTION.FUNC_SWEEP_UP:
+                           break;
+                        case Func_PWM.tenFUNCTION.FUNC_CUSTOM:
+                           break;
+                        case Func_PWM.tenFUNCTION.FUNC_RAMP_ON:
+                           break;
+                        case Func_PWM.tenFUNCTION.FUNC_RAMP_OFF:
+                           break;
+                        case Func_PWM.tenFUNCTION.FUNC_RAMP_BOTH:
                            break;
                         default:
                            break;

@@ -86,14 +86,14 @@ namespace HalloweenControllerRPi.Container
             //   draggedItem.Dispose();
 
             /* Only allow ONE of each function in the Always Actives group */
-            draggedItem = (Function_Button)Activator.CreateInstance(draggedItem.GetType(), draggedItem.Index, Function.tenTYPE.TYPE_TRIGGER);
+            //draggedItem = (Function_Button)Activator.CreateInstance(draggedItem.GetType(), draggedItem.Index, Function.tenTYPE.TYPE_TRIGGER);
 
             //Container.Children.Add(draggedItem);
 
             /* Create an instance of the FUNCTION GUI */
             FuncGUI = (Control)Activator.CreateInstance(draggedItem.GUIType, MainPage.HostApp, draggedItem.Index, Function.tenTYPE.TYPE_TRIGGER);
 
-            Container.Children.Add(FuncGUI);
+            AddFunctionToGroup(FuncGUI);
             return;
          }
       }
@@ -122,9 +122,9 @@ namespace HalloweenControllerRPi.Container
                      return;
                   }
                }
-
-               e.AcceptedOperation = DataPackageOperation.Copy;
             }
+
+            e.AcceptedOperation = DataPackageOperation.Copy;
          }
       }
 
@@ -155,7 +155,7 @@ namespace HalloweenControllerRPi.Container
 
          if (boValidTrigger)
          {
-            this.imageTrigger.Source = new BitmapImage(new Uri("ms-appx:///Assets/trigger.png"));
+            imageTrigger.Source = new BitmapImage(new Uri("ms-appx:///Assets/trigger.png"));
 
             /* Trigger each FUNCTION within the Active Group */
             foreach(UIElement c in Container.Children)

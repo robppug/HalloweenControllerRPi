@@ -67,14 +67,16 @@ namespace HalloweenControllerRPi.Device.Controllers
             case 'T':
                switch (subFunction.Value)
                {
+                  case 'S':
+                     lPwms[(int)index].Opacity = (double)((double)value / 100);
+                     break;
+
                   case 'N':
                   case 'M':
                      if (value >= 1)
                         lPwms[(int)index].Fill = new SolidColorBrush(Colors.Green);
                      else
                         lPwms[(int)index].Fill = new SolidColorBrush(Colors.Red);
-
-                     lPwms[(int)index].Opacity = (double)((double)value / 100);
                      break;
                   case 'R':
                      break;

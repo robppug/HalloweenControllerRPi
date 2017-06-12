@@ -41,6 +41,10 @@ namespace HalloweenControllerRPi
 
          buttonStart.Background = new SolidColorBrush(Colors.Red);
 
+         DrawCanvas mouseDraw = new DrawCanvas();
+         mouseDraw.ShowAsync();
+
+
          Loaded += OnLoaded;
          Unloaded += OnUnloaded;
       }

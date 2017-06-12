@@ -7,6 +7,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Shapes;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -15,8 +16,9 @@ namespace HalloweenControllerRPi.Function_GUI
    public sealed partial class Func_PWM_GUI : UserControl, IXmlSerializable, IFunctionGUI
    {
       private Func_PWM _Func;
+      private DrawCanvas customLevelDraw;
       private bool _boInitialised = false;
-
+      
       public uint MaxLevel
       {
          get { textBlock_MaxLevel.Text = "Max Level: " + _Func.MaxLevel.ToString() + " %"; return _Func.MaxLevel; }
@@ -40,22 +42,25 @@ namespace HalloweenControllerRPi.Function_GUI
 
          _boInitialised = true;
 
-         textBlock_MaxLevel.DataContext = this;
       }
 
       public Func_PWM_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
       {
          _Func = new Func_PWM(host, entype);
 
-         this.MaxLevel = 100;
-         this.MinLevel = 0;
+         MaxLevel = 100;
+         MinLevel = 0;
 
-         this._Func.Index = index;
+         customLevelDraw = new DrawCanvas();
+         customLevelDraw.PrimaryButtonClick += MouseDraw_PrimaryButtonClick;
          
-         this.textTitle.Text = "PWM #" + index;
-         this.textTitle.DoubleTapped += TextTitle_DoubleTapped;
-         this._Func.Duration_ms = (uint)slider_Duration.Value;
-         this._Func.Delay_ms = (uint)slider_MaxLevel.RangeMax;
+         _Func.Index = index;
+         
+         textTitle.Text = "PWM #" + index;
+         textTitle.DoubleTapped += TextTitle_DoubleTapped;
+         textBlock_MaxLevel.DataContext = this;
+         _Func.Duration_ms = (uint)slider_Duration.Value;
+         _Func.Delay_ms = (uint)slider_MaxLevel.RangeMax;
 
          /* Populate the comboBox list with available PWM Functions */
          foreach (Func_PWM.tenFUNCTION f in Enum.GetValues(typeof(Func_PWM.tenFUNCTION)))
@@ -67,11 +72,11 @@ namespace HalloweenControllerRPi.Function_GUI
 
          if (entype == Func_PWM.tenTYPE.TYPE_CONSTANT)
          {
-            this.slider_Duration.IsEnabled = false;
-            this.slider_StartDelay.IsEnabled = false;
+            slider_Duration.IsEnabled = false;
+            slider_StartDelay.IsEnabled = false;
          }
 
-         this._Func.FuncButtonType = typeof(Function_Button_PWM);
+         _Func.FuncButtonType = typeof(Function_Button_PWM);
       }
 
       private void TextTitle_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
@@ -120,15 +125,18 @@ namespace HalloweenControllerRPi.Function_GUI
 
       private void comboBox_Functions_SelectionChanged(object sender, SelectionChangedEventArgs e)
       {
-         if (_boInitialised == true)
-         {
-            this._Func.Function = (Func_PWM.tenFUNCTION)(sender as ComboBox).SelectedIndex;
+      }
 
-            if (this._Func.Function == Func_PWM.tenFUNCTION.FUNC_CUSTOM)
-            {
-               DrawCanvas mouseDraw = new DrawCanvas();
-               mouseDraw.ShowAsync();
-            }
+      private void MouseDraw_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+      {
+         DrawCanvas customDraw = (sender as DrawCanvas);
+
+         _Func.CustomLevels.Clear();
+
+         foreach (Line l in customDraw.CapturedPoints)
+         {
+            uint level = (uint)((100 / customDraw.YMax) * (customDraw.YMax - l.Y1));
+            _Func.CustomLevels.Add(level);
          }
       }
 
@@ -193,7 +201,23 @@ namespace HalloweenControllerRPi.Function_GUI
 
       public void Initialise()
       {
-         throw new NotImplementedException();
+         
+      }
+
+      private void comboBox_Functions_DropDownClosed(object sender, object e)
+      {
+         if (_boInitialised == true)
+         {
+            Func_PWM.tenFUNCTION prevFunc = this._Func.Function;
+
+            this._Func.Function = (Func_PWM.tenFUNCTION)(sender as ComboBox).SelectedIndex;
+
+            if (this._Func.Function == Func_PWM.tenFUNCTION.FUNC_CUSTOM)
+            {
+               customLevelDraw.SecondaryButtonClick += (s, args) => { this._Func.Function = prevFunc; (sender as ComboBox).SelectedIndex = (int)prevFunc; };
+               customLevelDraw.ShowAsync();
+            }
+         }
       }
    }
 }

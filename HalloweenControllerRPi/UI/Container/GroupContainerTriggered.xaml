@@ -11,10 +11,10 @@
     d:DesignWidth="400">
 
    <Border BorderThickness="1" BorderBrush="Black">
-      <ScrollViewer VerticalScrollBarVisibility="Auto">
-         <UniversalWrapPanel:UniversalWrapPanel x:Name="Container" HorizontalAlignment="Left" VerticalAlignment="Top" AllowDrop="True" MinHeight="300" MinWidth="400" Background="LightGray" Loaded="Panel_Loaded" Orientation="Horizontal" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+         <StackPanel x:Name="Container" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" AllowDrop="True" MinHeight="300" MinWidth="400" Background="LightGray" Loaded="Panel_Loaded">
             <Image x:Name="imageTrigger" MinHeight="300" MinWidth="60" Source="ms-appx:///Assets/blank.png" Stretch="Fill" Width="52"/>
-         </UniversalWrapPanel:UniversalWrapPanel>
+         </StackPanel>
       </ScrollViewer>
    </Border>
 </UserControl>

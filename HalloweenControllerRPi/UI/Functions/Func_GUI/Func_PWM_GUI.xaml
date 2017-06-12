@@ -55,7 +55,7 @@
                 Margin="10,30,10,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                SelectionChanged="comboBox_Functions_SelectionChanged" />
+                SelectionChanged="comboBox_Functions_SelectionChanged" DropDownClosed="comboBox_Functions_DropDownClosed" />
       <TextBlock x:Name="textBlock_Duration"
                  Width="109"
                  Margin="121,91,0,0"

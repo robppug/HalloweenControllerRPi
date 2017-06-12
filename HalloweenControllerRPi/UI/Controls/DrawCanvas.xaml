@@ -9,9 +9,7 @@
     Title="Draw custom sequence"
     PrimaryButtonText="Done"
     SecondaryButtonText="Cancel"
-    MinWidth="800"
-    PrimaryButtonClick="ContentDialog_DoneClick"
-    SecondaryButtonClick="ContentDialog_CancelClick">
+    MinWidth="800">
 
    <Canvas x:Name="grid"
          MinHeight="200" 
@@ -22,7 +20,9 @@
          PointerMoved="mouseDraw_PointerMoved" 
          PointerPressed="mouseDraw_PointerPressed" 
          PointerReleased="mouseDraw_PointerReleased" 
-         PointerEntered="mouseDraw_PointerEntered" Width="700" Height="160" Canvas.Left="30" Canvas.Top="20" />
+         PointerEntered="mouseDraw_PointerEntered" 
+         PointerExited="mouseDraw_PointerExited"
+         Width="700" Height="160" Canvas.Left="30" Canvas.Top="20" />
       <Rectangle HorizontalAlignment="Left" Height="1" Margin="29,180,0,0" Stroke="Black" StrokeThickness="1" VerticalAlignment="Top" Width="701"/>
       <Rectangle HorizontalAlignment="Left" Height="160" Margin="29,20,0,0" Stroke="Black" StrokeThickness="1" VerticalAlignment="Top" Width="1"/>
       <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="100%" FontSize="10" VerticalAlignment="Top" Margin="3,16,0,0"/>

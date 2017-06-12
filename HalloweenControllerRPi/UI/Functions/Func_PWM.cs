@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI.Xaml;
 
 namespace HalloweenControllerRPi.Functions
 {
@@ -30,7 +31,11 @@ namespace HalloweenControllerRPi.Functions
       private uint _MinLevel;
       private uint _MaxLevel;
       private uint _UpdateRate;
+      private int _CustomLevelIdx;
       private tenFUNCTION _Function;
+      private DispatcherTimer _timer;
+
+      public List<uint> CustomLevels { get; set; }
 
       public uint MinLevel
       {
@@ -64,11 +69,30 @@ namespace HalloweenControllerRPi.Functions
          : base(host, entype)
       {
          _Function = tenFUNCTION.FUNC_OFF;
+         CustomLevels = new List<uint>();
 
          FunctionKeyCommand = new Command("PWM", 'T');
 
          evOnDelayEnd += OnTrigger;
          evOnDurationEnd += OnDurationEnd;
+
+         _timer = new DispatcherTimer();
+         _timer.Tick += _timer_Tick;
+      }
+
+      private void _timer_Tick(object sender, object e)
+      {
+         SendCommand("SET", CustomLevels[_CustomLevelIdx]);
+
+         if (_CustomLevelIdx < CustomLevels.Count - 1)
+         {
+            _CustomLevelIdx++;
+         }
+         else
+         {
+            _CustomLevelIdx = 0;
+            _timer.Stop();
+         }
       }
 
       /// <summary>
@@ -78,7 +102,6 @@ namespace HalloweenControllerRPi.Functions
       /// <param name="e"></param>
       private void OnDurationEnd(object sender, EventArgs e)
       {
-
          if (base.Type == tenTYPE.TYPE_TRIGGER)
          {
             if (this._Function == tenFUNCTION.FUNC_OFF)
@@ -115,6 +138,14 @@ namespace HalloweenControllerRPi.Functions
             SendCommand("MAXLEVEL", MaxLevel);
             SendCommand("RATE", UpdateRate);
             SendCommand("FUNCTION", (uint)_Function);
+
+            if(_Function == tenFUNCTION.FUNC_CUSTOM)
+            {
+               //Start the timer to send the custom level curve
+               _timer.Interval = TimeSpan.FromMilliseconds(Duration_ms / CustomLevels.Count);
+               _CustomLevelIdx = 0;
+               _timer.Start();
+            }
          }
       }
 
