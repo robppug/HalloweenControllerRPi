@@ -137,9 +137,9 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          {
             hat = SupportedHATs.DISPLAY_v1;
          }
-         /* SC16IS752 - SOUND (0x48) */
-         else if (hatAddress == 0x48)
-         {
+         /* SC16IS752 - SOUND (0x48 - 0x4F) */
+         else if ((hatAddress >= 0x48) && (hatAddress <= 0x4F))
+         { 
             hat = SupportedHATs.SOUND_v1;
          }
          /* PCA9501 - PUSH BUTTONS and EEPROM (0x30, 0x70 is EEPROM) */

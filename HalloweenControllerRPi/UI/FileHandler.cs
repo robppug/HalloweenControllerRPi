@@ -58,7 +58,7 @@ namespace HalloweenControllerRPi
 
             if (xmlReader.ReadToFollowing("HalloweenControllerRPi.MainPage") == true)
             {
-               if (xmlReader.GetAttribute("Version") == "0.5")
+               if (xmlReader.GetAttribute("Version") == "1.0")
                {
                   if (xmlReader.ReadToFollowing("Settings") == true)
                   {
@@ -100,7 +100,7 @@ namespace HalloweenControllerRPi
 
             /* Store Version */
             xmlWriter.WriteStartElement(this.GetType().ToString());
-            xmlWriter.WriteAttributeString("Version", "0.5");
+            xmlWriter.WriteAttributeString("Version", "1.0");
                xmlWriter.WriteStartElement("Settings");
                xmlWriter.WriteAttributeString("LoadOnStart", this.checkBox_LoadOnStart.IsChecked.ToString());
                xmlWriter.WriteEndElement();
@@ -162,7 +162,7 @@ namespace HalloweenControllerRPi
             data = reader.GetAttribute("Version");
             //pbControl.Progress = noOfElements++;
 
-            if (data == "0.5")
+            if (data == "1.0")
             {
                string groupType = null;
 

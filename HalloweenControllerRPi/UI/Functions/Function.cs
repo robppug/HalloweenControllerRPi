@@ -146,16 +146,35 @@ namespace HalloweenControllerRPi.Functions
             t.Interval = TimeSpan.FromMilliseconds(value);
          }
       }
-
-      public void SendCommand(string cmd, object val = null)
+      public void SendCommand(string cmd)
       {
          List<string> data = new List<string>();
 
          data.Add(Index.ToString("00"));
-         if (val == null)
-            data.Add(" 0");
-         else
-            data.Add(val.ToString());
+         data.Add("  0");
+
+         SendCommandToHost(cmd, data.ToArray());
+      }
+
+      public void SendCommand<T>(string cmd, T[] val) where T : IConvertible
+      {
+         List<string> data = new List<string>();
+
+         data.Add(Index.ToString("00"));
+         foreach(T v in val)
+         {
+            data.Add(v.ToString().PadLeft(3));
+         }
+
+         SendCommandToHost(cmd, data.ToArray());
+      }
+
+      public void SendCommand<T>(string cmd, T val) where T : IConvertible
+      {
+         List<string> data = new List<string>();
+
+         data.Add(Index.ToString("00"));
+         data.Add(val.ToString().PadLeft(3));
 
          SendCommandToHost(cmd, data.ToArray());
       }

@@ -161,9 +161,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
                      Data = (ushort)((detectedCommand[5] << 8) | detectedCommand[6])
                   };
 
-                  result.Command.GetExpectedRxLength();
-
-                  decodedCommands.Add(result);
+                  if (result.Command.GetExpectedRxLength() != 0)
+                  {
+                     decodedCommands.Add(result);
+                  }
                }
             }
             else

@@ -9,7 +9,7 @@
     Title="Draw custom sequence"
     PrimaryButtonText="Done"
     SecondaryButtonText="Cancel"
-    MinWidth="800">
+    MinWidth="1100">
 
    <Canvas x:Name="grid"
          MinHeight="200" 
@@ -22,13 +22,13 @@
          PointerReleased="mouseDraw_PointerReleased" 
          PointerEntered="mouseDraw_PointerEntered" 
          PointerExited="mouseDraw_PointerExited"
-         Width="700" Height="160" Canvas.Left="30" Canvas.Top="20" />
-      <Rectangle HorizontalAlignment="Left" Height="1" Margin="29,180,0,0" Stroke="Black" StrokeThickness="1" VerticalAlignment="Top" Width="701"/>
-      <Rectangle HorizontalAlignment="Left" Height="160" Margin="29,20,0,0" Stroke="Black" StrokeThickness="1" VerticalAlignment="Top" Width="1"/>
+         Width="1000" Height="160" Canvas.Left="30" Canvas.Top="20" />
+      <Rectangle HorizontalAlignment="Left" Height="1" Margin="29,181,0,0" Stroke="Black" StrokeThickness="0.5" VerticalAlignment="Top" Width="1001"/>
+      <Rectangle HorizontalAlignment="Left" Height="161" Margin="29,20,0,0" Stroke="Black" StrokeThickness="0.5" VerticalAlignment="Top" Width="1"/>
       <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="100%" FontSize="10" VerticalAlignment="Top" Margin="3,16,0,0"/>
-      <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="0%" FontSize="10" VerticalAlignment="Top" Margin="3,174,0,0" RenderTransformOrigin="0.333,0.769"/>
-      <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Start" FontSize="10" VerticalAlignment="Top" Margin="29,185,0,0"/>
-      <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="End" FontSize="10" VerticalAlignment="Top" Margin="717,185,0,0"/>
+      <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="0%" FontSize="10" VerticalAlignment="Top" Margin="3,174,0,0"/>
+      <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Start" FontSize="10" VerticalAlignment="Top" Margin="28,182,0,0"/>
+      <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="End" FontSize="10" VerticalAlignment="Top" Margin="1014,182,0,0"/>
    </Canvas>
 
 </ContentDialog>

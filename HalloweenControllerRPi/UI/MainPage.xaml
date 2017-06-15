@@ -10,8 +10,9 @@
       mc:Ignorable="d">
 
 
-   <Grid Margin="0,0,0,10" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-      <Border Width="745"
+   <Grid x:Name="MainArea" Margin="0,0,0,10" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+      <Border x:Name="AvailablesArea"
+              Width="745"
               Height="150"
               Margin="10,42,0,0"
               HorizontalAlignment="Left"
@@ -27,7 +28,7 @@
                    DragItemsStarting="DragItemsStarting"
                    ScrollViewer.VerticalScrollBarVisibility="Auto" />
       </Border>
-      <Border
+      <Border x:Name="StaticsArea"
               Height="150"
               Margin="760,42,475,0"
               HorizontalAlignment="Stretch"
@@ -42,7 +43,8 @@
                    DragItemsStarting="DragItemsStarting"
                    ScrollViewer.VerticalScrollBarVisibility="Disabled" />
       </Border>
-      <Border Width="460"
+      <Border x:Name="SimulatedArea"
+              Width="460"
               Height="150"
               Margin="0,42,10,0"
               HorizontalAlignment="Right"

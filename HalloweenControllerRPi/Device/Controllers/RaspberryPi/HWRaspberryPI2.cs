@@ -56,11 +56,11 @@ namespace HalloweenControllerRPi.Device.Controllers
       //private static long TriggerTime;
 
       private static List<IHat> _lHats = new List<IHat>();
-      private static UInt16 _PWMs = 0;
-      private static UInt16 _Inputs = 0;
-      private static UInt16 _Relays = 0;
-      private static UInt16 _SoundChannels = 0;
       private static List<IChannel> _lAllFunctions = new List<IChannel>();
+      private static List<IChannel> _lPWMFunctions = new List<IChannel>();
+      private static List<IChannel> _lRELAYFunctions = new List<IChannel>();
+      private static List<IChannel> _lINPUTFunctions = new List<IChannel>();
+      private static List<IChannel> _lSOUNDFunctions = new List<IChannel>();
 
       #endregion /* PRIVATE */
 
@@ -180,7 +180,8 @@ namespace HalloweenControllerRPi.Device.Controllers
                new Command("FUNCTION", 'F'),
                new Command("MINLEVEL", 'N'),
                new Command("MAXLEVEL", 'M'),
-               new Command("RATE", 'R')
+               new Command("RATE", 'R'),
+               new Command("DATA", 'D')
             }
          },
          /* Command : SOUND */
@@ -307,7 +308,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return _Inputs;
+            return (uint)_lINPUTFunctions.Count;
          }
       }
 
@@ -315,7 +316,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return _PWMs;
+            return (uint)_lPWMFunctions.Count;
          }
       }
 
@@ -323,7 +324,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return _Relays;
+            return (uint)_lRELAYFunctions.Count;
          }
       }
 
@@ -331,7 +332,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return _SoundChannels;
+            return (uint)_lSOUNDFunctions.Count;
          }
       }
       #endregion /* AVAILABLE FUNCTIONS */
@@ -376,19 +377,19 @@ namespace HalloweenControllerRPi.Device.Controllers
          {
             if (c is ChannelFunction_PWM)
             {
-               _PWMs++;
+               _lPWMFunctions.Add(c);
             }
             else if (c is ChannelFunction_INPUT)
             {
-               _Inputs++;
+               _lINPUTFunctions.Add(c);
             }
             else if (c is ChannelFunction_RELAY)
             {
-               _Relays++;
+               _lRELAYFunctions.Add(c);
             }
             else if (c is ChannelFunction_SOUND)
             {
-               _SoundChannels++;
+               _lSOUNDFunctions.Add(c);
             }
          }
       }
@@ -489,6 +490,26 @@ namespace HalloweenControllerRPi.Device.Controllers
          throw new NotImplementedException();
       }
 
+      private static uint GetChannelIndex(ref char[] decodedData)
+      {
+         uint chan = UInt32.Parse(new string(decodedData).Substring(0, 2));
+
+         new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+
+         /* The CHANNEL of the request */
+         return chan;
+      }
+
+      private static uint GetValue(ref char[] decodedData, int len)
+      {
+         uint value = uint.Parse(new string(decodedData).Substring(0, len));
+
+         new string(decodedData).Remove(0, len).ToCharArray().CopyTo(decodedData, 0);
+
+         return value;
+      }
+
+
       /// <summary>
       ///
       /// </summary>
@@ -497,17 +518,16 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          Command function;
          Command subFunction;
-         char[] decodedData = new char[20];
+         char[] decodedData = new char[cmd.Length];
          uint channel;
 
          /* Decode the received COMMAND */
          DecodeCommand(cmd.ToList<char>(), out function, out subFunction, ref decodedData);
 
          /* Check if the received COMMAND is supported */
-         if (this.GetFunctionCommand(function.Key) != null)
+         if (GetFunctionCommand(function.Key) != null)
          {
-            /* The the CHANNEL of the request */
-            channel = UInt32.Parse(new string(decodedData).Substring(0, 2));
+            channel = GetChannelIndex(ref decodedData);
 
             if ((channel <= _lAllFunctions.Count) && (channel != 0))
             {
@@ -515,13 +535,10 @@ namespace HalloweenControllerRPi.Device.Controllers
                {
                   #region /* INPUT HANDLING */
                   case 'I':
-                     ChannelFunction_INPUT cINPUT = (_lAllFunctions[(int)channel - 1] as ChannelFunction_INPUT);
+                     ChannelFunction_INPUT cINPUT = (_lINPUTFunctions[(int)channel - 1] as ChannelFunction_INPUT);
 
                      if (cINPUT != null)
                      {
-                        /* Remove the Function and Channel from the string */
-                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
-
                         switch (subFunction.Value)
                         {
                            case 'D':
@@ -543,13 +560,10 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                   #region /* RELAY HANDLING */
                   case 'R':
-                     ChannelFunction_RELAY cRELAY = (_lAllFunctions[(int)channel - 1] as ChannelFunction_RELAY);
+                     ChannelFunction_RELAY cRELAY = (_lRELAYFunctions[(int)channel - 1] as ChannelFunction_RELAY);
 
                      if (cRELAY != null)
                      {
-                        /* Remove the Function and Channel from the string */
-                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
-
                         switch (subFunction.Value)
                         {
                            case 'S':
@@ -571,17 +585,14 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                   #region /* PWM HANDLING */
                   case 'T':
-                     ChannelFunction_PWM cPWM = (_lAllFunctions[(int)channel - 1] as ChannelFunction_PWM);
+                     ChannelFunction_PWM cPWM = (_lPWMFunctions[(int)channel - 1] as ChannelFunction_PWM);
 
                      if (cPWM != null)
                      {
-                        /* Remove the Function and Channel from the string */
-                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
-
                         switch (subFunction.Value)
                         {
                            case 'S':
-                              cPWM.Level = UInt32.Parse(new string(decodedData));
+                              cPWM.Level = GetValue(ref decodedData, 4);
                               cPWM.ChannelHost.UpdateChannel(cPWM);
                               break;
 
@@ -589,19 +600,28 @@ namespace HalloweenControllerRPi.Device.Controllers
                               break;
 
                            case 'F':
-                              cPWM.Function = (Func_PWM.tenFUNCTION)UInt32.Parse(new string(decodedData));
+                              cPWM.Function = (Func_PWM.tenFUNCTION)GetValue(ref decodedData, 4);
                               break;
 
                            case 'N':
-                              cPWM.MinLevel = UInt32.Parse(new string(decodedData));
+                              cPWM.MinLevel = GetValue(ref decodedData, 4);
                               break;
 
                            case 'M':
-                              cPWM.MaxLevel = UInt32.Parse(new string(decodedData));
+                              cPWM.MaxLevel = GetValue(ref decodedData, 4);
                               break;
 
                            case 'R':
-                              cPWM.UpdateCount = UInt32.Parse(new string(decodedData));
+                              cPWM.UpdateCount = GetValue(ref decodedData, 4);
+                              break;
+
+                           case 'D':
+                              while (decodedData[0] != '\n')
+                              {
+                                 uint level = GetValue(ref decodedData, 4);
+
+                                 cPWM.CustomLevel.Add(level);
+                              }
                               break;
 
                            default:
@@ -615,13 +635,10 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                   #region /* SOUND HANDLING */
                   case 'S':
-                     ChannelFunction_SOUND cSOUND = (_lAllFunctions[(int)channel - 1] as ChannelFunction_SOUND);
+                     ChannelFunction_SOUND cSOUND = (_lSOUNDFunctions[(int)channel - 1] as ChannelFunction_SOUND);
 
                      if (cSOUND != null)
                      {
-                        /* Remove the Function and Channel from the string */
-                        new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
-
                         switch (subFunction.Value)
                         {
                            case 'P':

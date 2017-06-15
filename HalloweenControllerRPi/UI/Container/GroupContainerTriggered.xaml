@@ -13,7 +13,7 @@
    <Border BorderThickness="1" BorderBrush="Black">
       <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
          <StackPanel x:Name="Container" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" AllowDrop="True" MinHeight="300" MinWidth="400" Background="LightGray" Loaded="Panel_Loaded">
-            <Image x:Name="imageTrigger" MinHeight="300" MinWidth="60" Source="ms-appx:///Assets/blank.png" Stretch="Fill" Width="52"/>
+            <Image x:Name="imageTrigger" MinHeight="300" MinWidth="60" Source="ms-appx:///Assets/blank.png" Width="52" Stretch="UniformToFill"/>
          </StackPanel>
       </ScrollViewer>
    </Border>

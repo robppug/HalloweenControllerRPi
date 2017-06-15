@@ -1,6 +1,8 @@
 ﻿using HalloweenControllerRPi.Controls;
 using HalloweenControllerRPi.Functions;
 using HalloweenControllerRPi.UI.Controls;
+using MathNet.Numerics;
+using MathNet.Numerics.Interpolation;
 using System;
 using System.Xml.Serialization;
 using Windows.UI.Xaml;
@@ -130,13 +132,17 @@ namespace HalloweenControllerRPi.Function_GUI
       private void MouseDraw_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
       {
          DrawCanvas customDraw = (sender as DrawCanvas);
+         double[] yPoints = new double[customDraw.CapturedPoints.Count];
 
          _Func.CustomLevels.Clear();
 
-         foreach (Line l in customDraw.CapturedPoints)
+         for (int i = 0; i < xPoints.Length; i++)
          {
-            uint level = (uint)((100 / customDraw.YMax) * (customDraw.YMax - l.Y1));
-            _Func.CustomLevels.Add(level);
+            Line l = customDraw.CapturedPoints[i];
+
+            yPoints[i] = ((100 / customDraw.YMax) * (customDraw.YMax - (l.Y2 > l.Y1 ? l.Y2 : l.Y1)));
+
+            _Func.CustomLevels.Add((uint)yPoints[i]);
          }
       }
 

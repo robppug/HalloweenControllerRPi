@@ -73,6 +73,8 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                   case 'N':
                   case 'M':
+                     lPwms[(int)index].Opacity = (double)((double)value / 100);
+
                      if (value >= 1)
                         lPwms[(int)index].Fill = new SolidColorBrush(Colors.Green);
                      else

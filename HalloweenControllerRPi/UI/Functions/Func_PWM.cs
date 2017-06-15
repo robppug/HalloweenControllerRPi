@@ -33,7 +33,6 @@ namespace HalloweenControllerRPi.Functions
       private uint _UpdateRate;
       private int _CustomLevelIdx;
       private tenFUNCTION _Function;
-      private DispatcherTimer _timer;
 
       public List<uint> CustomLevels { get; set; }
 
@@ -75,24 +74,6 @@ namespace HalloweenControllerRPi.Functions
 
          evOnDelayEnd += OnTrigger;
          evOnDurationEnd += OnDurationEnd;
-
-         _timer = new DispatcherTimer();
-         _timer.Tick += _timer_Tick;
-      }
-
-      private void _timer_Tick(object sender, object e)
-      {
-         SendCommand("SET", CustomLevels[_CustomLevelIdx]);
-
-         if (_CustomLevelIdx < CustomLevels.Count - 1)
-         {
-            _CustomLevelIdx++;
-         }
-         else
-         {
-            _CustomLevelIdx = 0;
-            _timer.Stop();
-         }
       }
 
       /// <summary>
@@ -102,7 +83,7 @@ namespace HalloweenControllerRPi.Functions
       /// <param name="e"></param>
       private void OnDurationEnd(object sender, EventArgs e)
       {
-         if (base.Type == tenTYPE.TYPE_TRIGGER)
+         if (Type == tenTYPE.TYPE_TRIGGER)
          {
             if (this._Function == tenFUNCTION.FUNC_OFF)
             {
@@ -110,11 +91,7 @@ namespace HalloweenControllerRPi.Functions
             }
             else
             {
-               List<string> data = new List<string>();
-
-               data.Add(Index.ToString("00"));
-               data.Add("0");
-               this.SendCommandToHost("FUNCTION", data.ToArray());
+               SendCommand("FUNCTION", "0");
             }
          }
          else
@@ -137,15 +114,18 @@ namespace HalloweenControllerRPi.Functions
             SendCommand("MINLEVEL", MinLevel);
             SendCommand("MAXLEVEL", MaxLevel);
             SendCommand("RATE", UpdateRate);
-            SendCommand("FUNCTION", (uint)_Function);
 
-            if(_Function == tenFUNCTION.FUNC_CUSTOM)
+            switch(_Function)
             {
-               //Start the timer to send the custom level curve
-               _timer.Interval = TimeSpan.FromMilliseconds(Duration_ms / CustomLevels.Count);
-               _CustomLevelIdx = 0;
-               _timer.Start();
+               case tenFUNCTION.FUNC_CUSTOM:
+                  SendCommand("DATA", CustomLevels.ToArray());
+                  break;
+
+               default:
+                  break;
             }
+
+            SendCommand("FUNCTION", (uint)_Function);
          }
       }
 

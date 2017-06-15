@@ -41,19 +41,15 @@ namespace HalloweenControllerRPi
 
          buttonStart.Background = new SolidColorBrush(Colors.Red);
 
-         DrawCanvas mouseDraw = new DrawCanvas();
-         mouseDraw.ShowAsync();
-
-
          Loaded += OnLoaded;
          Unloaded += OnUnloaded;
       }
 
       private void OnUnloaded(object sender, RoutedEventArgs e)
       {
-         if( lHWControllers.Count > 0 )
+         if (lHWControllers.Count > 0)
          {
-            foreach( IHWController hw in lHWControllers)
+            foreach (IHWController hw in lHWControllers)
             {
                hw.Disconnect();
             }
@@ -96,7 +92,7 @@ namespace HalloweenControllerRPi
       /// <param name="data"></param>
       private void HWController_DiscoveryProgress(uint data)
       {
-         textControllerProgressBar.Text = "Loading... " + data.ToString() + "%";
+         textControllerProgressBar.Text = "Detecting available functions... " + data.ToString() + "%";
          ControllerProgressBar.Value = (double)data;
       }
 
@@ -135,6 +131,8 @@ namespace HalloweenControllerRPi
          {
             HWSimulatedGrid.Items.Add(HWController.GetUIPanel());
          }
+         else
+            MainArea.Children.Remove(SimulatedArea);
 
          buttonStart.IsEnabled = true;
          buttonStop.IsEnabled = true;

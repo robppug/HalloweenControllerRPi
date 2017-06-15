@@ -29,13 +29,6 @@ namespace HalloweenControllerRPi.Device.Controllers
       /// </summary>
       private Dictionary<Command, List<Command>> _Commands = new Dictionary<Command, List<Command>>
       {
-         /* Command : DATA */
-         {  new Command("DATA", 'C'),
-            new List<Command>
-            {
-               new Command("VERSION", 'S')
-            }
-         },
          /* Command : INPUT */
          {  new Command("INPUT", 'I'),
             new List<Command>
@@ -62,7 +55,8 @@ namespace HalloweenControllerRPi.Device.Controllers
                new Command("FUNCTION", 'F'),
                new Command("MINLEVEL", 'N'),
                new Command("MAXLEVEL", 'M'),
-               new Command("RATE", 'R')
+               new Command("RATE", 'R'),
+               new Command("DATA", 'D')
             }
          }
       };
@@ -222,7 +216,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          Command function;
          Command subFunction;
-         char[] decodedData = new char[20];
+         char[] decodedData = new char[cmd.Length];
          uint index;
          uint value = 0;
 
@@ -301,6 +295,8 @@ namespace HalloweenControllerRPi.Device.Controllers
                      break;
                   case 'R':
                      value = UInt32.Parse(new string(decodedData));
+                     break;
+                  case 'D':
                      break;
                   default:
                      break;

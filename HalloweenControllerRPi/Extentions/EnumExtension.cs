@@ -7,8 +7,17 @@ namespace HalloweenControllerRPi.Extentions
    {
       internal static R GetModeAttribute(T type)
       {
+         R mde;
          Type enumType = type.GetType();
-         R mde = enumType.GetMember(type.ToString())[0].GetCustomAttribute<R>();
+
+         try
+         {
+            mde = enumType.GetMember(type.ToString())[0].GetCustomAttribute<R>();
+         }
+         catch(IndexOutOfRangeException)
+         {
+            mde = null;
+         }
          return mde;
       }
    }

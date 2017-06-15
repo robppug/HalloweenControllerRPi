@@ -2,6 +2,7 @@
 using MathNet.Numerics;
 using MathNet.Numerics.Interpolation;
 using System;
+using System.Collections.Generic;
 using static HalloweenControllerRPi.Functions.Func_PWM;
 
 namespace HalloweenControllerRPi.Device.Controllers.Channels
@@ -21,6 +22,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
       private bool toggle;
       private uint _functionLevel;
       private IChannelHost _channelHost;
+      private int _customLevelIdx;
 
       public const uint PWMResolution = 4095;
 
@@ -33,9 +35,11 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          Function = tenFUNCTION.FUNC_OFF;
          toggle = false;
          updateTick = 0;
+         _customLevelIdx = 0;
 
          Index = chan;
          ChannelHost = host;
+         CustomLevel = new List<uint>();
       }
 
       public uint Index
@@ -72,6 +76,11 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
       {
          get { return _updateCnt; }
          set { _updateCnt = value; Tick(); }
+      }
+
+      public List<uint> CustomLevel
+      {
+         get; set;
       }
 
       public IChannelHost ChannelHost
@@ -198,18 +207,46 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
                   }
                   break;
 
+
+               case tenFUNCTION.FUNC_RAMP_ON:
+                  break;
+
+               case tenFUNCTION.FUNC_RAMP_OFF:
+                  break;
+
+               case tenFUNCTION.FUNC_RAMP_BOTH:
+                  break;
+
+               case tenFUNCTION.FUNC_CUSTOM:
+                  if (_customLevelIdx < CustomLevel.Count)
+                  {
+                     _functionLevel = CustomLevel[_customLevelIdx];
+
+                     _customLevelIdx++;
+                  }
+                  else
+                  {
+                     _customLevelIdx = 0;
+                  }
+                  break;
+
                default:
+                  _customLevelIdx = 0;
                   break;
             }
          }
 
-         if (_functionLevel > MaxLevel)
+
+         if (Function != tenFUNCTION.FUNC_CUSTOM)
          {
-            _functionLevel = MaxLevel;
-         }
-         else if (_functionLevel < MinLevel)
-         {
-            _functionLevel = MinLevel;
+            if (_functionLevel > MaxLevel)
+            {
+               _functionLevel = MaxLevel;
+            }
+            else if (_functionLevel < MinLevel)
+            {
+               _functionLevel = MinLevel;
+            }
          }
 
          _func_value = (uint)curve.Interpolate(_functionLevel);

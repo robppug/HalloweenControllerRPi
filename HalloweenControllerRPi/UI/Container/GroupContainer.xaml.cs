@@ -85,7 +85,7 @@ namespace HalloweenControllerRPi.Container
             if (draggedItem.TriggerOnly == false)
             {
                /* Only allow ONE of each function in the Always Actives group */
-               draggedItem = (Function_Button)Activator.CreateInstance(draggedItem.GetType(), draggedItem.Index, Function.tenTYPE.TYPE_CONSTANT);
+               //draggedItem = (Function_Button)Activator.CreateInstance(draggedItem.GetType(), draggedItem.Index, Function.tenTYPE.TYPE_CONSTANT);
 
                //Container.Children.Add(draggedItem);
 
@@ -196,9 +196,28 @@ namespace HalloweenControllerRPi.Container
          switch(args.Commamd)
          {
             case 'I':
-               foreach (GroupContainerTriggered gt in this.Container.Children)
+               if (FuncAlwaysActive == true)
                {
-                  gt.boProcessRequest(args.Commamd, args.SubCommamd, args.Index, args.Value);
+                  foreach (Control c in Container.Children)
+                  {
+                     if (c is IFunctionGUI)
+                     {
+                        if ((c as IFunctionGUI).Func.Index == args.Index)
+                        {
+                           TriggerFunctions(c, false);
+                        }
+                     }
+                  }
+               }
+               else
+               {
+                  foreach (Control c in Container.Children)
+                  {
+                     if (c is GroupContainerTriggered)
+                     {
+                        (c as GroupContainerTriggered).boProcessRequest(args.Commamd, args.SubCommamd, args.Index, args.Value);
+                     }
+                  }
                }
                break;
 
