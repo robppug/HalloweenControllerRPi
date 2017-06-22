@@ -1,9 +1,8 @@
-﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats;
+﻿using HalloweenControllerRPi.Functions;
 using MathNet.Numerics;
 using MathNet.Numerics.Interpolation;
 using System;
 using System.Collections.Generic;
-using static HalloweenControllerRPi.Functions.Func_PWM;
 
 namespace HalloweenControllerRPi.Device.Controllers.Channels
 {
@@ -12,10 +11,11 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
       private IInterpolation curve = Interpolate.Common(new double[] { 0, 455, 910, 1365, 1820, 2275, 2730, 3185, 3640, 4095 },  /* 4095 / 9 points  */
                                                         new double[] { 0, 40, 140, 320, 620, 1000, 1450, 2200, 3100, 4095 }); /* y = x * x / 4095 */
 
-      private tenFUNCTION _enFunction;
-      private uint _channelIdx;
+      private PWMFunctions _enRampingFunction;
+      private PWMFunctions _enFunction;
       private uint _minLevel;
       private uint _maxLevel;
+      private uint _rampRate;
       private uint _updateCnt;
       private uint _func_value;
       private uint updateTick;
@@ -30,9 +30,11 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
       {
          MinLevel = 0;
          MaxLevel = PWMResolution;
+         RampRate = 1;
          Level = 0;
          UpdateCount = 0;
-         Function = tenFUNCTION.FUNC_OFF;
+         Function = PWMFunctions.FUNC_OFF;
+         _enRampingFunction = PWMFunctions.FUNC_OFF;
          toggle = false;
          updateTick = 0;
          _customLevelIdx = 0;
@@ -42,11 +44,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          CustomLevel = new List<uint>();
       }
 
-      public uint Index
-      {
-         set { _channelIdx = value; }
-         get { return _channelIdx; }
-      }
+      public uint Index { get; set; }
 
       public uint Level
       {
@@ -66,7 +64,13 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          set { _maxLevel = (PWMResolution * value) / 100; Tick(); }
       }
 
-      public tenFUNCTION Function
+      public uint RampRate
+      {
+         get { return _rampRate; }
+         set { _rampRate = value; Tick(); }
+      }
+
+      public PWMFunctions Function
       {
          get { return _enFunction; }
          set { _enFunction = value; Tick(); }
@@ -78,10 +82,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          set { _updateCnt = value; Tick(); }
       }
 
-      public List<uint> CustomLevel
-      {
-         get; set;
-      }
+      public List<uint> CustomLevel { get; set; }
 
       public IChannelHost ChannelHost
       {
@@ -105,20 +106,37 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          uint value;
          uint count;
 
-         if (Function == tenFUNCTION.FUNC_OFF)
+         if (Function == PWMFunctions.FUNC_OFF)
          {
-            _functionLevel = 0;
-         }
-         else if (Function == tenFUNCTION.FUNC_ON)
-         {
-            _functionLevel = MaxLevel;
+            if ((_enRampingFunction == PWMFunctions.FUNC_RAMP_BOTH) || (_enRampingFunction == PWMFunctions.FUNC_RAMP_OFF))
+            {
+               if (boUpdateTick() == true)
+               {
+                  if (_functionLevel < (MinLevel + _rampRate))
+                  {
+                     value = MinLevel;
+                     _enRampingFunction = PWMFunctions.FUNC_OFF;
+                  }
+                  else
+                  {
+                     value = (_functionLevel - _rampRate);
+                  }
+
+                  _functionLevel = value;
+               }
+            }
+            else
+            {
+               _enRampingFunction = PWMFunctions.FUNC_OFF;
+               _functionLevel = 0;
+            }
          }
          else if (boUpdateTick() == true)
          {
             switch (Function)
             {
-               case tenFUNCTION.FUNC_SWEEP_UP:
-                  value = (_functionLevel + 16);
+               case PWMFunctions.FUNC_SWEEP_UP:
+                  value = (_functionLevel + _rampRate);
                   if (value > MaxLevel)
                   {
                      value = MinLevel;
@@ -126,27 +144,27 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
                   _functionLevel = value;
                   break;
 
-               case tenFUNCTION.FUNC_SWEEP_DOWN:
-                  if (_functionLevel < (MinLevel + 16))
+               case PWMFunctions.FUNC_SWEEP_DOWN:
+                  if (_functionLevel < (MinLevel + _rampRate))
                   {
                      value = MinLevel;
                   }
                   else
                   {
-                     value = (_functionLevel - 16);
+                     value = (_functionLevel - _rampRate);
                   }
 
                   _functionLevel = (value <= MinLevel ? MaxLevel : value);
                   break;
 
-               case tenFUNCTION.FUNC_SIGNWAVE:
-                  if (toggle && (_functionLevel < (MinLevel + 16)))
+               case PWMFunctions.FUNC_SIGNWAVE:
+                  if (toggle && (_functionLevel < (MinLevel + _rampRate)))
                   {
                      _functionLevel = MinLevel;
                   }
                   else
                   {
-                     _functionLevel = (_functionLevel + (uint)(toggle ? -16 : 16));
+                     _functionLevel = (_functionLevel + (uint)(toggle ? -_rampRate : _rampRate));
                   }
 
                   if ((toggle == true && _functionLevel <= MinLevel)
@@ -156,9 +174,9 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
                   }
                   break;
 
-               case tenFUNCTION.FUNC_FLICKER_OFF:
+               case PWMFunctions.FUNC_FLICKER_OFF:
                   count = (uint)(new Random().Next((int)PWMResolution));
-                  if (count > (MaxLevel / 9))
+                  if (count > (MaxLevel / _rampRate))
                   {
                      _functionLevel = count;
                   }
@@ -168,9 +186,9 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
                   }
                   break;
 
-               case tenFUNCTION.FUNC_FLICKER_ON:
+               case PWMFunctions.FUNC_FLICKER_ON:
                   count = (uint)(new Random().Next((int)PWMResolution));
-                  if (count < (MaxLevel - (MaxLevel / 9)))
+                  if (count < (MaxLevel - (MaxLevel / _rampRate)))
                   {
                      _functionLevel = MinLevel;
                   }
@@ -180,7 +198,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
                   }
                   break;
 
-               case tenFUNCTION.FUNC_RANDOM:
+               case PWMFunctions.FUNC_RANDOM:
                   value = (uint)(new Random().Next((int)PWMResolution));
                   if (value > MaxLevel)
                   {
@@ -196,7 +214,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
                   }
                   break;
 
-               case tenFUNCTION.FUNC_STROBE:
+               case PWMFunctions.FUNC_STROBE:
                   if (_functionLevel != MinLevel)
                   {
                      _functionLevel = MinLevel;
@@ -208,16 +226,28 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
                   break;
 
 
-               case tenFUNCTION.FUNC_RAMP_ON:
+               case PWMFunctions.FUNC_RAMP_ON:
+               case PWMFunctions.FUNC_RAMP_BOTH:
+                  _enRampingFunction = _enFunction;
+
+                  value = (_functionLevel + _rampRate);
+                  if (value > MaxLevel)
+                  {
+                     value = MaxLevel;
+                  }
+                  _functionLevel = value;
                   break;
 
-               case tenFUNCTION.FUNC_RAMP_OFF:
+               case PWMFunctions.FUNC_ON:
+                  _functionLevel = MaxLevel;
                   break;
 
-               case tenFUNCTION.FUNC_RAMP_BOTH:
+               case PWMFunctions.FUNC_RAMP_OFF:
+                  _enRampingFunction = _enFunction;
+                  _functionLevel = MaxLevel;
                   break;
 
-               case tenFUNCTION.FUNC_CUSTOM:
+               case PWMFunctions.FUNC_CUSTOM:
                   if (_customLevelIdx < CustomLevel.Count)
                   {
                      _functionLevel = CustomLevel[_customLevelIdx];
@@ -237,7 +267,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          }
 
 
-         if (Function != tenFUNCTION.FUNC_CUSTOM)
+         if (Function != PWMFunctions.FUNC_CUSTOM)
          {
             if (_functionLevel > MaxLevel)
             {
@@ -252,7 +282,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          _func_value = (uint)curve.Interpolate(_functionLevel);
       }
 
-      public object GetValue()
+      public uint GetValue()
       {
          return Level;
       }

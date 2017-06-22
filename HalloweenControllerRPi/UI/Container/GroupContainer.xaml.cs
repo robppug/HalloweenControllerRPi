@@ -95,9 +95,15 @@ namespace HalloweenControllerRPi.Container
                Container.Children.Add(FuncGUI);
 
                (FuncGUI as IFunctionGUI).Initialise();
+               (FuncGUI as IFunctionGUI).OnRemove += GroupContainer_OnRemove;
                return;
             }
          }
+      }
+
+      private void GroupContainer_OnRemove(object sender, EventArgs e)
+      {
+         Container.Children.Remove((sender as UIElement));
       }
 
       private void Panel_DragEnter(object sender, DragEventArgs e)

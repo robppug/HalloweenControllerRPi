@@ -15,7 +15,7 @@ namespace HalloweenControllerRPi.Function_GUI
          : base(typeof(Func_Sound_GUI), "SOUND", idx, Colors.Orchid)
       {
          IsRemoveable = false;
-         OneOnly = true;
+         OneOnly = false;
          TriggerOnly = false;//RPUGLIESE - true;
       }
 
@@ -23,7 +23,7 @@ namespace HalloweenControllerRPi.Function_GUI
          : base(typeof(Func_Sound_GUI), "SOUND", idx, Colors.Orchid)
       {
          IsRemoveable = false;
-         OneOnly = true;
+         OneOnly = false;
          TriggerOnly = false;//RPUGLIESE - true;
       }
    }

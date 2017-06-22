@@ -7,6 +7,7 @@ using Windows.Storage.Streams;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
+using System.Xml;
 
 namespace HalloweenControllerRPi.Functions
 {
@@ -15,7 +16,7 @@ namespace HalloweenControllerRPi.Functions
       private uint _volume;
 
       #region Parameters
-      public uint AvailableTracks { get; set; }
+      public uint AvailableTracks { get; set; } = 0;
 
       public uint Volume
       {
@@ -27,10 +28,9 @@ namespace HalloweenControllerRPi.Functions
          }
       }
 
-      public uint Track { get; set; }
+      public uint Track { get; set; } = 0;
 
-      public bool Loop { get; set; }
-
+      public bool Loop { get; set; } = false;
       #endregion
 
       public Func_SOUND() { }
@@ -41,16 +41,6 @@ namespace HalloweenControllerRPi.Functions
 
          evOnDelayEnd += OnTrigger;
          evOnDurationEnd += OnDurationEnd;
-
-         Track = 0;
-      }
-
-      void vSetTimerInterval(DispatcherTimer t, uint value)
-      {
-         if (value > 0)
-         {
-            t.Interval = TimeSpan.FromMilliseconds(value);
-         }
       }
 
       internal void Initialise()
@@ -73,6 +63,17 @@ namespace HalloweenControllerRPi.Functions
       private void OnDurationEnd(object sender, EventArgs e)
       {
          SendCommand("STOP");
+      }
+
+      public override void ReadXml(XmlReader reader)
+      {
+         base.ReadXml(reader);
+
+         Duration_ms = Convert.ToUInt16(reader.GetAttribute("Duration"));
+         Delay_ms = Convert.ToUInt16(reader.GetAttribute("Delay"));
+         Volume = Convert.ToUInt32(reader.GetAttribute("Volume"));
+         Track = Convert.ToUInt32(reader.GetAttribute("Track"));
+         Loop = Convert.ToBoolean(reader.GetAttribute("Loop"));
       }
 
       public override void WriteXml(System.Xml.XmlWriter writer)
@@ -104,7 +105,7 @@ namespace HalloweenControllerRPi.Functions
                case 'A':
                   AvailableTracks = u32FuncValue;
                   evOnFunctionUpdated?.Invoke(this, EventArgs.Empty);
-                  break;
+                  return true;
 
                case 'F':
                   if (Loop == true)

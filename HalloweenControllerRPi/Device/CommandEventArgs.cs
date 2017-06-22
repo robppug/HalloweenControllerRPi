@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HalloweenControllerRPi.Device
 {
-   public class CommandEventArgs
+   public class CommandEventArgs : EventArgs
    {
       public char Commamd
       {

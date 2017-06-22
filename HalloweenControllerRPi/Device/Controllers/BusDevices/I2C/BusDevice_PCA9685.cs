@@ -205,19 +205,7 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
 
       public void RefreshChannel(IChannel chan)
       {
-         ChannelFunction_PWM pwm = (chan as ChannelFunction_PWM);
-
-         if (pwm != null)
-         {
-            if (pwm.Function != Func_PWM.tenFUNCTION.FUNC_OFF)
-            {
-               SetChannel((ushort)pwm.Index, (ushort)pwm.Level);
-            }
-            else
-            {
-               SetChannel((ushort)pwm.Index, 0x00);
-            }
-         }
+         SetChannel((ushort)chan.Index, (ushort)chan.GetValue());
       }
 
       public void SetRegister(Registers register, byte value)

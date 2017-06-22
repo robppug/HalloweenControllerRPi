@@ -1,8 +1,4 @@
-﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
-using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats;
-using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
+﻿using System;
 using Windows.ApplicationModel.Core;
 using Windows.Devices.Gpio;
 using Windows.UI.Core;
@@ -28,9 +24,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          public uint Index { get { return _index; } }
       }
 
-      private uint _channelIdx;
       private TimeSpan _debTime;
-      private TimeSpan _postTriggerTime;
       private IIOPin _Pin;
       private DispatcherTimer _reenableTimer;
       private bool _waitForRetrigger;
@@ -50,19 +44,15 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          _Pin.DebounceTimeout = TimeSpan.FromMilliseconds(50);
          _Pin.ValueChanged += Pin_ValueChanged;
 
-         _postTriggerTime = TimeSpan.FromMilliseconds(50);
+         PostTriggerTime = TimeSpan.FromMilliseconds(50);
 
          _reenableTimer = new DispatcherTimer();
          _reenableTimer.Tick += _reenableTimer_Tick;
-         _reenableTimer.Interval = _postTriggerTime;
+         _reenableTimer.Interval = PostTriggerTime;
          _waitForRetrigger = false;
       }
 
-      public uint Index
-      {
-         set { _channelIdx = value; }
-         get { return _channelIdx; }
-      }
+      public uint Index { get; set; }
 
       public IChannelHost ChannelHost
       {
@@ -82,11 +72,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          set { _debTime = value; if (_Pin != null) _Pin.DebounceTimeout = _debTime; }
       }
 
-      public TimeSpan PostTriggerTime
-      {
-         get { return _postTriggerTime; }
-         set { _postTriggerTime = value; }
-      }
+      public TimeSpan PostTriggerTime { get; set; }
 
       private async void Pin_ValueChanged(IIOPin sender, InputPinValueChangedEventArgs args)
       {
@@ -108,7 +94,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
             InputLevelChanged(sender, new EventArgsINPUT((gpEdge == GpioPinEdge.RisingEdge ? tenTriggerLvl.tHigh : tenTriggerLvl.tLow), Index));
          }
 
-         _reenableTimer.Interval = _postTriggerTime;
+         _reenableTimer.Interval = PostTriggerTime;
          _reenableTimer.Start();
       }
 
@@ -123,7 +109,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          _Pin.Read();
       }
 
-      public object GetValue()
+      public uint GetValue()
       {
          return Level;
       }

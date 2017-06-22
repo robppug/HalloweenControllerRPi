@@ -10,10 +10,17 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
 
+   <UserControl.Resources>
+      <ResourceDictionary>
+         <BitmapImage x:Key="Blank" UriSource="Assets\blank.png"/>
+         <BitmapImage x:Key="Triggered" UriSource="Assets\trigger.png"/>
+      </ResourceDictionary>
+   </UserControl.Resources>
+
    <Border BorderThickness="1" BorderBrush="Black">
       <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
          <StackPanel x:Name="Container" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" AllowDrop="True" MinHeight="300" MinWidth="400" Background="LightGray" Loaded="Panel_Loaded">
-            <Image x:Name="imageTrigger" MinHeight="300" MinWidth="60" Source="ms-appx:///Assets/blank.png" Width="52" Stretch="UniformToFill"/>
+            <Image x:Name="imageTrigger" MinHeight="300" MinWidth="50" MaxWidth="50" Source="{StaticResource Blank}" Stretch="Fill"/>
          </StackPanel>
       </ScrollViewer>
    </Border>

@@ -5,6 +5,6 @@
       IChannelHost ChannelHost { get; }
       uint Index { get; set; }
 
-      object GetValue();
+      uint GetValue();
    }
 }

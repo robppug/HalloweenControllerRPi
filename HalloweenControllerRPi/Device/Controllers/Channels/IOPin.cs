@@ -2,10 +2,12 @@
 using System;
 using Windows.Devices.Gpio;
 using Windows.Foundation;
+using Windows.System.Threading;
+using Windows.UI.Xaml;
 
-namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function
+namespace HalloweenControllerRPi.Device.Controllers.Channels
 {
-   public class InputPinValueChangedEventArgs
+   public class InputPinValueChangedEventArgs : EventArgs
    {
       public GpioPinEdge Edge { get; private set; }
 
@@ -15,19 +17,18 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function
       }
    }
 
-   class IOPin_PCA9501 : IIOPin
+   class IOPin : IIOPin
    {
+      private GpioPinEdge m_lastEdge;
       private GpioPinValue m_lastValue;
       private GpioPinValue m_value;
       private GpioPinDriveMode m_driveMode;
       private uint m_pin;
+      private DispatcherTimer DebounceTimer;
 
       public event TypedEventHandler<IIOPin, InputPinValueChangedEventArgs> ValueChanged;
 
-      public TimeSpan DebounceTimeout
-      {
-         get; set;
-      }
+      public TimeSpan DebounceTimeout { get; set; } = TimeSpan.FromMilliseconds(50);
 
       public uint PinNumber
       {
@@ -37,16 +38,46 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function
          }
       }
 
-      public IOPin_PCA9501(uint pin)
+      public IOPin(uint pin)
       {
          m_pin = pin;
          m_value = GpioPinValue.High;
+         m_lastEdge = GpioPinEdge.FallingEdge;
          m_lastValue =  GpioPinValue.High;
+
+         DebounceTimer = new DispatcherTimer();
+         DebounceTimer.Tick += DebounceTimer_Tick;
+         DebounceTimer.Interval = DebounceTimeout;
+      }
+
+      private void DebounceTimer_Tick(object sender, object e)
+      {
+         DebounceTimer.Stop();
+
+         ValueChanged?.Invoke(this, new InputPinValueChangedEventArgs(m_lastEdge));
       }
 
       protected void OnValueChanged(InputPinValueChangedEventArgs e)
       {
-         ValueChanged?.Invoke(this, e);
+         bool boStartTimer = true;
+
+         if(DebounceTimer.IsEnabled)
+         {
+            if (e.Edge != m_lastEdge)
+            {
+               DebounceTimer.Stop();
+            }
+            else
+               boStartTimer = false;
+         }
+
+         m_lastEdge = e.Edge;
+
+         if (boStartTimer)
+         {
+            DebounceTimer.Interval = DebounceTimeout;
+            DebounceTimer.Start();
+         }
       }
 
       public bool IsDriveModeSupported(GpioPinDriveMode driveMode)

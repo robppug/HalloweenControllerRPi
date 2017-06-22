@@ -1,6 +1,8 @@
 ﻿using HalloweenControllerRPi.Functions;
+using HalloweenControllerRPi.UI.Functions.Func_GUI;
 using System;
 using System.Xml.Serialization;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
@@ -14,10 +16,12 @@ namespace HalloweenControllerRPi.Function_GUI
       private Func_RELAY _Func;
       private bool _boInitialised = false;
 
+      public event EventHandler OnRemove;
+
       public Function Func
       {
-         get { return this._Func; }
-         set { this._Func = (value as Func_RELAY); }
+         get { return _Func; }
+         set { _Func = (value as Func_RELAY); }
       }
 
       public Func_Relay_GUI()
@@ -46,13 +50,20 @@ namespace HalloweenControllerRPi.Function_GUI
          }
 
          _Func.FuncButtonType = typeof(Function_Button_RELAY);
+
+         RemoveButton.Click += RemoveButton_Click;
+      }
+
+      private void RemoveButton_Click(object sender, RoutedEventArgs e)
+      {
+         OnRemove?.Invoke(this, EventArgs.Empty);
       }
 
       private void TextTitle_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
       {
          if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
          {
-            SetCustomName();
+            textTitle.Text = FuncGUIHelper.SetCustomName(textTitle.Text).Result;
          }
       }
 
@@ -60,8 +71,8 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          if (_boInitialised == true)
          {
-            this._Func.Duration_ms = (uint)(sender as Slider).Value;
-            this.textBlock_Duration.Text = "Duration: " + this._Func.Duration_ms.ToString() + " (ms)";
+            _Func.Duration_ms = (uint)(sender as Slider).Value;
+            textBlock_Duration.Text = "Duration: " + _Func.Duration_ms.ToString() + " (ms)";
          }
       }
 
@@ -69,26 +80,26 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          if (_boInitialised == true)
          {
-            this._Func.Delay_ms = (uint)(sender as Slider).Value;
-            this.textBlock_StartDelay.Text = "Start Delay: " + this._Func.Delay_ms.ToString() + " (ms)";
+            _Func.Delay_ms = (uint)(sender as Slider).Value;
+            textBlock_StartDelay.Text = "Start Delay: " + Func.Delay_ms.ToString() + " (ms)";
          }
       }
 
       #region XML Handling
       public void ReadXml(System.Xml.XmlReader reader)
       {
-         this._Func.Delay_ms = Convert.ToUInt16(reader.GetAttribute("Delay"));
-         this._Func.Duration_ms = Convert.ToUInt16(reader.GetAttribute("Duration"));
-         this.textTitle.Text = reader.GetAttribute("CustomName");
+         _Func.ReadXml(reader);
 
-         this.textBlock_StartDelay.Text = "Start Delay: " + this._Func.Delay_ms.ToString() + " (ms)";
-         this.textBlock_Duration.Text = "Duration: " + this._Func.Duration_ms.ToString() + " (ms)";
+         textTitle.Text = reader.GetAttribute("CustomName");
+
+         textBlock_StartDelay.Text = "Start Delay: " + _Func.Delay_ms.ToString() + " (ms)";
+         textBlock_Duration.Text = "Duration: " + _Func.Duration_ms.ToString() + " (ms)";
 
          /* Ignore MIN/MAX limits. */
          try
          {
-            this.slider_Duration.Value = (int)this._Func.Duration_ms;
-            this.slider_StartDelay.Value = (int)this._Func.Delay_ms;
+            slider_Duration.Value = (int)_Func.Duration_ms;
+            slider_StartDelay.Value = (int)_Func.Delay_ms;
          }
          catch { }
       }
@@ -101,33 +112,15 @@ namespace HalloweenControllerRPi.Function_GUI
       public void WriteXml(System.Xml.XmlWriter writer)
       {
          writer.WriteAttributeString("Type", GetType().ToString());
-         writer.WriteAttributeString("CustomName", this.textTitle.Text);
+         writer.WriteAttributeString("CustomName", textTitle.Text);
 
-         this._Func.WriteXml(writer);
+         _Func.WriteXml(writer);
       }
 
       #endregion
-      public async void SetCustomName()
-      {
-         ContentDialog cd = new ContentDialog();
-         StackPanel panel = new StackPanel();
-         TextBox tb = new TextBox() { Text = this.textTitle.Text };
-         panel.Orientation = Orientation.Vertical;
-         panel.Children.Add(tb);
-
-         cd.Title = "Enter Custom Name";
-         cd.PrimaryButtonText = "OK";
-         cd.PrimaryButtonClick += (sender, e) =>
-         {
-            this.textTitle.Text = tb.Text;
-         };
-         cd.Content = panel;
-         await cd.ShowAsync();
-      }
 
       public void Initialise()
       {
-         throw new NotImplementedException();
       }
    }
 }

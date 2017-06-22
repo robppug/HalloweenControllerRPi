@@ -1,7 +1,7 @@
-﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
-using System;
+﻿using System;
 using Windows.Devices.Gpio;
 using Windows.Foundation;
+using Windows.UI.Xaml;
 
 namespace HalloweenControllerRPi.Device.Controllers.Channels
 {

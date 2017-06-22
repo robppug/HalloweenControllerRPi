@@ -2,31 +2,26 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:Container="using:HalloweenControllerRPi.Container"
-      xmlns:Controls="using:HalloweenControllerRPi.Controls"
-      xmlns:HalloweenControllerRPi="using:HalloweenControllerRPi"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:local="using:HalloweenControllerRPi"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       mc:Ignorable="d">
 
 
-   <Grid x:Name="MainArea" Margin="0,0,0,10" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+   <Grid x:Name="MainArea" Margin="10,10,10,10" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
       <Border x:Name="AvailablesArea"
               Width="745"
               Height="150"
-              Margin="10,42,0,0"
+              Margin="10,42,10,10"
               HorizontalAlignment="Left"
               VerticalAlignment="Top"
               BorderBrush="Black"
               BorderThickness="1"
-              CornerRadius="2"
-              ScrollViewer.VerticalScrollBarVisibility="Disabled">
+              CornerRadius="2">
          <GridView x:Name="Available_Board"
                    HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch"
                    CanDragItems="True"
-                   DragItemsStarting="DragItemsStarting"
-                   ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                   DragItemsStarting="DragItemsStarting" />
       </Border>
       <Border x:Name="StaticsArea"
               Height="150"
@@ -40,8 +35,7 @@
                    HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch"
                    CanDragItems="True"
-                   DragItemsStarting="DragItemsStarting"
-                   ScrollViewer.VerticalScrollBarVisibility="Disabled" />
+                   DragItemsStarting="DragItemsStarting" />
       </Border>
       <Border x:Name="SimulatedArea"
               Width="460"
@@ -54,8 +48,7 @@
               CornerRadius="2">
          <GridView x:Name="HWSimulatedGrid"
                    HorizontalAlignment="Stretch"
-                   VerticalAlignment="Stretch"
-                   ScrollViewer.VerticalScrollBarVisibility="Disabled" />
+                   VerticalAlignment="Stretch" />
       </Border>
       <Pivot x:Name="pivotContainer"
              Width="Auto"
@@ -64,7 +57,7 @@
              VerticalAlignment="Stretch"
              FontSize="10">
          <PivotItem x:Name="pivotItemContainer"
-                    Margin="0,0,0,0"
+                    Margin="10,10,10,10"
                     FontSize="10"
                     Header="Always Active">
             <Border HorizontalAlignment="Stretch"
@@ -97,7 +90,7 @@
             </Border>
          </PivotItem>
          <PivotItem x:Name="pivotItemContainerTriggered"
-                    Margin="0,0,0,0"
+                    Margin="10,10,10,10"
                     FontSize="10"
                     Header="Triggered">
             <Border BorderBrush="Black"
@@ -155,10 +148,9 @@
                 Content="Load 'saved' file on startup."
                 Unchecked="checkBox_LoadOnStart_Unchecked" />
       <ProgressBar x:Name="ControllerProgressBar"
-                   Width="741"
+                   Width="736"
                    Height="28"
-                   Margin="14,160,0,0"
-                   HorizontalAlignment="Left"
+                   Margin="14,160,2,0"
                    VerticalAlignment="Top"
                    BorderBrush="Black"
                    BorderThickness="1"
@@ -166,9 +158,9 @@
                    IsDoubleTapEnabled="False"
                    IsHoldingEnabled="False"
                    IsRightTapEnabled="False"
-                   IsTapEnabled="False" />
+                   IsTapEnabled="False" HorizontalAlignment="Left" />
       <TextBlock x:Name="textControllerProgressBar"
-                 Width="741"
+                 Width="736"
                  Height="28"
                  Margin="14,160,0,0"
                  HorizontalAlignment="Left"

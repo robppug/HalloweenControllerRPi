@@ -1,4 +1,5 @@
 ﻿using HalloweenControllerRPi.Functions;
+using HalloweenControllerRPi.UI.Functions.Func_GUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,6 +19,8 @@ namespace HalloweenControllerRPi.Function_GUI
    {
       private Func_SOUND _Func;
       private bool _boInitialised = false;
+
+      public event EventHandler OnRemove;
 
       public List<String> Tracks
       {
@@ -41,16 +44,11 @@ namespace HalloweenControllerRPi.Function_GUI
          _boInitialised = true;
       }
 
-      private void TextTitle_Tapped(object sender, TappedRoutedEventArgs e)
-      {
-         this.SetCustomName();
-      }
-
       private void TextTitle_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
       {
          if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
          {
-            SetCustomName();
+            textTitle.Text = FuncGUIHelper.SetCustomName(textTitle.Text).Result;
          }
       }
 
@@ -75,6 +73,13 @@ namespace HalloweenControllerRPi.Function_GUI
          }
 
          _Func.FuncButtonType = typeof(Function_Button_SOUND);
+
+         this.RemoveButton.Click += RemoveButton_Click;
+      }
+
+      private void RemoveButton_Click(object sender, RoutedEventArgs e)
+      {
+         OnRemove?.Invoke(this, EventArgs.Empty);
       }
 
       private void UpdateGUI(object sender, EventArgs e)
@@ -129,9 +134,8 @@ namespace HalloweenControllerRPi.Function_GUI
 
       public void ReadXml(System.Xml.XmlReader reader)
       {
-         _Func.Delay_ms = Convert.ToUInt16(reader.GetAttribute("Delay"));
-         _Func.Duration_ms = Convert.ToUInt16(reader.GetAttribute("Duration"));
-         _Func.Volume = Convert.ToUInt32(reader.GetAttribute("Volume"));
+         _Func.ReadXml(reader);
+
          textTitle.Text = reader.GetAttribute("CustomName");
 
          textBlock_Volume.Text = "Volume: " + (_Func.Volume * 100f).ToString() + " (%)";
@@ -141,6 +145,7 @@ namespace HalloweenControllerRPi.Function_GUI
          /* Ignore MIN/MAX limits. */
          try
          {
+            comboBox_Track.SelectedIndex = (int)_Func.Track;
             slider_Duration.Value = _Func.Duration_ms;
             slider_StartDelay.Value = _Func.Delay_ms;
             slider_Volume.Value = _Func.Volume * 100;
@@ -151,27 +156,9 @@ namespace HalloweenControllerRPi.Function_GUI
       public void WriteXml(System.Xml.XmlWriter writer)
       {
          writer.WriteAttributeString("Type", GetType().ToString());
-         writer.WriteAttributeString("CustomName", this.textTitle.Text);
+         writer.WriteAttributeString("CustomName", textTitle.Text);
          
-         this._Func.WriteXml(writer);
-      }
-
-      public async void SetCustomName()
-      {
-         ContentDialog cd = new ContentDialog();
-         StackPanel panel = new StackPanel();
-         TextBox tb = new TextBox() { Text = this.textTitle.Text };
-         panel.Orientation = Orientation.Vertical;
-         panel.Children.Add(tb);
-
-         cd.Title = "Enter Custom Name";
-         cd.PrimaryButtonText = "OK";
-         cd.PrimaryButtonClick += (sender, e) =>
-            {
-               this.textTitle.Text = tb.Text;
-            };
-         cd.Content = panel;
-         await cd.ShowAsync();
+         _Func.WriteXml(writer);
       }
 
       public void Initialise()

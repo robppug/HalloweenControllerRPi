@@ -26,7 +26,7 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
 
          bgRxTask = new DispatcherTimer();
          bgRxTask.Tick += BgRxTask_Tick;
-         bgRxTask.Interval = TimeSpan.FromMilliseconds(10);
+         bgRxTask.Interval = TimeSpan.FromMilliseconds(50);
          bgRxTask.Start();
       }
 

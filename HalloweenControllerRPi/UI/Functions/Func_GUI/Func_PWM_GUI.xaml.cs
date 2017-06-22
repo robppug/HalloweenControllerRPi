@@ -1,6 +1,7 @@
 ﻿using HalloweenControllerRPi.Controls;
 using HalloweenControllerRPi.Functions;
 using HalloweenControllerRPi.UI.Controls;
+using HalloweenControllerRPi.UI.Functions.Func_GUI;
 using MathNet.Numerics;
 using MathNet.Numerics.Interpolation;
 using System;
@@ -20,7 +21,9 @@ namespace HalloweenControllerRPi.Function_GUI
       private Func_PWM _Func;
       private DrawCanvas customLevelDraw;
       private bool _boInitialised = false;
-      
+
+      public event EventHandler OnRemove;
+
       public uint MaxLevel
       {
          get { textBlock_MaxLevel.Text = "Max Level: " + _Func.MaxLevel.ToString() + " %"; return _Func.MaxLevel; }
@@ -43,7 +46,6 @@ namespace HalloweenControllerRPi.Function_GUI
          this.InitializeComponent();
 
          _boInitialised = true;
-
       }
 
       public Func_PWM_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
@@ -65,27 +67,44 @@ namespace HalloweenControllerRPi.Function_GUI
          _Func.Delay_ms = (uint)slider_MaxLevel.RangeMax;
 
          /* Populate the comboBox list with available PWM Functions */
-         foreach (Func_PWM.tenFUNCTION f in Enum.GetValues(typeof(Func_PWM.tenFUNCTION)))
+         foreach (PWMFunctions f in Enum.GetValues(typeof(PWMFunctions)))
          {
-            if (f != Func_PWM.tenFUNCTION.FUNC_NO_OF_FUNCTIONS)
-               comboBox_Functions.Items.Add(f.ToString());
+            if (f != PWMFunctions.FUNC_NO_OF_FUNCTIONS)
+            {
+               if (  (f.IsConstant() && (entype == Function.tenTYPE.TYPE_CONSTANT))
+                  || (f.IsTriggered() && (entype == Function.tenTYPE.TYPE_TRIGGER)))
+               {
+                  comboBox_Functions.Items.Add(f.ToString());
+               }
+            }
          }
-         comboBox_Functions.SelectedIndex = 0;
+
+         comboBox_Functions.SelectedValue = PWMFunctions.FUNC_ON.ToString();
+         comboBox_Functions_DropDownClosed(comboBox_Functions, EventArgs.Empty);
 
          if (entype == Func_PWM.tenTYPE.TYPE_CONSTANT)
          {
             slider_Duration.IsEnabled = false;
+            textBlock_Duration.Visibility = Visibility.Collapsed;
             slider_StartDelay.IsEnabled = false;
+            textBlock_StartDelay.Visibility = Visibility.Collapsed;
          }
 
          _Func.FuncButtonType = typeof(Function_Button_PWM);
+
+         this.RemoveButton.Click += RemoveButton_Click;
+      }
+
+      private void RemoveButton_Click(object sender, RoutedEventArgs e)
+      {
+         OnRemove?.Invoke(this, EventArgs.Empty);
       }
 
       private void TextTitle_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
       {
          if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
          {
-            this.SetCustomName();
+            textTitle.Text = FuncGUIHelper.SetCustomName(textTitle.Text).Result;
          }
       }
 
@@ -95,15 +114,6 @@ namespace HalloweenControllerRPi.Function_GUI
          {
             this._Func.Duration_ms = (uint)(sender as Slider).Value;
             this.textBlock_Duration.Text = "Duration: " + this._Func.Duration_ms.ToString() + " (ms)";
-         }
-      }
-
-      private void slider_MaxLevel_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-      {
-         if (_boInitialised == true)
-         {
-            
-            this.textBlock_MaxLevel.Text = "Max Level: " + this._Func.MaxLevel.ToString() + " (%)";
          }
       }
 
@@ -121,7 +131,16 @@ namespace HalloweenControllerRPi.Function_GUI
          if (_boInitialised == true)
          {
             this._Func.UpdateRate = (uint)(sender as Slider).Value;
-            this.textBlock_UpdateRate.Text = "Update Rate: " + this._Func.UpdateRate.ToString() + " (ms)";
+            this.textBlock_UpdateRate.Text = "Update Rate: " + this._Func.UpdateRate.ToString();
+         }
+      }
+
+      private void slider_RampRate_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+      {
+         if (_boInitialised == true)
+         {
+            this._Func.RampRate = (uint)(sender as Slider).Value;
+            this.textBlock_RampRate.Text = "Ramp Rate: " + this._Func.RampRate.ToString();
          }
       }
 
@@ -136,7 +155,7 @@ namespace HalloweenControllerRPi.Function_GUI
 
          _Func.CustomLevels.Clear();
 
-         for (int i = 0; i < xPoints.Length; i++)
+         for (int i = 0; i < customDraw.CapturedPoints.Count; i++)
          {
             Line l = customDraw.CapturedPoints[i];
 
@@ -149,26 +168,31 @@ namespace HalloweenControllerRPi.Function_GUI
       #region XML Handling
       public void ReadXml(System.Xml.XmlReader reader)
       {
-         this._Func.Delay_ms = Convert.ToUInt16(reader.GetAttribute("Delay"));
-         this._Func.Duration_ms = Convert.ToUInt16(reader.GetAttribute("Duration"));
-         this._Func.MaxLevel = Convert.ToUInt16(reader.GetAttribute("MaxLevel"));
-         this._Func.UpdateRate = Convert.ToUInt16(reader.GetAttribute("UpdateRate"));
-         this._Func.Function = (Func_PWM.tenFUNCTION)Convert.ToUInt16(reader.GetAttribute("Function"));
-         //this.gb_FunctionName.Text = reader.GetAttribute("CustomName");
+         _Func.ReadXml(reader);
 
-         this.textBlock_Duration.Text = "Duration: " + this._Func.Duration_ms.ToString() + " (ms)";
-         this.textBlock_MaxLevel.Text = "Max Level: " + this._Func.MaxLevel.ToString() + " (%)";
-         this.textBlock_UpdateRate.Text = "Update Rate: " + this._Func.UpdateRate.ToString() + " (ms)";
-         this.textBlock_StartDelay.Text = "Start Delay: " + this._Func.Delay_ms.ToString() + " (ms)";
+         MinLevel = Convert.ToUInt16(reader.GetAttribute("MinLevel"));
+         MaxLevel = Convert.ToUInt16(reader.GetAttribute("MaxLevel"));
+
+         textTitle.Text = reader.GetAttribute("CustomName");
+         textBlock_Duration.Text = "Duration: " + _Func.Duration_ms.ToString() + " (ms)";
+         textBlock_UpdateRate.Text = "Update Rate: " + _Func.UpdateRate.ToString();
+         textBlock_RampRate.Text = "Ramp Rate: " + _Func.RampRate.ToString();
+         textBlock_StartDelay.Text = "Start Delay: " + _Func.Delay_ms.ToString() + " (ms)";
+
+         if (_Func.Function == PWMFunctions.FUNC_CUSTOM)
+         {
+            this.customLevelDraw.ReadXml(reader);
+         }
 
          /* Ignore MIN/MAX limits. */
          try
          {
-            this.slider_Duration.Value = (int)this._Func.Duration_ms;
-            this.slider_StartDelay.Value = (int)this._Func.Delay_ms;
-            this.slider_MaxLevel.RangeMax = (int)this._Func.MaxLevel;
-            this.slider_UpdateRate.Value = (int)this._Func.UpdateRate;
-            this.comboBox_Functions.SelectedIndex = (int)this._Func.Function;
+            slider_Duration.Value = (int)_Func.Duration_ms;
+            slider_StartDelay.Value = (int)_Func.Delay_ms;
+            slider_MaxLevel.RangeMin = (int)_Func.MinLevel;
+            slider_MaxLevel.RangeMax = (int)_Func.MaxLevel;
+            slider_UpdateRate.Value = (int)_Func.UpdateRate;
+            comboBox_Functions.SelectedIndex = (int)_Func.Function;
          }
          catch { }
       }
@@ -181,49 +205,73 @@ namespace HalloweenControllerRPi.Function_GUI
       public void WriteXml(System.Xml.XmlWriter writer)
       {
          writer.WriteAttributeString("Type", GetType().ToString());
-         writer.WriteAttributeString("CustomName", this.textTitle.Text);
+         writer.WriteAttributeString("CustomName", textTitle.Text);
 
-         this._Func.WriteXml(writer);
+         _Func.WriteXml(writer);
+         customLevelDraw.WriteXml(writer);
       }
       #endregion
 
-      public async void SetCustomName()
-      {
-         ContentDialog cd = new ContentDialog();
-         StackPanel panel = new StackPanel();
-         TextBox tb = new TextBox() { Text = this.textTitle.Text };
-         panel.Orientation = Orientation.Vertical;
-         panel.Children.Add(tb);
-
-         cd.Title = "Enter Custom Name";
-         cd.PrimaryButtonText = "OK";
-         cd.PrimaryButtonClick += (sender, e) =>
-         {
-            this.textTitle.Text = tb.Text;
-         };
-         cd.Content = panel;
-         await cd.ShowAsync();
-      }
-
       public void Initialise()
       {
-         
       }
 
       private void comboBox_Functions_DropDownClosed(object sender, object e)
       {
+         bool boCanRamp = true;
+         bool boCanUpdateTick = true;
+
          if (_boInitialised == true)
          {
-            Func_PWM.tenFUNCTION prevFunc = this._Func.Function;
+            PWMFunctions prevFunc = _Func.Function;
 
-            this._Func.Function = (Func_PWM.tenFUNCTION)(sender as ComboBox).SelectedIndex;
+            _Func.Function = FuncGUIHelper.GetFunctionEnum((sender as ComboBox).SelectedValue.ToString());
 
-            if (this._Func.Function == Func_PWM.tenFUNCTION.FUNC_CUSTOM)
+            switch(_Func.Function)
             {
-               customLevelDraw.SecondaryButtonClick += (s, args) => { this._Func.Function = prevFunc; (sender as ComboBox).SelectedIndex = (int)prevFunc; };
-               customLevelDraw.ShowAsync();
+               case PWMFunctions.FUNC_OFF:
+                  boCanUpdateTick = false;
+                  break;
+               case PWMFunctions.FUNC_ON:
+                  boCanUpdateTick = false;
+                  break;
+               case PWMFunctions.FUNC_FLICKER_OFF:
+                  break;
+               case PWMFunctions.FUNC_FLICKER_ON:
+                  break;
+               case PWMFunctions.FUNC_RANDOM:
+                  boCanRamp = false;
+                  break;
+               case PWMFunctions.FUNC_SIGNWAVE:
+                  break;
+               case PWMFunctions.FUNC_STROBE:
+                  boCanRamp = false;
+                  break;
+               case PWMFunctions.FUNC_SWEEP_DOWN:
+                  break;
+               case PWMFunctions.FUNC_SWEEP_UP:
+                  break;
+               case PWMFunctions.FUNC_CUSTOM:
+                  customLevelDraw.SecondaryButtonClick += (s, args) => { _Func.Function = prevFunc; (sender as ComboBox).SelectedValue = prevFunc; };
+                  customLevelDraw.ShowAsync();
+                  boCanRamp = false;
+                  break;
+               case PWMFunctions.FUNC_RAMP_ON:
+                  break;
+               case PWMFunctions.FUNC_RAMP_OFF:
+                  break;
+               case PWMFunctions.FUNC_RAMP_BOTH:
+                  break;
+               default:
+                  break;
             }
+
+            slider_RampRate.IsEnabled = boCanRamp;
+            textBlock_RampRate.Visibility = (boCanRamp ? Visibility.Visible : Visibility.Collapsed);
+            slider_UpdateRate.IsEnabled = boCanUpdateTick;
+            textBlock_UpdateRate.Visibility = (boCanUpdateTick ? Visibility.Visible : Visibility.Collapsed);
          }
       }
+
    }
 }

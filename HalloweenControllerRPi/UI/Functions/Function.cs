@@ -247,20 +247,14 @@ namespace HalloweenControllerRPi.Functions
       /// <returns></returns>
       virtual public bool boProcessRequest(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue)
       {
-         if (evOnTrigger != null)
-         {
-            evOnTrigger.Invoke(this, new ProcessFunctionArgs(cFunc, subFunc, cFuncIndex, u32FuncValue));
-         }
+         evOnTrigger?.Invoke(this, new ProcessFunctionArgs(cFunc, subFunc, cFuncIndex, u32FuncValue));
 
          return true;
       }
 
       public void vStopFunction(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue)
       {
-         if (evOnDurationEnd != null)
-         {
-            evOnDurationEnd.Invoke(this, new ProcessFunctionArgs(cFunc, subFunc, cFuncIndex, u32FuncValue));
-         }
+         evOnDurationEnd?.Invoke(this, new ProcessFunctionArgs(cFunc, subFunc, cFuncIndex, u32FuncValue));
       }
 
       /// <summary>

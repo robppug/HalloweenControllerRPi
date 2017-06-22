@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace HalloweenControllerRPi.Functions
 {
@@ -17,13 +18,8 @@ namespace HalloweenControllerRPi.Functions
 
       private uint _debounceTime_ms;
       private uint _postTriggerDelay_ms;
-      private tenTriggerLvl _triggerLevel;
 
-      public tenTriggerLvl TriggerLevel
-      {
-         get { return _triggerLevel; }
-         set { _triggerLevel = value; }
-      }
+      public tenTriggerLvl TriggerLevel { get; set; }
 
       public uint DebounceTime_ms
       {
@@ -41,8 +37,7 @@ namespace HalloweenControllerRPi.Functions
          set
          {
             _postTriggerDelay_ms = value;
-
-            SendCommand("POSTDEBTIME", _debounceTime_ms);
+            SendCommand("POSTDEBTIME", _postTriggerDelay_ms);
          }
       }
       public Func_INPUT()
@@ -65,14 +60,23 @@ namespace HalloweenControllerRPi.Functions
 
       public override bool boCheckTriggerConditions(uint u32value)
       {
-         return (u32value == (uint)_triggerLevel);
+         return (u32value == (uint)TriggerLevel);
+      }
+
+      public override void ReadXml(XmlReader reader)
+      {
+         base.ReadXml(reader);
+
+         TriggerLevel = (Func_INPUT.tenTriggerLvl)Convert.ToUInt16(reader.GetAttribute("TriggerLevel"));
+         DebounceTime_ms = Convert.ToUInt16(reader.GetAttribute("DebounceTime"));
+         PostTriggerDelay_ms = Convert.ToUInt16(reader.GetAttribute("PostTriggerTime"));
       }
 
       public override void WriteXml(System.Xml.XmlWriter writer)
       {
          base.WriteXml(writer);
 
-         writer.WriteAttributeString("TriggerLevel", _triggerLevel.GetHashCode().ToString());
+         writer.WriteAttributeString("TriggerLevel", TriggerLevel.GetHashCode().ToString());
          writer.WriteAttributeString("DebounceTime", _debounceTime_ms.GetHashCode().ToString());
          writer.WriteAttributeString("PostTriggerTime", _postTriggerDelay_ms.GetHashCode().ToString());
       }

@@ -6,13 +6,13 @@
              xmlns:local="using:HalloweenControllerRPi.Function_GUI"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              x:Name="_this"
-             d:DesignHeight="245"
+             d:DesignHeight="286"
              d:DesignWidth="240"
              mc:Ignorable="d">
 
    <Grid Background="LightGray" BorderThickness="2" >
       <TextBlock x:Name="textTitle"
-                 Margin="2,2,0,0"
+                 Margin="5,2,35,213"
                  Foreground="Black"
                  Text="PWM (#)"
                  TextWrapping="Wrap" />
@@ -50,6 +50,12 @@
               TickFrequency="1"
               ValueChanged="slider_UpdateRate_ValueChanged"
               Value="10" />
+      <Slider x:Name="slider_RampRate"
+              Margin="5,230,5,0"
+              VerticalAlignment="Top"
+              Minimum="1"
+              TickFrequency="1"
+              Value="10" ValueChanged="slider_RampRate_ValueChanged" />
       <ComboBox x:Name="comboBox_Functions"
                 Width="220"
                 Margin="10,30,10,0"
@@ -102,5 +108,7 @@
                  FontSize="10"
                  Text="Update Rate: 10 (ms)"
                  TextWrapping="Wrap" />
+      <TextBlock x:Name="textBlock_RampRate" Width="109" Margin="123,263,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10" Text="Ramp Rate: 10" TextWrapping="Wrap" />
+      <Button x:Name="RemoveButton" Content="X" HorizontalAlignment="Right" Margin="0,3,3,0" VerticalAlignment="Top" Width="25" Height="20" FontSize="8" FontFamily="Arial"/>
    </Grid>
 </UserControl>

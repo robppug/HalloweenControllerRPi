@@ -10,7 +10,7 @@
 
    <Grid Background="LightGray" BorderThickness="2">
       <TextBlock x:Name="textTitle"
-                 Margin="2,2,0,0"
+                 Margin="5,2,40,188"
                  Foreground="Black"
                  Text="SOUND (#)" />
       <Slider x:Name="slider_Duration"
@@ -34,23 +34,27 @@
               ValueChanged="slider_StartDelay_ValueChanged"
               Value="0" />
       <TextBlock x:Name="textBlock_Duration"
-                 Width="109"                 Margin="121,108,0,0"
+                 Width="109"
+                 Margin="121,108,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  FontSize="10"
                  Text="Duration: 500 (ms)" />
       <TextBlock x:Name="textBlock_Volume"
-                 Width="109"                 Margin="121,152,0,0"
+                 Width="109"
+                 Margin="121,152,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  FontSize="10"
                  Text="Volume: 100 (%)" />
       <TextBlock x:Name="textBlock_StartDelay"
-                 Width="109"                 Margin="121,192,0,0"
+                 Width="109"
+                 Margin="121,192,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  FontSize="10"
                  Text="Start Delay: 0 (ms)" />
       <ComboBox x:Name="comboBox_Track" HorizontalAlignment="Left" Margin="5,32,0,0" VerticalAlignment="Top" Width="230" SelectionChanged="comboBox_Track_SelectionChanged"/>
+      <Button x:Name="RemoveButton" Content="X" HorizontalAlignment="Right" Margin="0,3,3,0" VerticalAlignment="Top" Width="25" Height="20" FontSize="8" FontFamily="Arial"/>
    </Grid>
 </UserControl>

@@ -1,6 +1,5 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.Channels;
 using HalloweenControllerRPi.Device.Controllers.Providers;
-using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
 using System;
 using System.Collections.Generic;
 using Windows.Devices.Gpio;
@@ -83,7 +82,7 @@ namespace HalloweenControllerRPi.Device.Controllers.BusDevices
          /* Initialise GPIO channels */
          for (uint i = 0; i < 8; i++)
          {
-            m_GpioPins.Add(new IOPin_PCA9501(i));
+            m_GpioPins.Add(new IOPin(i));
          }
 
          Initialised = true;

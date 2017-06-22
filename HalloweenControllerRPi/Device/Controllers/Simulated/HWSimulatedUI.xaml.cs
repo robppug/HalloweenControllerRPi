@@ -29,6 +29,7 @@ namespace HalloweenControllerRPi.Device.Controllers
    {
       List<Rectangle> lRelays = new List<Rectangle>();
       List<Rectangle> lPwms = new List<Rectangle>();
+      List<TextBlock> lSounds = new List<TextBlock>();
       public event EventHandler OnInputTrigger;
 
       static public Stopwatch sWatch;
@@ -47,6 +48,11 @@ namespace HalloweenControllerRPi.Device.Controllers
          lPwms.Add(PWM_2);
          lPwms.Add(PWM_3);
          lPwms.Add(PWM_4);
+
+         lSounds.Add(SND_1);
+         lSounds.Add(SND_2);
+         lSounds.Add(SND_3);
+         lSounds.Add(SND_4);
       }
 
       public void Update(Command function, Command subFunction, uint index, uint value)
@@ -83,33 +89,48 @@ namespace HalloweenControllerRPi.Device.Controllers
                   case 'R':
                      break;
                   case 'F':
-                     switch((Func_PWM.tenFUNCTION)value)
+                     switch((PWMFunctions)value)
                      {
-                        case Func_PWM.tenFUNCTION.FUNC_OFF:
+                        case PWMFunctions.FUNC_OFF:
                            lPwms[(int)index].Fill = new SolidColorBrush(Colors.Red);
                            lPwms[(int)index].Opacity = 1;
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_ON:
+                        case PWMFunctions.FUNC_ON:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_FLICKER_OFF:
+                        case PWMFunctions.FUNC_FLICKER_OFF:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_FLICKER_ON:
+                        case PWMFunctions.FUNC_FLICKER_ON:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_RANDOM:
+                        case PWMFunctions.FUNC_RANDOM:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_SIGNWAVE:
+                        case PWMFunctions.FUNC_SIGNWAVE:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_STROBE:
+                        case PWMFunctions.FUNC_STROBE:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_SWEEP_DOWN:
+                        case PWMFunctions.FUNC_SWEEP_DOWN:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_SWEEP_UP:
+                        case PWMFunctions.FUNC_SWEEP_UP:
                            break;
                         default:
                            break;
                      }
                      break;
                   default:
+                     break;
+               }
+               break;
+            case 'S':
+               switch (subFunction.Value)
+               {
+                  case 'P':
+                     lSounds[(int)index].Foreground = new SolidColorBrush(Colors.Green);
+                     break;
+                  case 'S':
+                     lSounds[(int)index].Foreground = new SolidColorBrush(Colors.Black);
+                     lSounds[(int)index].Opacity = 1.0;
+                     break;
+                  case 'V':
+                     lSounds[(int)index].Opacity = (double)((double)value / 100);
                      break;
                }
                break;

@@ -1,6 +1,8 @@
 ﻿using HalloweenControllerRPi.Functions;
+using HalloweenControllerRPi.UI.Functions.Func_GUI;
 using System;
 using System.Xml.Serialization;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
@@ -14,38 +16,48 @@ namespace HalloweenControllerRPi.Function_GUI
       private Func_INPUT _Func;
       private bool _boInitialised = false;
 
+      public event EventHandler OnRemove;
+
       public Function Func
       {
-         get { return this._Func; }
-         set { this._Func = (value as Func_INPUT); }
+         get { return _Func; }
+         set { _Func = (value as Func_INPUT); }
       }
       
       public Func_Input_GUI()
       {
-         this.InitializeComponent();
+         InitializeComponent();
 
          _boInitialised = true;
       }
 
       public Func_Input_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
       {
-         this._Func = new Func_INPUT(host, entype);
-         this._Func.Index = index;
-         this._Func.FuncButtonType = typeof(Function_Button_INPUT);
+         _Func = new Func_INPUT(host, entype);
+         _Func.Index = index;
+         _Func.FuncButtonType = typeof(Function_Button_INPUT);
 
-         this.textTitle.Text = "Input #" + index;
-         this.textTitle.DoubleTapped += TextTitle_DoubleTapped;
+         textTitle.Text = "Input #" + index;
+         textTitle.DoubleTapped += TextTitle_DoubleTapped;
 
-         this.comboBox_TrigEdge.Items.Add("Low (GND)");
-         this.comboBox_TrigEdge.Items.Add("High (VCC)");
-         this.comboBox_TrigEdge.SelectedIndex = 0;
+         comboBox_TrigEdge.Items.Add("Low (GND)");
+         comboBox_TrigEdge.Items.Add("High (VCC)");
+         comboBox_TrigEdge.SelectedIndex = 1;
+         _Func.TriggerLevel = Func_INPUT.tenTriggerLvl.tHigh;
+
+         RemoveButton.Click += RemoveButton_Click;
+      }
+
+      private void RemoveButton_Click(object sender, RoutedEventArgs e)
+      {
+         OnRemove?.Invoke(this, EventArgs.Empty);
       }
 
       private void TextTitle_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
       {
          if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
          {
-            this.SetCustomName();
+            textTitle.Text = FuncGUIHelper.SetCustomName(textTitle.Text).Result;
          }
       }
 
@@ -53,8 +65,8 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          if (_boInitialised == true)
          {
-            this._Func.DebounceTime_ms = (uint)(sender as Slider).Value;
-            this.textBlock_Debounce.Text = "Debounce Time: " + this._Func.DebounceTime_ms.ToString() + " (ms)";
+            _Func.DebounceTime_ms = (uint)(sender as Slider).Value;
+            textBlock_Debounce.Text = "Debounce Time: " + _Func.DebounceTime_ms.ToString() + " (ms)";
          }
       }
 
@@ -62,31 +74,30 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          if (_boInitialised == true)
          {
-            this._Func.PostTriggerDelay_ms = (uint)(sender as Slider).Value;
-            this.textBlock_PostDelay.Text = "Post Trigger Time: " + this._Func.PostTriggerDelay_ms.ToString() + " (ms)";
+            _Func.PostTriggerDelay_ms = (uint)(sender as Slider).Value;
+            textBlock_PostDelay.Text = "Post Trigger Time: " + _Func.PostTriggerDelay_ms.ToString() + " (ms)";
          }
       }
 
       #region XML Handling
       private void comboBox_TrigEdge_SelectionChanged(object sender, SelectionChangedEventArgs e)
       {
-         this._Func.TriggerLevel = (Func_INPUT.tenTriggerLvl)(sender as ComboBox).SelectedIndex;
+         _Func.TriggerLevel = (Func_INPUT.tenTriggerLvl)(sender as ComboBox).SelectedIndex;
       }
 
       public void ReadXml(System.Xml.XmlReader reader)
       {
-         this._Func.TriggerLevel = (Func_INPUT.tenTriggerLvl)Convert.ToUInt16(reader.GetAttribute("TriggerLevel"));
-         this._Func.DebounceTime_ms = Convert.ToUInt16(reader.GetAttribute("DebounceTime"));
-         this._Func.PostTriggerDelay_ms = Convert.ToUInt16(reader.GetAttribute("PostTriggerTime"));
-         //this.textTitle.Text = reader.GetAttribute("CustomName");
+         _Func.ReadXml(reader);
 
-         this.textBlock_Debounce.Text = "Debounce Time: " + this._Func.DebounceTime_ms.ToString() + " (ms)";
-         this.textBlock_PostDelay.Text = "Post Trigger Time: " + this._Func.PostTriggerDelay_ms.ToString() + " (ms)";
+         textTitle.Text = reader.GetAttribute("CustomName");
+
+         textBlock_Debounce.Text = "Debounce Time: " + _Func.DebounceTime_ms.ToString() + " (ms)";
+         textBlock_PostDelay.Text = "Post Trigger Time: " + _Func.PostTriggerDelay_ms.ToString() + " (ms)";
 
          /* Ignore MIN/MAX limits. */
          try
          {
-            this.comboBox_TrigEdge.SelectedIndex = (int)this._Func.TriggerLevel;
+            comboBox_TrigEdge.SelectedIndex = (int)_Func.TriggerLevel;
          }
          catch { }
       }
@@ -99,29 +110,11 @@ namespace HalloweenControllerRPi.Function_GUI
       public void WriteXml(System.Xml.XmlWriter writer)
       {
          writer.WriteAttributeString("Type", GetType().ToString());
-         writer.WriteAttributeString("CustomName", this.textTitle.Text);
+         writer.WriteAttributeString("CustomName", textTitle.Text);
 
-         this._Func.WriteXml(writer);
+         _Func.WriteXml(writer);
       }
       #endregion
-
-      public async void SetCustomName()
-      {
-         ContentDialog cd = new ContentDialog();
-         StackPanel panel = new StackPanel();
-         TextBox tb = new TextBox() { Text = this.textTitle.Text };
-         panel.Orientation = Orientation.Vertical;
-         panel.Children.Add(tb);
-
-         cd.Title = "Enter Custom Name";
-         cd.PrimaryButtonText = "OK";
-         cd.PrimaryButtonClick += (sender, e) =>
-         {
-            this.textTitle.Text = tb.Text;
-         };
-         cd.Content = panel;
-         await cd.ShowAsync();
-      }
 
       private void UserControl_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
       {
@@ -131,7 +124,7 @@ namespace HalloweenControllerRPi.Function_GUI
 
       public void Initialise()
       {
-         throw new NotImplementedException();
+         
       }
    }
 }

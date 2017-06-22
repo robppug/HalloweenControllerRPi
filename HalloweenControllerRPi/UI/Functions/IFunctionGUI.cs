@@ -14,7 +14,8 @@ namespace HalloweenControllerRPi.Function_GUI
    {
       Function Func { get; set; }
 
-      void SetCustomName();
+      event EventHandler OnRemove;
+
       void Initialise();
    }
 }

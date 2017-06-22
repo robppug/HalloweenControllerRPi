@@ -5,7 +5,7 @@ using static HalloweenControllerRPi.Device.Controllers.Channels.SoundChannelEven
 namespace HalloweenControllerRPi.Device.Controllers.Channels
 {
 
-   public class SoundChannelEventArgs
+   public class SoundChannelEventArgs : EventArgs
    {
       public enum SoundState
       {
@@ -67,11 +67,6 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          Loop = false;
       }
 
-      public void Tick()
-      {
-         
-      }
-
       public void Play()
       {
          ChannelUpdated?.Invoke(this, new SoundChannelEventArgs(SoundState.Play));
@@ -82,7 +77,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          ChannelUpdated?.Invoke(this, new SoundChannelEventArgs(SoundState.Stop));
       }
 
-      public object GetValue()
+      public uint GetValue()
       {
          return Volume;
       }

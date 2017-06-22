@@ -18,9 +18,13 @@
       <Button x:Name="buttonInput_2" Content="Input #02" HorizontalAlignment="Left" Margin="240,60,0,0" VerticalAlignment="Top" Click="buttonInput_Click" Tag="02"/>
       <Button x:Name="buttonInput_3" Content="Input #03" HorizontalAlignment="Left" Margin="330,0,0,0" VerticalAlignment="Top" Click="buttonInput_Click" Tag="03"/>
       <Button x:Name="buttonInput_4" Content="Input #04" HorizontalAlignment="Left" Margin="330,60,0,0" VerticalAlignment="Top" Click="buttonInput_Click" Tag="04"/>
-      <Rectangle x:FieldModifier="public" x:Name="PWM_1" Fill="Red" HorizontalAlignment="Left" Height="40" Margin="0,60,0,0" Stroke="Black" VerticalAlignment="Top" Width="40"/>
+      <Rectangle x:Name="PWM_1" Fill="Red" HorizontalAlignment="Left" Height="40" Margin="0,60,0,0" Stroke="Black" VerticalAlignment="Top" Width="40"/>
       <Rectangle x:Name="PWM_2" Fill="Red" HorizontalAlignment="Left" Height="40" Margin="60,60,0,0" Stroke="Black" VerticalAlignment="Top" Width="40"/>
       <Rectangle x:Name="PWM_3" Fill="Red" HorizontalAlignment="Left" Height="40" Margin="120,60,0,0" Stroke="Black" VerticalAlignment="Top" Width="40"/>
       <Rectangle x:Name="PWM_4" Fill="Red" HorizontalAlignment="Left" Height="40" Margin="180,60,0,0" Stroke="Black" VerticalAlignment="Top" Width="40"/>
+      <TextBlock x:Name="SND_1" FontSize="12" TextAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap" Text="SND 1" VerticalAlignment="Top" Margin="0,42,0,0" Width="40"/>
+      <TextBlock x:Name="SND_2" FontSize="12" TextAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap" Text="SND 2" VerticalAlignment="Top" Margin="60,42,0,0" Width="40"/>
+      <TextBlock x:Name="SND_3" FontSize="12" TextAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap" Text="SND 3" VerticalAlignment="Top" Margin="120,42,0,0" Width="40"/>
+      <TextBlock x:Name="SND_4" FontSize="12" TextAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap" Text="SND 4" VerticalAlignment="Top" Margin="180,42,0,0" Width="40"/>
    </Grid>
 </UserControl>

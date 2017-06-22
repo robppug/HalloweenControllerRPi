@@ -4,39 +4,22 @@ using HalloweenControllerRPi.Functions;
 using Microsoft.IoT.Lightning.Providers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 using Windows.Devices.Spi;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 
 namespace HalloweenControllerRPi.Device.Controllers
 {
    internal class HWRaspberryPI2 : HWController
    {
-      #region /* ENUMS */
-
-      public enum tenInputPins
-      {
-         INPUT_PIN_12 = 12,
-         INPUT_PIN_16 = 16,
-         INPUT_PIN_19 = 19,
-         INPUT_PIN_20 = 20,
-         INPUT_PIN_21 = 21,
-         INPUT_PIN_26 = 26
-      };
-
-      public enum tenOutputPins
-      {
-         OUTPUT_PIN_18 = 18,
-         OUTPUT_PIN_23 = 23,
-         OUTPUT_PIN_24 = 24,
-         OUTPUT_PIN_25 = 25
-      };
+      #region /* CONSTANTS */
 
       private const int MaxI2CAddresses = 128;
 
@@ -53,7 +36,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       private static GpioController _gpioController;
 
       //private static Stopwatch sWatch;
-      //private static long TriggerTime;
+      private static DispatcherTimer CycleTimer;
 
       private static List<IHat> _lHats = new List<IHat>();
       private static List<IChannel> _lAllFunctions = new List<IChannel>();
@@ -61,57 +44,9 @@ namespace HalloweenControllerRPi.Device.Controllers
       private static List<IChannel> _lRELAYFunctions = new List<IChannel>();
       private static List<IChannel> _lINPUTFunctions = new List<IChannel>();
       private static List<IChannel> _lSOUNDFunctions = new List<IChannel>();
-
       #endregion /* PRIVATE */
 
-      #region /* HW MAPPING */
-
-      public class InputMap
-      {
-         public uint Index;
-         public tenInputPins Pin;
-
-         public InputMap(uint i, tenInputPins pin)
-         {
-            Index = i;
-            Pin = pin;
-         }
-      };
-
-      public class OutputMap
-      {
-         public uint Index;
-         public tenOutputPins Pin;
-
-         public OutputMap(uint i, tenOutputPins pin)
-         {
-            Index = i;
-            Pin = pin;
-         }
-      };
-
-      private static List<InputMap> lInputMap = new List<InputMap>()
-      {
-         new InputMap(1, tenInputPins.INPUT_PIN_12),
-         new InputMap(2, tenInputPins.INPUT_PIN_16),
-         new InputMap(3, tenInputPins.INPUT_PIN_20),
-         new InputMap(4, tenInputPins.INPUT_PIN_21),
-         new InputMap(5, tenInputPins.INPUT_PIN_19),
-         new InputMap(6, tenInputPins.INPUT_PIN_26)
-      };
-
-      private static List<OutputMap> lOutputMap = new List<OutputMap>()
-      {
-         new OutputMap(1, tenOutputPins.OUTPUT_PIN_18),
-         new OutputMap(2, tenOutputPins.OUTPUT_PIN_23),
-         new OutputMap(3, tenOutputPins.OUTPUT_PIN_24),
-         new OutputMap(4, tenOutputPins.OUTPUT_PIN_25)
-      };
-
-      #endregion /* HW MAPPING */
-
       #region /* CONSTRUCTORS */
-
       public HWRaspberryPI2()
       {
          if (LightningProvider.IsLightningEnabled == true)
@@ -121,7 +56,6 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          var getCtrlTask = Task.Run(async () => { await GetControllers(); });
       }
-
       #endregion /* CONSTRUCTORS */
 
       #region /* HW Bus Devices */
@@ -148,7 +82,6 @@ namespace HalloweenControllerRPi.Device.Controllers
       }
 
       #region /* COMMAND LIST & HANDLING */
-
       /// <summary>
       /// Dictionary containing a list of all supported COMMANDS and SUB-COMMANDS.
       /// </summary>
@@ -181,7 +114,8 @@ namespace HalloweenControllerRPi.Device.Controllers
                new Command("MINLEVEL", 'N'),
                new Command("MAXLEVEL", 'M'),
                new Command("RATE", 'R'),
-               new Command("DATA", 'D')
+               new Command("DATA", 'D'),
+               new Command("RAMPRATE", 'A')
             }
          },
          /* Command : SOUND */
@@ -206,100 +140,6 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get { return _Commands; }
       }
-
-      private Command GetSubFunctionCommand(Command function, string subFunc)
-      {
-         Command command = null;
-
-         foreach (Command c in this.Commands[function].ToList())
-         {
-            if (c.Key == subFunc)
-            {
-               command = c;
-            }
-         }
-
-         return command;
-      }
-
-      private Command GetFunctionCommand(string p)
-      {
-         Command command = null;
-
-         foreach (Command c in this.Commands.Keys)
-         {
-            if (c.Key == p)
-            {
-               command = c;
-               break;
-            }
-         }
-
-         return command;
-      }
-
-      public override string BuildCommand(string func, string subFunc, params string[] data)
-      {
-         StringBuilder fullCommand = new StringBuilder();
-
-         Command function = this.GetFunctionCommand(func);
-         Command subFunction = this.GetSubFunctionCommand(function, subFunc);
-
-         if (function == null)
-         {
-            throw new HWInterfaceException("Function " + func + "  not available.");
-         }
-
-         fullCommand.Append(function.Value.ToString() + ": ");
-
-         if (subFunc != null)
-            fullCommand.Append(subFunction.Value.ToString());
-
-         if (data.Length != 0)
-         {
-            foreach (string s in data)
-               fullCommand.Append(" " + s);
-         }
-
-         fullCommand.Append(commandTerminator);
-
-         return fullCommand.ToString();
-      }
-
-      /// <summary>
-      /// Processed RX'ed commands and decodes the byte array, returning the Function, Sub-Function and Data (if any).
-      /// </summary>
-      /// <param name="command">List of bytes (actual RX'ed data)</param>
-      /// <param name="function">Decoded FUNCTION (out param nullable)</param>
-      /// <param name="subFunction">Decoded SUBFUNCTION (out param nullable)</param>
-      /// <param name="data">Decoded Data Array (ref param)</param>
-      public override void DecodeCommand(List<char> fullCmd, out Command function, out Command subFunction, ref char[] data)
-      {
-         char l_FuncCommand = (char)fullCmd[0];
-         char l_SubCommand = (char)fullCmd[3];
-
-         function = null;
-         foreach (Command c in this.Commands.Keys)
-         {
-            if (c.Value == l_FuncCommand)
-            {
-               function = c;
-               break;
-            }
-         }
-
-         subFunction = null;
-         foreach (Command c in this.Commands[function].ToList())
-         {
-            if (c.Value == l_SubCommand)
-            {
-               subFunction = c;
-            }
-         }
-
-         fullCmd.CopyTo(5, data, 0, fullCmd.Count - 5);
-      }
-
       #endregion /* COMMAND LIST & HANDLING */
 
       #region /* AVAILABLE FUNCTIONS */
@@ -365,10 +205,10 @@ namespace HalloweenControllerRPi.Device.Controllers
          //sWatch.Start();
 
          /* Create the Background Task handle */
-         DispatcherTimer dispatcher = new DispatcherTimer();
-         dispatcher.Tick += ControllerTask;
-         dispatcher.Interval = new TimeSpan(0, 0, 0, 0, 1);
-         dispatcher.Start();
+         CycleTimer = new DispatcherTimer();
+         CycleTimer.Tick += ControllerTask;
+         CycleTimer.Interval = new TimeSpan(0, 0, 0, 0, 1);
+         CycleTimer.Start();
       }
 
       private void PopulateChannelList()
@@ -400,14 +240,12 @@ namespace HalloweenControllerRPi.Device.Controllers
       private void ControllerTask(object sender, object e)
       {
          //System.Diagnostics.Debug.WriteLine("Cyclic Trigger - " + sWatch.ElapsedMilliseconds.ToString());
-
          //sWatch.Restart();
 
          foreach (IHat hat in _lHats)
          {
             hat.HatTask();
          }
-
       }
 
       /// <summary>
@@ -436,7 +274,7 @@ namespace HalloweenControllerRPi.Device.Controllers
             _i2cDevice = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, _i2cSettings);
 
             /* Update Discovery Progress event */
-            OnDiscoveryProgressUpdated((uint)((double)Address / (double)MaxI2CAddresses * 100));
+            OnDiscoveryProgressUpdated((uint)((double)(Address + 2) / (double)MaxI2CAddresses * 100));
 
             if (_i2cDevice.ReadPartial(new byte[1] { 0x00 }).Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
             {
@@ -467,8 +305,6 @@ namespace HalloweenControllerRPi.Device.Controllers
 
             Address++;
          }
-
-         OnDiscoveryProgressUpdated(100);
       }
 
       /// <summary>
@@ -489,27 +325,7 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          throw new NotImplementedException();
       }
-
-      private static uint GetChannelIndex(ref char[] decodedData)
-      {
-         uint chan = UInt32.Parse(new string(decodedData).Substring(0, 2));
-
-         new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
-
-         /* The CHANNEL of the request */
-         return chan;
-      }
-
-      private static uint GetValue(ref char[] decodedData, int len)
-      {
-         uint value = uint.Parse(new string(decodedData).Substring(0, len));
-
-         new string(decodedData).Remove(0, len).ToCharArray().CopyTo(decodedData, 0);
-
-         return value;
-      }
-
-
+      
       /// <summary>
       ///
       /// </summary>
@@ -522,12 +338,12 @@ namespace HalloweenControllerRPi.Device.Controllers
          uint channel;
 
          /* Decode the received COMMAND */
-         DecodeCommand(cmd.ToList<char>(), out function, out subFunction, ref decodedData);
+         DecodeCommand(cmd, out function, out subFunction, ref decodedData);
 
          /* Check if the received COMMAND is supported */
          if (GetFunctionCommand(function.Key) != null)
          {
-            channel = GetChannelIndex(ref decodedData);
+            channel = GetChannelIndex(String.Join(null, decodedData));
 
             if ((channel <= _lAllFunctions.Count) && (channel != 0))
             {
@@ -539,14 +355,16 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                      if (cINPUT != null)
                      {
+                        uint value = GetValue(String.Join(null, decodedData));
+
                         switch (subFunction.Value)
                         {
                            case 'D':
-                              cINPUT.DebounceTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
+                              cINPUT.DebounceTime = TimeSpan.FromMilliseconds((double)value);
                               break;
 
                            case 'P':
-                              cINPUT.PostTriggerTime = TimeSpan.FromMilliseconds((double)UInt32.Parse(new string(decodedData)));
+                              cINPUT.PostTriggerTime = TimeSpan.FromMilliseconds((double)value);
                               break;
 
                            default:
@@ -589,38 +407,42 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                      if (cPWM != null)
                      {
+                        uint value = GetValue(String.Join(null, decodedData));
+
                         switch (subFunction.Value)
                         {
                            case 'S':
-                              cPWM.Level = GetValue(ref decodedData, 4);
+                              cPWM.Level = value;
                               cPWM.ChannelHost.UpdateChannel(cPWM);
+                              break;
+
+                           case 'A':
+                              cPWM.RampRate = value;
                               break;
 
                            case 'G':
                               break;
 
                            case 'F':
-                              cPWM.Function = (Func_PWM.tenFUNCTION)GetValue(ref decodedData, 4);
+                              cPWM.Function = (PWMFunctions)value;
                               break;
 
                            case 'N':
-                              cPWM.MinLevel = GetValue(ref decodedData, 4);
+                              cPWM.MinLevel = value;
                               break;
 
                            case 'M':
-                              cPWM.MaxLevel = GetValue(ref decodedData, 4);
+                              cPWM.MaxLevel = value;
                               break;
 
                            case 'R':
-                              cPWM.UpdateCount = GetValue(ref decodedData, 4);
+                              cPWM.UpdateCount = value;
                               break;
 
                            case 'D':
-                              while (decodedData[0] != '\n')
+                              foreach(uint val in GetValues(String.Join(null, decodedData)))
                               {
-                                 uint level = GetValue(ref decodedData, 4);
-
-                                 cPWM.CustomLevel.Add(level);
+                                 cPWM.CustomLevel.Add(val);
                               }
                               break;
 
@@ -639,6 +461,8 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                      if (cSOUND != null)
                      {
+                        uint value = GetValue(String.Join(null, decodedData));
+
                         switch (subFunction.Value)
                         {
                            case 'P':
@@ -650,15 +474,15 @@ namespace HalloweenControllerRPi.Device.Controllers
                               break;
 
                            case 'T':
-                              cSOUND.Track = Byte.Parse(new string(decodedData));
+                              cSOUND.Track = (byte)value;
                               break;
 
                            case 'V':
-                              cSOUND.Volume = Byte.Parse(new string(decodedData));
+                              cSOUND.Volume = (byte)value;
                               break;
 
                            case 'L':
-                              cSOUND.Loop = bool.Parse(new string(decodedData));
+                              cSOUND.Loop = (value != 0 ? true : false);
                               break;
 
                            case 'A':
@@ -683,54 +507,6 @@ namespace HalloweenControllerRPi.Device.Controllers
          {
             /* COMMAND not supported */
          }
-      }
-
-      /// <summary>
-      /// 
-      /// </summary>
-      /// <param name="data"></param>
-      /// <returns>True if COMMAND was successfully handled</returns>
-      public override bool ReceivedCommand(List<char> data)
-      {
-         bool l_Result = false;
-         Command function;
-         Command subFunction;
-         char[] decodedData = new char[20];
-
-         if (data.Count > 0)
-         {
-            while (data[0] == 0x00) { data.RemoveAt(0); }
-
-            DecodeCommand(data, out function, out subFunction, ref decodedData);
-
-            switch (function.Value)
-            {
-               case 'I':
-                  if (data.Count >= 8)
-                  {
-                     char cInputIdx = (char)(data[3] - 0x30);
-                     char cInputLevel = (char)(data[5] - 0x30);
-                     data.RemoveRange(0, 8);
-
-                     //Packet received, allow active groups to process.
-                     TransmitCommand(new CommandEventArgs(function.Value, subFunction.Value, cInputIdx, cInputLevel));
-                     l_Result = true;
-                  }
-                  break;
-               case 'R':
-                  break;
-               case 'P':
-                  break;
-               case 'A':
-                  break;
-               case 'C':
-                  break;
-               default:
-                  break;
-            }
-         }
-         return l_Result;
-
       }
 
       public override void OnChannelNotification(object sender, CommandEventArgs e)

@@ -10,10 +10,11 @@
     d:DesignWidth="240">
 
    <Grid Background="LightGray" BorderThickness="2" >
-      <TextBlock x:Name="textTitle" TextWrapping="Wrap" Text="Relay (#)" Foreground="Black" Margin="2,2,0,0"/>
+      <TextBlock x:Name="textTitle" TextWrapping="Wrap" Text="Relay (#)" Foreground="Black" Margin="5,2,35,89"/>
       <Slider x:Name="slider_Duration" VerticalAlignment="Stretch" Margin="5,27,5,49" Tag="Amount of time the RELAY will be active when triggered." TickFrequency="1000" Maximum="20000" Minimum="10" ValueChanged="slider_Duration_ValueChanged"/>
       <Slider x:Name="slider_StartDelay" VerticalAlignment="Top" Margin="5,69,5,0" Tag="Time to wait before starting the RELAY when triggered." TickFrequency="1000" Value="0" ValueChanged="slider_StartDelay_ValueChanged" Maximum="10000"/>
       <TextBlock x:Name="textBlock_Duration" HorizontalAlignment="Left" Margin="121,58,0,0" TextWrapping="Wrap" Text="Duration: 2000 (ms)" VerticalAlignment="Top" Width="109" FontSize="10"/>
       <TextBlock x:Name="textBlock_StartDelay" HorizontalAlignment="Left" Margin="121,94,0,0" TextWrapping="Wrap" Text="Start Delay: 0 (ms)" VerticalAlignment="Top" Width="109" FontSize="10"/>
+      <Button x:Name="RemoveButton" Content="X" HorizontalAlignment="Right" Margin="0,3,3,0" VerticalAlignment="Top" Width="25" Height="20" FontSize="8" FontFamily="Arial"/>
    </Grid>
 </UserControl>

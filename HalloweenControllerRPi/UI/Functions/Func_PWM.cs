@@ -1,64 +1,81 @@
-﻿using HalloweenControllerRPi.Device;
+﻿using HalloweenControllerRPi.Attributes;
+using HalloweenControllerRPi.Device;
+using HalloweenControllerRPi.Extentions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
+using System.Xml;
 
 namespace HalloweenControllerRPi.Functions
 {
+   public enum PWMFunctions
+   {
+      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_OFF,
+      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_ON,
+      [FunctionAttribute(FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_RAMP_ON,
+      [FunctionAttribute(FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_RAMP_OFF,
+      [FunctionAttribute(FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_RAMP_BOTH,
+      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_SWEEP_UP,
+      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_SWEEP_DOWN,
+      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_SIGNWAVE,
+      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_FLICKER_OFF,
+      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_FLICKER_ON,
+      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_RANDOM,
+      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_STROBE,
+      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      FUNC_CUSTOM,
+      FUNC_NO_OF_FUNCTIONS
+   };
+
+   internal static class PWMFunctionsEnumExtensions
+   {
+      public static bool IsConstant(this PWMFunctions func)
+      {
+         FunctionAttribute mde = EnumExtension<FunctionAttribute, PWMFunctions>.GetModeAttribute(func);
+         if (mde != null)
+            return mde.IsConstant;
+         else
+            return true;
+      }
+
+      public static bool IsTriggered(this PWMFunctions func)
+      {
+         FunctionAttribute mde = EnumExtension<FunctionAttribute, PWMFunctions>.GetModeAttribute(func);
+         if (mde != null)
+            return mde.IsTriggered;
+         else
+            return true;
+      }
+   }
+
    public class Func_PWM : Function
    {
-      public enum tenFUNCTION
-      {
-         FUNC_OFF,
-         FUNC_ON,
-         FUNC_RAMP_ON,
-         FUNC_RAMP_OFF,
-         FUNC_RAMP_BOTH,
-         FUNC_SWEEP_UP,
-         FUNC_SWEEP_DOWN,
-         FUNC_SIGNWAVE,
-         FUNC_FLICKER_OFF,
-         FUNC_FLICKER_ON,
-         FUNC_RANDOM,
-         FUNC_STROBE,
-         FUNC_CUSTOM,
-         FUNC_NO_OF_FUNCTIONS
-      };
-
-      private uint _MinLevel;
-      private uint _MaxLevel;
-      private uint _UpdateRate;
-      private int _CustomLevelIdx;
-      private tenFUNCTION _Function;
-
       public List<uint> CustomLevels { get; set; }
 
-      public uint MinLevel
-      {
-         get { return _MinLevel; }
-         set { _MinLevel = value; }
-      }
+      public uint MinLevel { get; set; } = 0;
 
-      public uint MaxLevel
-      {
-         get { return _MaxLevel; }
-         set { _MaxLevel = value; }
-      }
+      public uint MaxLevel { get; set; } = 100;
 
-      public uint UpdateRate
-      {
-         get { return _UpdateRate; }
-         set { _UpdateRate = value; }
-      }
+      public uint UpdateRate { get; set; } = 1;
 
-      public tenFUNCTION Function
-      {
-         get { return _Function; }
-         set { _Function = value; }
-      }
+      public uint RampRate { get; set; } = 1;
+
+      public PWMFunctions Function { get; set; } = PWMFunctions.FUNC_OFF;
 
       public Func_PWM()
       {
@@ -67,7 +84,6 @@ namespace HalloweenControllerRPi.Functions
       public Func_PWM(IHostApp host, tenTYPE entype)
          : base(host, entype)
       {
-         _Function = tenFUNCTION.FUNC_OFF;
          CustomLevels = new List<uint>();
 
          FunctionKeyCommand = new Command("PWM", 'T');
@@ -85,7 +101,7 @@ namespace HalloweenControllerRPi.Functions
       {
          if (Type == tenTYPE.TYPE_TRIGGER)
          {
-            if (this._Function == tenFUNCTION.FUNC_OFF)
+            if (Function == PWMFunctions.FUNC_OFF)
             {
                SendCommand("SET");
             }
@@ -109,15 +125,16 @@ namespace HalloweenControllerRPi.Functions
       {
          List<string> data = new List<string>();
 
-         if (this._Function != tenFUNCTION.FUNC_OFF)
+         if (Function != PWMFunctions.FUNC_OFF)
          {
             SendCommand("MINLEVEL", MinLevel);
             SendCommand("MAXLEVEL", MaxLevel);
             SendCommand("RATE", UpdateRate);
+            SendCommand("RAMPRATE", RampRate);
 
-            switch(_Function)
+            switch (Function)
             {
-               case tenFUNCTION.FUNC_CUSTOM:
+               case PWMFunctions.FUNC_CUSTOM:
                   SendCommand("DATA", CustomLevels.ToArray());
                   break;
 
@@ -125,8 +142,19 @@ namespace HalloweenControllerRPi.Functions
                   break;
             }
 
-            SendCommand("FUNCTION", (uint)_Function);
+            SendCommand("FUNCTION", (uint)Function);
          }
+      }
+
+      public override void ReadXml(XmlReader reader)
+      {
+         base.ReadXml(reader);
+
+         Duration_ms = Convert.ToUInt16(reader.GetAttribute("Duration"));
+         Delay_ms = Convert.ToUInt16(reader.GetAttribute("Delay"));
+         RampRate = Convert.ToUInt16(reader.GetAttribute("RampRate"));
+         UpdateRate = Convert.ToUInt16(reader.GetAttribute("UpdateRate"));
+         Function = (PWMFunctions)Convert.ToUInt16(reader.GetAttribute("Function"));
       }
 
       public override void WriteXml(System.Xml.XmlWriter writer)
@@ -137,6 +165,7 @@ namespace HalloweenControllerRPi.Functions
          writer.WriteAttributeString("Delay", Delay_ms.ToString());
          writer.WriteAttributeString("MinLevel", MinLevel.ToString());
          writer.WriteAttributeString("MaxLevel", MaxLevel.ToString());
+         writer.WriteAttributeString("RampRate", RampRate.ToString());
          writer.WriteAttributeString("UpdateRate", UpdateRate.ToString());
          writer.WriteAttributeString("Function", ((int)Function).ToString());
       }

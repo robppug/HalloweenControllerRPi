@@ -56,7 +56,21 @@ namespace HalloweenControllerRPi.Device.Controllers
                new Command("MINLEVEL", 'N'),
                new Command("MAXLEVEL", 'M'),
                new Command("RATE", 'R'),
-               new Command("DATA", 'D')
+               new Command("DATA", 'D'),
+               new Command("RAMPRATE", 'A')
+            }
+         },
+         /* Command : SOUND */
+         {  new Command("SOUND", 'S'),
+            new List<Command>
+            {
+               new Command("PLAY", 'P'),
+               new Command("TRACK", 'T'),
+               new Command("STOP", 'S'),
+               new Command("LOOP", 'L'),
+               new Command("VOLUME", 'V'),
+               new Command("FEEDBACK", 'F'),
+               new Command("AVAILABLE TRACKS", 'A')
             }
          }
       };
@@ -100,112 +114,13 @@ namespace HalloweenControllerRPi.Device.Controllers
       {
          get
          {
-            return 0;
+            return 4;
          }
-      }
-      private Command GetSubFunctionCommand(Command function, string subFunc)
-      {
-         Command command = null;
-
-         foreach (Command c in this.Commands[function].ToList())
-         {
-            if (c.Key == subFunc)
-            {
-               command = c;
-            }
-         }
-
-         return command;
-      }
-
-      private Command GetFunctionCommand(string p)
-      {
-         Command command = null;
-
-         foreach (Command c in this.Commands.Keys)
-         {
-            if (c.Key == p)
-            {
-               command = c;
-               break;
-            }
-         }
-
-         return command;
-      }
-
-      /// <summary>
-      /// Builds the TX string based on the Function, Sub-Function and data provided.
-      /// </summary>
-      /// <param name="func">Function</param>
-      /// <param name="subFunc">Sub-Function (if any)</param>
-      /// <param name="data">Data (if any)</param>
-      /// <returns></returns>
-      public override string BuildCommand(string func, string subFunc, params string[] data)
-      {
-         StringBuilder fullCommand = new StringBuilder();
-
-         Command function = this.GetFunctionCommand(func);
-         Command subFunction = this.GetSubFunctionCommand(function, subFunc);
-
-         if (function == null)
-         {
-            throw new HWInterfaceException("Function " + func + "  not available.");
-         }
-
-         fullCommand.Append(function.Value.ToString() + ": ");
-
-         if (subFunc != null)
-            fullCommand.Append(subFunction.Value.ToString());
-
-         if (data.Length != 0)
-         {
-            foreach (string s in data)
-               fullCommand.Append(" " + s);
-         }
-
-         fullCommand.Append(commandTerminator);
-
-         return fullCommand.ToString();
       }
 
       public override void Connect()
       {
          OnControllerInitialised();
-      }
-
-      /// <summary>
-      /// Processed RX'ed commands and decodes the byte array, returning the Function, Sub-Function and Data (if any).
-      /// </summary>
-      /// <param name="command">List of bytes (actual RX'ed data)</param>
-      /// <param name="function">Decoded FUNCTION (out param nullable)</param>
-      /// <param name="subFunction">Decoded SUBFUNCTION (out param nullable)</param>
-      /// <param name="data">Decoded Data Array (ref param)</param>
-      public override void DecodeCommand(List<char> fullCmd, out Command function, out Command subFunction, ref char[] data)
-      {
-         char l_FuncCommand = (char)fullCmd[0];
-         char l_SubCommand = (char)fullCmd[3];
-
-         function = null;
-         foreach (Command c in this.Commands.Keys)
-         {
-            if (c.Value == l_FuncCommand)
-            {
-               function = c;
-               break;
-            }
-         }
-
-         subFunction = null;
-         foreach (Command c in this.Commands[function].ToList())
-         {
-            if (c.Value == l_SubCommand)
-            {
-               subFunction = c;
-            }
-         }
-
-         fullCmd.CopyTo(5, data, 0, fullCmd.Count - 5);
       }
 
       public override void Disconnect()
@@ -220,7 +135,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          uint index;
          uint value = 0;
 
-         DecodeCommand(cmd.ToList<char>(), out function, out subFunction, ref decodedData);
+         DecodeCommand(cmd, out function, out subFunction, ref decodedData);
 
          index = UInt32.Parse(new string(decodedData).Substring(0, 2));
 
@@ -258,33 +173,33 @@ namespace HalloweenControllerRPi.Device.Controllers
                   case 'F':
                      value = UInt32.Parse(new string(decodedData));
 
-                     switch ((Func_PWM.tenFUNCTION)value)
+                     switch ((PWMFunctions)value)
                      {
-                        case Func_PWM.tenFUNCTION.FUNC_OFF:
+                        case PWMFunctions.FUNC_OFF:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_ON:
+                        case PWMFunctions.FUNC_ON:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_FLICKER_OFF:
+                        case PWMFunctions.FUNC_FLICKER_OFF:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_FLICKER_ON:
+                        case PWMFunctions.FUNC_FLICKER_ON:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_RANDOM:
+                        case PWMFunctions.FUNC_RANDOM:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_SIGNWAVE:
+                        case PWMFunctions.FUNC_SIGNWAVE:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_STROBE:
+                        case PWMFunctions.FUNC_STROBE:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_SWEEP_DOWN:
+                        case PWMFunctions.FUNC_SWEEP_DOWN:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_SWEEP_UP:
+                        case PWMFunctions.FUNC_SWEEP_UP:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_CUSTOM:
+                        case PWMFunctions.FUNC_CUSTOM:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_RAMP_ON:
+                        case PWMFunctions.FUNC_RAMP_ON:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_RAMP_OFF:
+                        case PWMFunctions.FUNC_RAMP_OFF:
                            break;
-                        case Func_PWM.tenFUNCTION.FUNC_RAMP_BOTH:
+                        case PWMFunctions.FUNC_RAMP_BOTH:
                            break;
                         default:
                            break;
@@ -296,6 +211,8 @@ namespace HalloweenControllerRPi.Device.Controllers
                   case 'R':
                      value = UInt32.Parse(new string(decodedData));
                      break;
+                  case 'A':
+                     break;
                   case 'D':
                      break;
                   default:
@@ -304,9 +221,24 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                UIPanel.Update(function, subFunction, index, value);
                break;
-            case 'A': //ADC
-               break;
-            case 'C':
+            case 'S':
+               //Remove the Function and Index from the string
+               new string(decodedData).Remove(0, 2).ToCharArray().CopyTo(decodedData, 0);
+
+               switch (subFunction.Value)
+               {
+                  case 'P':
+                     value = 1;
+                     break;
+                  case 'S':
+                     value = 0;
+                     break;
+                  case 'V':
+                     value = UInt32.Parse(new string(decodedData));
+                     break;
+               }
+
+               UIPanel.Update(function, subFunction, index, value);
                break;
             default:
                break;
@@ -330,7 +262,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          {
             while (data[0] == 0x00) { data.RemoveAt(0); }
 
-            DecodeCommand(data, out function, out subFunction, ref decodedData);
+            DecodeCommand(String.Join(null, data), out function, out subFunction, ref decodedData);
 
             switch (function.Value)
             {

@@ -1,14 +1,10 @@
-﻿using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Function;
-using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats;
-using System;
-using Windows.Devices.Gpio;
+﻿using Windows.Devices.Gpio;
 using static HalloweenControllerRPi.Functions.Func_RELAY;
 
 namespace HalloweenControllerRPi.Device.Controllers.Channels
 {
    internal class ChannelFunction_RELAY : IChannel, IProcessTick
    {
-      private uint _channelIdx;
       private tenOutputLevel _outputLevel;
       private IIOPin _Pin;
       private IChannelHost _channelHost;
@@ -24,11 +20,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          _Pin = pin;
       }
 
-      public uint Index
-      {
-         set { _channelIdx = value; }
-         get { return _channelIdx; }
-      }
+      public uint Index { get; set; }
 
       public IChannelHost ChannelHost
       {
@@ -48,7 +40,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          set { _Pin.Write(value); }
       }
 
-      public object GetValue()
+      public uint GetValue()
       {
          return Level;
       }

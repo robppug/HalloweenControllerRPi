@@ -15,6 +15,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 
 namespace HalloweenControllerRPi
 {
@@ -113,6 +114,8 @@ namespace HalloweenControllerRPi
 
       private async void buttonLoadSequence_Click(object sender, RoutedEventArgs e)
       {
+         (sender as Button).IsEnabled = false;
+
          if (fileToLoad != null)
          {
             StreamReader loadfile = new StreamReader(await fileToLoad.OpenStreamForReadAsync());
@@ -125,8 +128,15 @@ namespace HalloweenControllerRPi
                gc.ClearAllFunctions();
             }
 
-            //pbControl = new ProgressBarControl();
-            //pbControl.Title = "Loading XML file...";
+            new ContentDialog()
+            {
+               Title = "Please Wait",
+               IsPrimaryButtonEnabled = false,
+               IsSecondaryButtonEnabled = false,
+               HorizontalContentAlignment = HorizontalAlignment.Center,
+               VerticalContentAlignment = VerticalAlignment.Center,
+               Content = new TextBlock() { Text = "Loading XML file..." }
+            }.ShowAsync();
 
             //pbControl.MaxValue = xDoc.Descendants().Count();
             //pbControl.Show(this);
@@ -138,6 +148,8 @@ namespace HalloweenControllerRPi
 
             loadfile.Dispose();
          }
+
+         (sender as Button).IsEnabled = true;
       }
 
       private void checkBox_LoadOnStart_Checked(object sender, RoutedEventArgs e)
@@ -245,20 +257,48 @@ namespace HalloweenControllerRPi
                   }
                }
 
-         //      pbControl.Progress = noOfElements++;
-         //      pbControl.Remove();
+               if (GetVisibleContentDialog() != null)
+                  GetVisibleContentDialog().Hide();
+
+               //      pbControl.Progress = noOfElements++;
+               //      pbControl.Remove();
             }
             else
             {
-         //      MessageBox.Show("File version mismatch (" + data + ") found.", "Loading error...");
+               if( GetVisibleContentDialog() != null)
+                  GetVisibleContentDialog().Hide();
+
+               new ContentDialog()
+               {
+                  Title = "Error",
+                  IsSecondaryButtonEnabled = false,
+                  PrimaryButtonText = "Exit",
+                  HorizontalContentAlignment = HorizontalAlignment.Center,
+                  VerticalContentAlignment = VerticalAlignment.Center,
+                  Content = new TextBlock() { Text = "File version mismatch (" + data + ")." }
+               }.ShowAsync();
             }
          }
+      }
+
+      private static ContentDialog GetVisibleContentDialog()
+      {
+         var currentDialogs = VisualTreeHelper.GetOpenPopups(Window.Current);
+
+         foreach (var p in currentDialogs)
+         {
+            if (p.Child is ContentDialog)
+               return (p.Child as ContentDialog);
+         }
+
+         return null;
       }
       #endregion
 
       #region /* XML Saving */
       private async void buttonSaveSequence_Click(object sender, RoutedEventArgs e)
       {
+         (sender as Button).IsEnabled = false;
 
          fileToSave = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync("HWControllerSequence.sqn", CreationCollisionOption.ReplaceExisting);
          
@@ -276,6 +316,7 @@ namespace HalloweenControllerRPi
 
             savefile.Dispose();
          }
+         (sender as Button).IsEnabled = true;
       }
 
       /// <summary>
@@ -288,7 +329,7 @@ namespace HalloweenControllerRPi
 
          /* Store Version */
          writer.WriteStartElement(this.GetType().ToString());
-         writer.WriteAttributeString("Version", "0.5");
+         writer.WriteAttributeString("Version", "1.0");
 
          /* Iterates through all the GroupConters in the PIVOT control. */
          foreach (GroupContainer gc in lGroupContainers)

@@ -2,64 +2,20 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="using:HalloweenControllerRPi.Function_GUI"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DesignHeight="165.068"
+             d:DesignHeight="166"
              d:DesignWidth="140"
              Loaded="UserControl_Loaded"
              mc:Ignorable="d">
 
    <Grid Background="LightGray" BorderThickness="2" >
-      <TextBlock x:Name="textTitle"
-                 Margin="5,0,0,0"
-                 Foreground="Black"
-                 Text="Input (#)"
-                 TextWrapping="Wrap" />
-      <ComboBox x:Name="comboBox_TrigEdge"
-                Width="Auto"
-                Height="29"
-                Margin="5,26,5,0"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Top"
-                FontSize="12"
-                SelectionChanged="comboBox_TrigEdge_SelectionChanged" />
-      <TextBlock x:Name="textTriggerEdge"
-                 Margin="60,55,0,94"
-                 FontSize="10"
-                 Foreground="Black"
-                 Text="Trigger Edge"
-                 TextWrapping="Wrap" />
-      <Slider x:Name="slider_Debounce"
-              Margin="5,60,5,0"
-              VerticalAlignment="Top"
-              Maximum="500"
-              Minimum="0"
-              TickFrequency="100"
-              ValueChanged="slider_Debounce_ValueChanged"
-              Value="50" />
-      <TextBlock x:Name="textBlock_Debounce"
-                 Width="130"
-                 Margin="5,92,0,58"
-                 HorizontalAlignment="Left"
-                 FontSize="10"
-                 Foreground="Black"
-                 Text="Debounce Time: 50 (ms)"
-                 TextWrapping="Wrap" />
-      <Slider x:Name="slider_PostDelay"
-              Margin="5,113,5,0"
-              VerticalAlignment="Top"
-              Maximum="500"
-              Minimum="0"
-              TickFrequency="100"
-              ValueChanged="slider_PostDelay_ValueChanged"
-              Value="50" />
-      <TextBlock x:Name="textBlock_PostDelay"
-                 Width="130"
-                 Margin="5,145,0,5"
-                 HorizontalAlignment="Left"
-                 FontSize="10"
-                 Foreground="Black"
-                 Text="Post Trigger Delay: 50 (ms)"
-                 TextWrapping="Wrap" />
+      <TextBlock x:Name="textTitle" Margin="5,2,30,137" Foreground="Black" Text="Input (#)" TextWrapping="Wrap" />
+      <ComboBox x:Name="comboBox_TrigEdge" Width="Auto" Height="29" Margin="5,26,5,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" FontSize="12" SelectionChanged="comboBox_TrigEdge_SelectionChanged" />
+      <TextBlock x:Name="textTriggerEdge" Margin="60,55,0,94" FontSize="10" Foreground="Black" Text="Trigger Edge" TextWrapping="Wrap" />
+      <Slider x:Name="slider_Debounce" Margin="5,60,5,0" VerticalAlignment="Top" Maximum="500" Minimum="0" TickFrequency="100" ValueChanged="slider_Debounce_ValueChanged" Value="50" />
+      <TextBlock x:Name="textBlock_Debounce" Width="130" Margin="5,92,0,58" HorizontalAlignment="Left" FontSize="10" Foreground="Black" Text="Debounce Time: 50 (ms)" TextWrapping="Wrap" />
+      <Slider x:Name="slider_PostDelay" Margin="5,100,5,0" VerticalAlignment="Top" Maximum="10000" Minimum="0" TickFrequency="500" ValueChanged="slider_PostDelay_ValueChanged" Value="500" />
+      <TextBlock x:Name="textBlock_PostDelay" Width="130" Margin="5,137,0,10" HorizontalAlignment="Left" FontSize="10" Foreground="Black" Text="Post Trigger Delay: 500 (ms)" TextWrapping="Wrap" />
+      <Button x:Name="RemoveButton" Content="X" HorizontalAlignment="Right" Margin="0,3,3,0" VerticalAlignment="Top" Width="25" Height="20" FontSize="8" FontFamily="Arial"/>
    </Grid>
 </UserControl>

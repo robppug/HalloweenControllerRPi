@@ -29,7 +29,7 @@ namespace HalloweenControllerRPi
 
       public MainPage()
       {
-         this.InitializeComponent();
+         InitializeComponent();
 
          HostApp = this;
 
@@ -71,20 +71,17 @@ namespace HalloweenControllerRPi
 
          HWController.CommandReceived += ReceiveCommandFromDevice;
 
-         try
-         {
-            ControllerProgressBar.Visibility = Visibility.Visible;
-            textControllerProgressBar.Visibility = Visibility.Visible;
+         ControllerProgressBar.Visibility = Visibility.Visible;
+         textControllerProgressBar.Visibility = Visibility.Visible;
 
-            HWController.ControllerInitialised += HWController_OnControllerInitialised;
-            HWController.DiscoveryProgress += HWController_DiscoveryProgress;
+         HWController.ControllerInitialised += HWController_OnControllerInitialised;
+         HWController.DiscoveryProgress += HWController_DiscoveryProgress;
 
-            HWController.Connect();
+         HWController.Connect();
 
-            lHWControllers.Add(HWController);
-         }
-         catch { }
+         lHWControllers.Add(HWController);
       }
+
 
       /// <summary>
       /// Discovery of available functions progress bar.
@@ -132,7 +129,9 @@ namespace HalloweenControllerRPi
             HWSimulatedGrid.Items.Add(HWController.GetUIPanel());
          }
          else
+         {
             MainArea.Children.Remove(SimulatedArea);
+         }
 
          buttonStart.IsEnabled = true;
          buttonStop.IsEnabled = true;
@@ -220,7 +219,6 @@ namespace HalloweenControllerRPi
             c.OnDragStarting(sender, e);
          }
       }
-
       #endregion
 
    }

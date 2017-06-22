@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text.RegularExpressions;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
@@ -20,10 +24,19 @@ using Windows.UI.Xaml.Shapes;
 
 namespace HalloweenControllerRPi.UI.Controls
 {
-   public sealed partial class DrawCanvas : ContentDialog
+   public sealed partial class DrawCanvas : ContentDialog, IXmlSerializable
    {
+      private enum DirectionInfo
+      {
+         Left,
+         Right,
+         Top, 
+         Bottom
+      };
       private TextBlock coordsText;
       private Point lastLineEndPoint;
+      private Line nextLine;
+      private Line editingLine;
 
       public double Resolution { get; set; } = 10.0;
 
@@ -38,10 +51,15 @@ namespace HalloweenControllerRPi.UI.Controls
          get { return mouseDraw.ActualWidth; }
       }
 
+      public Color LineColor { get; set; } = Colors.Red;
+
+      public bool DisplayCoordinates { get; set; } = false;
 
       public DrawCanvas()
       {
          this.InitializeComponent();
+
+         editingLine = null;
 
          CapturedPoints = new List<Line>();
          coordsText = new TextBlock()
@@ -50,7 +68,79 @@ namespace HalloweenControllerRPi.UI.Controls
          };
 
          grid.Children.Add(coordsText);
-         PointerMoved += DrawCanvas_PointerMoved;
+
+         if (DisplayCoordinates)
+         {
+            PointerMoved += DrawCanvas_PointerMoved;
+         }
+      }
+
+      private void AddLine(Line line)
+      {
+         CapturedPoints.Add(line);
+         mouseDraw.Children.Add(line);
+      }
+
+      private void RemoveLine(Line line)
+      {
+         CapturedPoints.Remove(line);
+         mouseDraw.Children.Remove(line);
+      }
+
+      private Line GetNextLine(Line currentLine)
+      {
+         Line next = null;
+
+         if (CapturedPoints.IndexOf(currentLine) < (CapturedPoints.Count - 1))
+         {
+            next = CapturedPoints[CapturedPoints.IndexOf(currentLine) + 1];
+         }
+
+         return next;
+      }
+
+      private bool RemoveAllFromPoint(Point p)
+      {
+         bool found = false;
+         Line[] currentLines = new Line[CapturedPoints.Count];
+
+         CapturedPoints.CopyTo(currentLines);
+
+         foreach (Line l in currentLines)
+         {
+            if (found)
+            {
+               RemoveLine(l);
+            }
+            else if ((p.X >= l.X1) && (p.X <= l.X2))
+            {
+               //RPUGLIESE - Should NOT set the mouse X position, MUST use RESOLUTION property
+               l.X2 = p.X;
+               l.Y2 = p.Y;
+
+               found = true;
+            }
+         }
+
+         //Update the LAST line end point to the new LAST line.
+         if (CapturedPoints.Count > 0)
+         {
+            lastLineEndPoint.X = CapturedPoints.Last().X2;
+            lastLineEndPoint.Y = CapturedPoints.Last().Y2;
+         }
+
+         return found;
+      }
+
+      private void ClearAllCapturedLines()
+      {
+         mouseDraw.Children.Clear();
+         CapturedPoints.Clear();
+      }
+      private void UpdateEndPoint(Line l)
+      {
+         lastLineEndPoint.X = l.X2;
+         lastLineEndPoint.Y = l.Y2;
       }
 
       private void DrawCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
@@ -76,58 +166,6 @@ namespace HalloweenControllerRPi.UI.Controls
          Canvas.SetTop(coordsText, p.Y - 5);
       }
 
-      private bool RemoveAllFromPoint(Point p)
-      {
-         bool found = false;
-         Line[] currentLines = new Line[CapturedPoints.Count];
-
-         CapturedPoints.CopyTo(currentLines);
-
-         foreach (Line l in currentLines)
-         {
-            if (found)
-            {
-               RemovePoint(l);
-            }
-            else if ((p.X >= l.X1) && (p.X <= l.X2))
-            {
-               l.X2 = p.X;
-               l.Y2 = p.Y;
-
-               found = true;
-            }
-         }
-
-         //Update the LAST line end point to the new LAST line.
-         if (CapturedPoints.Count > 0)
-         {
-            lastLineEndPoint.X = CapturedPoints.Last().X2;
-            lastLineEndPoint.Y = CapturedPoints.Last().Y2;
-         }
-
-         return found;
-      }
-
-      private void AddPoint(Line line)
-      {
-         //if (line.X1 < 0)
-         //   line.X1 = 0;
-         //if (line.X2 > XMax)
-         //   line.X2 = XMax;
-         //if (line.Y1 < 0)
-         //   line.Y1 = 0;
-         //if (line.Y2 > YMax)
-         //   line.Y2 = YMax;
-
-         CapturedPoints.Add(line);
-         mouseDraw.Children.Add(line);
-      }
-      private void RemovePoint(Line line)
-      {
-         CapturedPoints.Remove(line);
-         mouseDraw.Children.Remove(line);
-      }
-
       private void mouseDraw_PointerMoved(object sender, PointerRoutedEventArgs e)
       {
          Point p = e.GetCurrentPoint(mouseDraw).Position;
@@ -135,23 +173,54 @@ namespace HalloweenControllerRPi.UI.Controls
 
          if (e.Pointer.IsInContact == true)
          {
-            distance_X = p.X - lastLineEndPoint.X;
+            if (editingLine != null)
+               distance_X = p.X - editingLine.X1;
+            else
+               distance_X = p.X - lastLineEndPoint.X;
 
             //Only allow MOVING forward
             if (distance_X >= Resolution)
             {
-               Line line = new Line();
+               if (editingLine != null)
+               {
+                  //Set the current LINE to the new Y position
+                  editingLine.Y2 = p.Y;
 
-               line.Stroke = new SolidColorBrush(Colors.Red);
-               line.X1 = lastLineEndPoint.X;
-               line.Y1 = lastLineEndPoint.Y;
-               line.X2 = lastLineEndPoint.X + Resolution;
-               line.Y2 = p.Y;
+                  //Update the Last End Point to the current editing LINE
+                  lastLineEndPoint.X = editingLine.X2;
+                  lastLineEndPoint.Y = editingLine.Y2;
 
-               lastLineEndPoint.X = line.X2;
-               lastLineEndPoint.Y = line.Y2;
+                  //Check if we are at the END of the curve, stop EDITING
+                  if(GetNextLine(editingLine) == null)
+                  {
+                     editingLine = null;
+                  }
+                  else
+                  {
+                     nextLine.Y1 = p.Y;
 
-               AddPoint(line);
+                     //Move the editing LINE to the NEXT LINE
+                     editingLine = nextLine;
+
+                     //Get the NEXT LINE
+                     nextLine = GetNextLine(editingLine);
+                  }
+               }
+               else
+               {
+                  Line line = new Line();
+
+                  line.Stroke = new SolidColorBrush(LineColor);
+                  line.X1 = lastLineEndPoint.X;
+                  line.Y1 = lastLineEndPoint.Y;
+                  line.X2 = lastLineEndPoint.X + Resolution;
+                  line.Y2 = p.Y;
+
+                  lastLineEndPoint.X = line.X2;
+                  lastLineEndPoint.Y = line.Y2;
+
+                  AddLine(line);
+               }
             }
          }
       }
@@ -163,8 +232,32 @@ namespace HalloweenControllerRPi.UI.Controls
 
          if (e.Pointer.IsInContact)
          {
-            //Check if the new LINE is before existing LINEs
-            RemoveAllFromPoint(p);
+            Line[] currentLines = new Line[CapturedPoints.Count];
+
+            CapturedPoints.CopyTo(currentLines);
+
+            foreach (Line l in currentLines)
+            {
+               if ((p.X >= l.X1) && (p.X <= l.X2))
+               {
+                  //Ensure they are not editing the LAST line
+                  if (CapturedPoints.Last() != l)
+                  {
+                     int index = CapturedPoints.IndexOf(l);
+
+                     editingLine = l;
+                     nextLine = CapturedPoints[index + 1];
+                     return;
+                  }
+                  else
+                  {
+                     RemoveLine(l);
+
+                     lastLineEndPoint.X = CapturedPoints.Last().X2;
+                     lastLineEndPoint.Y = CapturedPoints.Last().Y2;
+                  }
+               }
+            }
 
             if (mouseDraw.Children.Count > 0)
             {
@@ -174,7 +267,7 @@ namespace HalloweenControllerRPi.UI.Controls
                {
                   Line line = new Line();
 
-                  line.Stroke = new SolidColorBrush(Colors.Red);
+                  line.Stroke = new SolidColorBrush(LineColor);
                   line.X1 = lastLineEndPoint.X;
                   line.Y1 = lastLineEndPoint.Y;
                   line.X2 = lastLineEndPoint.X + Resolution;
@@ -185,7 +278,7 @@ namespace HalloweenControllerRPi.UI.Controls
 
                   distance_X -= Resolution;
 
-                  AddPoint(line);
+                  AddLine(line);
                }
             }
          }
@@ -193,6 +286,10 @@ namespace HalloweenControllerRPi.UI.Controls
 
       private void mouseDraw_PointerReleased(object sender, PointerRoutedEventArgs e)
       {
+         editingLine = null;
+
+         lastLineEndPoint.X = CapturedPoints.Last().X2;
+         lastLineEndPoint.Y = CapturedPoints.Last().Y2;
       }
 
       private void mouseDraw_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -221,7 +318,7 @@ namespace HalloweenControllerRPi.UI.Controls
                   {
                      Line line = new Line();
 
-                     line.Stroke = new SolidColorBrush(Colors.Red);
+                     line.Stroke = new SolidColorBrush(LineColor);
                      line.X1 = lastLineEndPoint.X;
                      line.Y1 = lastLineEndPoint.Y;
                      line.X2 = lastLineEndPoint.X + Resolution;
@@ -232,64 +329,121 @@ namespace HalloweenControllerRPi.UI.Controls
 
                      distance_X -= Resolution;
 
-                     AddPoint(line);
+                     AddLine(line);
                   }
                }
             }
          }
       }
 
-      private void ClearAllCapturedLines()
-      {
-         mouseDraw.Children.Clear();
-         CapturedPoints.Clear();
-      }
-
       private void mouseDraw_PointerExited(object sender, PointerRoutedEventArgs e)
       {
          Point p = e.GetCurrentPoint(mouseDraw).Position;
+         DirectionInfo? exitDirection = null;
 
          if (e.Pointer.IsInContact == true)
          {
-            Line line = new Line();
-
-            line.Stroke = new SolidColorBrush(Colors.Red);
-            line.X1 = lastLineEndPoint.X;
-            line.Y1 = lastLineEndPoint.Y;
-
-            //EXIT from the RIGHT
+            //Get the EXIT direction
             if (p.X >= XMax - Resolution)
-            {
-               line.X2 = XMax;
-               line.Y2 = p.Y;
-
-               lastLineEndPoint.X = line.X2;
-               lastLineEndPoint.Y = line.Y2;
-
-               AddPoint(line);
-            }
-            //EXIT from the BOTTOM
+               exitDirection = DirectionInfo.Right;
             else if (p.Y >= YMax - Resolution)
-            {
-               line.X2 = lastLineEndPoint.X + Resolution;
-               line.Y2 = YMax;
-
-               lastLineEndPoint.X = line.X2;
-               lastLineEndPoint.Y = line.Y2;
-
-               AddPoint(line);
-            }
-            //EXIT from the TOP
+               exitDirection = DirectionInfo.Bottom;
             else if (p.Y <= Resolution)
+               exitDirection = DirectionInfo.Top;
+
+            if (editingLine != null)
             {
-               line.X2 = lastLineEndPoint.X + Resolution;
-               line.Y2 = 0;
+               editingLine.Y2 = p.Y;
 
-               lastLineEndPoint.X = line.X2;
-               lastLineEndPoint.Y = line.Y2;
+               UpdateEndPoint(editingLine);
 
-               AddPoint(line);
+               editingLine = null;
             }
+            else
+            {
+               Line line = new Line();
+
+               line.Stroke = new SolidColorBrush(LineColor);
+               line.X1 = lastLineEndPoint.X;
+               line.Y1 = lastLineEndPoint.Y;
+
+               //EXIT from the RIGHT
+               if (exitDirection == DirectionInfo.Right)
+               {
+                  line.X2 = XMax;
+                  line.Y2 = p.Y;
+               }
+               //EXIT from the BOTTOM
+               else if (exitDirection == DirectionInfo.Bottom)
+               {
+                  line.X2 = lastLineEndPoint.X + Resolution;
+                  line.Y2 = YMax;
+               }
+               //EXIT from the TOP
+               else if (exitDirection == DirectionInfo.Top)
+               {
+                  line.X2 = lastLineEndPoint.X + Resolution;
+                  line.Y2 = 0;
+               }
+
+               if(exitDirection != null)
+               {
+                  UpdateEndPoint(line);
+
+                  AddLine(line);
+               }
+            }
+         }
+      }
+
+      public XmlSchema GetSchema()
+      {
+         throw new NotImplementedException();
+      }
+
+      public void ReadXml(XmlReader reader)
+      {
+         String customData = Convert.ToString(reader.GetAttribute("CustomLevel"));
+
+         // ?<x1>\d+(?:\.\d+)?)\s+
+         // ?<x1> = GroupName
+         // \d+ = Match all digits (any length)
+         // ( = capture group (open)
+         //   ?: = non-capturing group
+         //      \. = Match '.' character
+         //      \d+ = Match all digits (any length)
+         // ) = capture group (close)
+         // ? = Match 0 or 1 of the above
+         // \s+ = Match all whitespaces (any length)
+         Regex line = new Regex(@"(?<x1>\d+(?:\.\d+)?)\s+(?<x2>\d+(?:\.\d+)?)\s+(?<y1>\d+(?:\.\d+)?)\s+(?<y2>\d+(?:\.\d+)?)", RegexOptions.Compiled);
+         MatchCollection match = line.Matches(customData);
+
+         foreach(Match m in match)
+         {
+            Line l = new Line();
+
+            l.Stroke = new SolidColorBrush(Colors.Red);
+            l.X1 = Convert.ToDouble(m.Groups["x1"].Value);
+            l.X2 = Convert.ToDouble(m.Groups["x2"].Value);
+            l.Y1 = Convert.ToDouble(m.Groups["y1"].Value);
+            l.Y2 = Convert.ToDouble(m.Groups["y2"].Value);
+
+            AddLine(l);
+         }
+      }
+
+      public void WriteXml(XmlWriter writer)
+      {
+         String data = null;
+
+         if (CapturedPoints != null)
+         {
+            foreach (Line l in CapturedPoints)
+            {
+               data = String.Join(" ", data, l.X1.ToString("0.0000"), l.X2.ToString("0.0000"), l.Y1.ToString("0.0000"), l.Y2.ToString("0.0000"));
+            }
+            data = data.TrimStart(' ');
+            writer.WriteAttributeString("CustomLevel", data);
          }
       }
    }

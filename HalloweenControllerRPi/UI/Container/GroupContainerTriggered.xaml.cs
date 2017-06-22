@@ -1,26 +1,14 @@
-﻿using Gregstoll;
-using HalloweenControllerRPi.Function_GUI;
+﻿using HalloweenControllerRPi.Function_GUI;
 using HalloweenControllerRPi.Functions;
 using HalloweenControllerRPi.UI.Functions.Function_Button;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
+using System.Xml;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
-using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -92,7 +80,7 @@ namespace HalloweenControllerRPi.Container
 
             /* Create an instance of the FUNCTION GUI */
             FuncGUI = (Control)Activator.CreateInstance(draggedItem.GUIType, MainPage.HostApp, draggedItem.Index, Function.tenTYPE.TYPE_TRIGGER);
-
+            
             AddFunctionToGroup(FuncGUI);
             return;
          }
@@ -155,10 +143,10 @@ namespace HalloweenControllerRPi.Container
 
          if (boValidTrigger)
          {
-            imageTrigger.Source = new BitmapImage(new Uri("ms-appx:///Assets/trigger.png"));
+            imageTrigger.Source = (BitmapImage)Resources["Triggered"];
 
             /* Trigger each FUNCTION within the Active Group */
-            foreach(UIElement c in Container.Children)
+            foreach (UIElement c in Container.Children)
             {
                if (c is IFunctionGUI)
                {
@@ -195,15 +183,15 @@ namespace HalloweenControllerRPi.Container
             }
          }
 
-         this.imageTrigger.Source = null;
+         this.imageTrigger.Source = (BitmapImage)Resources["Blank"];
       }
 
-      public System.Xml.Schema.XmlSchema GetSchema()
+      public XmlSchema GetSchema()
       {
          throw new NotImplementedException();
       }
 
-      public void ReadXml(System.Xml.XmlReader reader)
+      public void ReadXml(XmlReader reader)
       {
          throw new NotImplementedException();
       }
@@ -230,11 +218,18 @@ namespace HalloweenControllerRPi.Container
          if (ctl is IFunctionGUI)
          {
             Container.Children.Add(ctl);
+
+            (ctl as IFunctionGUI).OnRemove += GroupContainerTriggered_OnRemove;
          }
          else
          {
             throw new Exception("Only controls of type IFunctionGUI can be added.");
          }
+      }
+
+      private void GroupContainerTriggered_OnRemove(object sender, EventArgs e)
+      {
+         Container.Children.Remove((sender as UIElement));
       }
    }
 }
