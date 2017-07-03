@@ -1,9 +1,12 @@
 ﻿using HalloweenControllerRPi.Functions;
+using HalloweenControllerRPi.UI.ExternalDisplay;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
+using Windows.UI.Core;
 using Windows.UI.Xaml.Controls;
 
 namespace HalloweenControllerRPi.Device.Controllers
@@ -17,6 +20,8 @@ namespace HalloweenControllerRPi.Device.Controllers
          UIPanel = new HWSimulatedUI();
 
          UIPanel.OnInputTrigger += UIPanel_OnInputTrigger;
+
+         HWController.Display = new GraphicsProvider(null);
       }
 
       private void UIPanel_OnInputTrigger(object sender, EventArgs e)
@@ -117,9 +122,39 @@ namespace HalloweenControllerRPi.Device.Controllers
             return 4;
          }
       }
+      public override bool HasDisplay
+      {
+         get
+         {
+            return false;
+         }
+      }
 
       public override void Connect()
       {
+         CoreApplication.MainView.Dispatcher.RunAsync(CoreDispatcherPriority.High, async () =>
+         {
+            await Discovery();
+         }).AsTask();
+      }
+
+      private async Task Discovery()
+      {
+         uint discovery = 0;
+
+         OnDisplayInitialised();
+
+         while (discovery < 100)
+         {
+            System.Diagnostics.Debug.WriteLine("\n\nUPDATE: " + discovery.ToString());
+
+            OnDiscoveryProgressUpdated(discovery);
+
+            await Task.Delay(500);
+
+            discovery++;
+         }
+
          OnControllerInitialised();
       }
 

@@ -11,7 +11,7 @@
     <AssemblyName>HalloweenControllerRPi</AssemblyName>
     <DefaultLanguage>en</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
+    <TargetPlatformVersion>10.0.15063.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.10586.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -56,6 +56,7 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <UseDotNetNativeToolchain>false</UseDotNetNativeToolchain>
     <EnableGatekeeperAnalysis>false</EnableGatekeeperAnalysis>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
     <OutputPath>bin\ARM\Release\</OutputPath>
@@ -108,6 +109,8 @@
     <Compile Include="Attributes\FunctionAttribute.cs" />
     <Compile Include="Attributes\RxLengthAttribute.cs" />
     <Compile Include="Attributes\AccessTypeAttribute.cs" />
+    <Compile Include="Device\Controllers\Channels\ChannelFunction_BUTTON.cs" />
+    <Compile Include="Device\Controllers\Channels\IDisplayChannel.cs" />
     <Compile Include="Extentions\EnumExtension.cs" />
     <Compile Include="Device\Controllers\Channels\ChannelFunction_SOUND.cs" />
     <Compile Include="Device\Controllers\Channels\IIOPin.cs" />
@@ -127,8 +130,6 @@
     <Compile Include="Device\Controllers\Providers\IPwmChannelProvider.cs" />
     <Compile Include="Device\Controllers\BusDevices\I2C\BusDevice_SC16IS752.cs" />
     <Compile Include="Device\Controllers\BusDevices\I2C\BusDevice_PCA9685.cs" />
-    <Compile Include="Device\Controllers\Drivers\SSD1306\DisplayFont.cs" />
-    <Compile Include="Device\Controllers\Drivers\SSD1306\DisplayImage.cs" />
     <Compile Include="Device\Controllers\Channels\IChannelHost.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_DISPLAY_v1.cs" />
     <Compile Include="Device\Controllers\RaspberryPi\Hats\RPiHat_INPUT_v1.cs" />
@@ -165,6 +166,13 @@
     <Compile Include="Device\Controllers\HWController.cs" />
     <Compile Include="Device\Controllers\IHWController.cs" />
     <Compile Include="Device\Controllers\ISupportedFunctions.cs" />
+    <Compile Include="UI\ExternalDisplay\Screens\DetectingScreen.xaml.cs">
+      <DependentUpon>DetectingScreen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\ExternalDisplay\Screens\MainScreen.xaml.cs">
+      <DependentUpon>MainScreen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\ExternalDisplay\MenuHandler.cs" />
     <Compile Include="UI\FileHandler.cs" />
     <Compile Include="UI\Functions\Function.cs" />
     <Compile Include="UI\Functions\Function_Button\Function_Button.xaml.cs">
@@ -194,6 +202,7 @@
       <DependentUpon>Func_Input_GUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\Functions\IFunctionGUI.cs" />
+    <Compile Include="UI\ExternalDisplay\GraphicsProvider.cs" />
     <Compile Include="UI\IHostApp.cs" />
     <Compile Include="UI\MainPage.xaml.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -241,6 +250,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Device\Controllers\Simulated\HWSimulatedUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\ExternalDisplay\Screens\DetectingScreen.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\ExternalDisplay\Screens\MainScreen.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -299,7 +316,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <SDKReference Include="WindowsIoT, Version=10.0.10586.0">
+    <SDKReference Include="WindowsIoT, Version=10.0.15063.0">
       <Name>Windows IoT Extensions for the UWP</Name>
     </SDKReference>
   </ItemGroup>

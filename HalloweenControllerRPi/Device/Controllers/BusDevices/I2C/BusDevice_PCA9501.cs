@@ -2,6 +2,7 @@
 using HalloweenControllerRPi.Device.Controllers.Providers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 

@@ -35,7 +35,11 @@
                    HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch"
                    CanDragItems="True"
-                   DragItemsStarting="DragItemsStarting" />
+                   DragItemsStarting="DragItemsStarting"
+                   Background="Black">
+            <Canvas x:Name="ExternalDisplayCanvas" MinHeight="64" MinWidth="128" MaxHeight="64" MaxWidth="128"/>
+            <Image x:Name="OutputImage" MinHeight="64" MinWidth="128" MaxHeight="64" MaxWidth="128"/>
+         </GridView>
       </Border>
       <Border x:Name="SimulatedArea"
               Width="460"

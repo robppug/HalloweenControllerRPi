@@ -1,14 +1,12 @@
-﻿using HalloweenControllerRPi.Attributes;
-using HalloweenControllerRPi.Device.Controllers;
-using HalloweenControllerRPi.Device.Controllers.Channels;
-using HalloweenControllerRPi.Extentions;
+﻿using HalloweenControllerRPi.Device.Controllers;
+using HalloweenControllerRPi.UI.ExternalDisplay;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
-using static HalloweenControllerRPi.Device.HWController;
 
 namespace HalloweenControllerRPi.Device
 {
@@ -25,7 +23,8 @@ namespace HalloweenControllerRPi.Device
 
       public event HostedMessageDelegate CommandReceived;
       public event DataEventHandler<uint> DiscoveryProgress;
-      public event EventHandler ControllerInitialised;
+      public event EventHandler DiscoveryComplete;
+      public event EventHandler Initialised;
 
       public class HWInterfaceException : Exception { public HWInterfaceException(String msg) : base(msg) { } }
 
@@ -39,8 +38,14 @@ namespace HalloweenControllerRPi.Device
 
       protected virtual void OnControllerInitialised()
       {
-         ControllerInitialised?.Invoke(this, EventArgs.Empty);
+         DiscoveryComplete?.Invoke(this, EventArgs.Empty);
       }
+
+      protected virtual void OnDisplayInitialised()
+      {
+         Initialised?.Invoke(this, EventArgs.Empty);
+      }
+
 
       protected virtual void OnDiscoveryProgressUpdated(uint percentage)
       {
@@ -54,6 +59,8 @@ namespace HalloweenControllerRPi.Device
       public abstract uint PWMs { get; }
       public abstract uint Relays { get; }
       public abstract uint SoundChannels { get; }
+      public abstract bool HasDisplay { get; }
+      public static GraphicsProvider Display { get; protected set; }
 
       private static Match GetRegexMatch(string pattern, string decodedData)
       {
@@ -245,4 +252,5 @@ namespace HalloweenControllerRPi.Device
       }
 
    }
+
 }

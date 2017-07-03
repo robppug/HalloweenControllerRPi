@@ -1,18 +1,17 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.Channels;
 using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats;
 using HalloweenControllerRPi.Functions;
+using HalloweenControllerRPi.UI.ExternalDisplay;
 using Microsoft.IoT.Lightning.Providers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Devices;
 using Windows.Devices.Enumeration;
-using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 using Windows.Devices.Spi;
-using Windows.UI.Core;
+using Windows.System.Threading;
 using Windows.UI.Xaml;
 
 namespace HalloweenControllerRPi.Device.Controllers
@@ -26,14 +25,10 @@ namespace HalloweenControllerRPi.Device.Controllers
       #endregion /* ENUMS */
 
       #region /* PRIVATE */
-
       private static I2cDevice _i2cDevice;
-      private static I2cController _i2cController;
       private static I2cConnectionSettings _i2cSettings;
 
       private static SpiDevice _spiDevice;
-
-      private static GpioController _gpioController;
 
       //private static Stopwatch sWatch;
       private static DispatcherTimer CycleTimer;
@@ -49,12 +44,6 @@ namespace HalloweenControllerRPi.Device.Controllers
       #region /* CONSTRUCTORS */
       public HWRaspberryPI2()
       {
-         if (LightningProvider.IsLightningEnabled == true)
-         {
-            LowLevelDevicesController.DefaultProvider = LightningProvider.GetAggregateProvider();
-         }
-
-         var getCtrlTask = Task.Run(async () => { await GetControllers(); });
       }
       #endregion /* CONSTRUCTORS */
 
@@ -71,15 +60,6 @@ namespace HalloweenControllerRPi.Device.Controllers
          protected set { _spiDevice = value; }
       }
       #endregion
-
-      private async Task GetControllers()
-      {
-         if (LightningProvider.IsLightningEnabled == true)
-         {
-            _gpioController = (await GpioController.GetControllersAsync(LightningGpioProvider.GetGpioProvider()))[0];
-            _i2cController = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
-         }
-      }
 
       #region /* COMMAND LIST & HANDLING */
       /// <summary>
@@ -175,41 +155,15 @@ namespace HalloweenControllerRPi.Device.Controllers
             return (uint)_lSOUNDFunctions.Count;
          }
       }
-      #endregion /* AVAILABLE FUNCTIONS */
 
-      /// <summary>
-      ///
-      /// </summary>
-      /// <returns></returns>
-      private async Task OnConnect()
+      public override bool HasDisplay
       {
-         /* Allow the HW to initialise */
-         await Task.Delay(500);
-
-         /* Discover 'HATs' that are connected */
-         if (LightningProvider.IsLightningEnabled == true)
+         get
          {
-            _i2cDevice = _i2cController.GetDevice(_i2cSettings);
+            return (Display != null);
          }
-         else
-         {
-            await DiscoverHats();
-         }
-
-         /* Initialise available channels (PWM, RELAY, INPUT) */
-         PopulateChannelList();
-
-         OnControllerInitialised();
-
-         //sWatch = new Stopwatch();
-         //sWatch.Start();
-
-         /* Create the Background Task handle */
-         CycleTimer = new DispatcherTimer();
-         CycleTimer.Tick += ControllerTask;
-         CycleTimer.Interval = new TimeSpan(0, 0, 0, 0, 1);
-         CycleTimer.Start();
       }
+      #endregion /* AVAILABLE FUNCTIONS */
 
       private void PopulateChannelList()
       {
@@ -254,71 +208,119 @@ namespace HalloweenControllerRPi.Device.Controllers
       /// <returns></returns>
       private async Task DiscoverHats()
       {
+         DeviceInformationCollection i2cDeviceControllers = null;
+         I2cController i2cController = null;
          RPiHat rpiHat;
-         string deviceSelector = I2cDevice.GetDeviceSelector("I2C1");
-         var i2cDeviceControllers = await DeviceInformation.FindAllAsync(deviceSelector).AsTask();
-
-         if (i2cDeviceControllers == null)
-         {
-            throw new Exception("Device not found (" + deviceSelector + ")");
-         }
-
          int Address = 0x00;
 
-         while (Address < MaxI2CAddresses)
-         {
-            _i2cSettings = new I2cConnectionSettings(Address);
-            _i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
-            _i2cSettings.SharingMode = I2cSharingMode.Exclusive;
 
+         //RPUGLIESE - LightningI2cProvider is not working (Doesn't like the Address of 0x00)!
+         if (LightningProvider.IsLightningEnabled == true)
+         {
+            LowLevelDevicesController.DefaultProvider = LightningProvider.GetAggregateProvider();
+
+            i2cController = await I2cController.GetDefaultAsync();
+
+            //i2cController = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
+         }
+         else
+         {
+            string deviceSelector = I2cDevice.GetDeviceSelector("I2C1");
+            i2cDeviceControllers = await DeviceInformation.FindAllAsync(deviceSelector).AsTask();
+
+            if (i2cDeviceControllers == null)
+            {
+               throw new Exception("Device not found (" + deviceSelector + ")");
+            }
+         }
+
+         _i2cSettings = new I2cConnectionSettings(RPiHat.DisplayHatAddress);
+         _i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
+         _i2cSettings.SharingMode = I2cSharingMode.Shared;
+
+         if (LightningProvider.IsLightningEnabled == true)
+            _i2cDevice = i2cController.GetDevice(_i2cSettings);
+         else
             _i2cDevice = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, _i2cSettings);
 
-            /* Update Discovery Progress event */
-            OnDiscoveryProgressUpdated((uint)((double)(Address + 2) / (double)MaxI2CAddresses * 100));
-
-            if (_i2cDevice.ReadPartial(new byte[1] { 0x00 }).Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
-            {
-               System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - No device found.");
-
-               /* No device found */
-               Address++;
-
-               continue;
-            }
-
-            /* Device found, store the HAT and it's Address then establish communication with the HAT and initialise the HATs available CHANNELS */
-            rpiHat = RPiHat.Open(this, (UInt16)Address);
+         if (_i2cDevice.ReadPartial(new byte[1] { 0x00 }).Status != I2cTransferStatus.SlaveAddressNotAcknowledged)
+         {
+            rpiHat = RPiHat.Open(this, RPiHat.DisplayHatAddress);
 
             if (rpiHat != null)
             {
-               System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - Device found (" + rpiHat.HatType.ToString() + ").");
+               /* There can ONLY be 1 DISPLAY channel */
+               if (rpiHat is IDisplayChannel)
+               {
+                  Display = new GraphicsProvider((rpiHat as IDisplayChannel).Device);
+
+                  OnDisplayInitialised();
+               }
 
                _lHats.Add(rpiHat);
 
                /* Store a collection of all the available Channels */
                _lAllFunctions.AddRange(_lHats.Last().Channels);
             }
+         }
+
+         //Find all other HATs
+         while (Address < MaxI2CAddresses)
+         {
+            _i2cSettings.SlaveAddress = Address;
+
+            if (LightningProvider.IsLightningEnabled == true)
+               _i2cDevice = i2cController.GetDevice(_i2cSettings);
             else
+               _i2cDevice = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, _i2cSettings);
+            
+            if (_i2cDevice.ReadPartial(new byte[1] { 0x00 }).Status != I2cTransferStatus.SlaveAddressNotAcknowledged)
             {
-               System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - Device found (UNSUPPORTED).");
+               /* Device found, store the HAT and it's Address then establish communication with the HAT and initialise the HATs available CHANNELS */
+               rpiHat = RPiHat.Open(this, (UInt16)Address);
+
+               if (rpiHat != null)
+               {
+                  //System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - Device found (" + rpiHat.HatType.ToString() + ").");
+
+                  _lHats.Add(rpiHat);
+
+                  /* Store a collection of all the available Channels */
+                  _lAllFunctions.AddRange(_lHats.Last().Channels);
+               }
             }
 
-            Address++;
+            if (++Address == RPiHat.DisplayHatAddress)
+               Address++;
+
+            OnDiscoveryProgressUpdated((uint)((double)(Address + 1) / (double)MaxI2CAddresses * 100));
          }
+
+         await Task.Delay(500);
+
+         /* Initialise available channels (PWM, RELAY, INPUT) */
+         PopulateChannelList();
+
+         OnControllerInitialised();
+
+         //sWatch = new Stopwatch();
+         //sWatch.Start();
+
+         /* Create the Background Task handle */
+         CycleTimer = new DispatcherTimer();
+         CycleTimer.Tick += ControllerTask;
+         CycleTimer.Interval = new TimeSpan(0, 0, 0, 0, 1); //Unlikely to run this fast, but trigger as fast as possible
+         CycleTimer.Start();
       }
+
 
       /// <summary>
       /// Initialise any drivers (ie. I2C)
       /// </summary>
       public override void Connect()
       {
-         /* Setup the I2C bus for access to the PWM channels */
-         _i2cSettings = new I2cConnectionSettings(0x40);
-         _i2cSettings.BusSpeed = I2cBusSpeed.FastMode;
-         _i2cSettings.SharingMode = I2cSharingMode.Exclusive;
-
-         /* Wait for the 'OnConnect' to complete without blocking the UI */
-         OnConnect();
+         /* Discover 'HATs' that are connected */
+         DiscoverHats();
       }
 
       public override void Disconnect()

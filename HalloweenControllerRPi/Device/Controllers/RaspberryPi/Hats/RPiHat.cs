@@ -4,10 +4,6 @@ using System.Collections.Generic;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
-   public interface IHatChannel
-   {
-
-   }
    /// <summary>
    /// Raspberry Pi HAT class for the Raspberry Pi 2/3
    /// </summary>
@@ -32,6 +28,8 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
       #region Declarations
 
       protected IHWController m_hostController;
+
+      public static readonly ushort DisplayHatAddress = 0x3C;
 
       public IHWController HostController
       {
@@ -132,8 +130,8 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
          {
             hat = SupportedHATs.RELAY_v1;
          }
-         /* PCA9501 - DISPLAY (0x3C or 0x3D) */
-         else if ((hatAddress == 0x3C) || (hatAddress == 0x3C))
+         /* PCA9501 - DISPLAY (0x3C or 0x3D <Not Used>) */
+         else if (hatAddress == DisplayHatAddress)
          {
             hat = SupportedHATs.DISPLAY_v1;
          }

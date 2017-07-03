@@ -1,17 +1,26 @@
 ﻿using HalloweenControllerRPi.Container;
 using HalloweenControllerRPi.Device;
 using HalloweenControllerRPi.Device.Controllers;
+using HalloweenControllerRPi.Device.Drivers;
 using HalloweenControllerRPi.Function_GUI;
 using HalloweenControllerRPi.Functions;
 using HalloweenControllerRPi.UI.Controls;
 using HalloweenControllerRPi.UI.Functions.Function_Button;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Windows.System.Profile;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
+using Windows.UI.Xaml.Shapes;
+using Windows.Storage.Streams;
+using Windows.Foundation;
+using Windows.Graphics.Imaging;
+using HalloweenControllerRPi.UI.ExternalDisplay;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -26,13 +35,14 @@ namespace HalloweenControllerRPi
       public List<GroupContainer> lGroupContainers = new List<GroupContainer>();
 
       static public IHostApp HostApp;
+      static public MenuHandler Menu;
 
       public MainPage()
       {
          InitializeComponent();
 
          HostApp = this;
-
+         
          buttonStart.IsEnabled = false;
          buttonStop.IsEnabled = false;
 
@@ -74,28 +84,63 @@ namespace HalloweenControllerRPi
          ControllerProgressBar.Visibility = Visibility.Visible;
          textControllerProgressBar.Visibility = Visibility.Visible;
 
-         HWController.ControllerInitialised += HWController_OnControllerInitialised;
+         HWController.DiscoveryComplete += HWController_OnDiscoveryComplete;
          HWController.DiscoveryProgress += HWController_DiscoveryProgress;
+         HWController.Initialised += HWController_DisplayInitialised;
 
          HWController.Connect();
 
          lHWControllers.Add(HWController);
       }
 
+      public static DetectingScreen _screen_Detecting = new DetectingScreen();
+      public static MainScreen _screen_Main = new MainScreen();
+
+      public static Task _displayUpdate;
+
+      public void HWController_DisplayInitialised(object sender, EventArgs e)
+      {
+         HWController.Display.ActiveCanvas = ExternalDisplayCanvas;
+         HWController.Display.OutputImage = OutputImage;
+
+         Menu = new MenuHandler(HWController.Display, new MenuNode<UserControl>(null, _screen_Main));
+
+         Menu.DisplayPopup(_screen_Detecting);
+
+         _displayUpdate = Menu.Update();
+      }
 
       /// <summary>
       /// Discovery of available functions progress bar.
       /// </summary>
       /// <param name="data"></param>
-      private void HWController_DiscoveryProgress(uint data)
+      public async void HWController_DiscoveryProgress(uint data)
       {
          textControllerProgressBar.Text = "Detecting available functions... " + data.ToString() + "%";
          ControllerProgressBar.Value = (double)data;
+
+         if(_displayUpdate.IsCompleted)
+         {
+            _screen_Detecting.UpdateProgressBar((double)data);
+            _screen_Detecting.UpdateLayout();
+
+            _displayUpdate = Menu.Update();
+
+            await _displayUpdate;
+         }
       }
 
-      private void HWController_OnControllerInitialised(object sender, EventArgs e)
+      private async void HWController_OnDiscoveryComplete(object sender, EventArgs e)
       {
          HWController HWController = (sender as HWController);
+
+         _displayUpdate.Wait();
+
+         Menu.EndPopup(_screen_Detecting);
+
+         _displayUpdate = Menu.Update();
+
+         await _displayUpdate;
 
          ControllerProgressBar.Visibility = Visibility.Collapsed;
          textControllerProgressBar.Visibility = Visibility.Collapsed;
