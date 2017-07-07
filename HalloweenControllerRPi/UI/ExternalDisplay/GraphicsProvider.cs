@@ -86,25 +86,22 @@ namespace HalloweenControllerRPi.UI.ExternalDisplay
 
          //System.Diagnostics.Debug.WriteLine("DISPLAY UPDATE END");
 
-         await Task.Run(async () =>
-         {
-            var stream = new InMemoryRandomAccessStream();
-            var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.BmpEncoderId, stream);
+         var stream = new InMemoryRandomAccessStream();
+         var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.BmpEncoderId, stream);
 
-            IBuffer buffer = await renderBitmap.GetPixelsAsync();
+         IBuffer buffer = await renderBitmap.GetPixelsAsync();
 
-            byte[] pixelBuffer = buffer.ToArray(0, (int)(renderBitmap.PixelWidth * renderBitmap.PixelHeight * 4));
+         byte[] pixelBuffer = buffer.ToArray(0, (int)(renderBitmap.PixelWidth * renderBitmap.PixelHeight * 4));
 
-            encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Straight, (uint)ActiveCanvas.DesiredSize.Width, (uint)ActiveCanvas.DesiredSize.Height, 96, 96, pixelBuffer);
+         encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Straight, (uint)ActiveCanvas.DesiredSize.Width, (uint)ActiveCanvas.DesiredSize.Height, 96, 96, pixelBuffer);
 
-            await encoder.FlushAsync();
-            stream.Seek(0);
+         await encoder.FlushAsync();
+         stream.Seek(0);
 
-            WriteableBitmap bmp = new WriteableBitmap(128, 64);
-            bmp.SetSource(stream);
+         WriteableBitmap bmp = new WriteableBitmap(128, 64);
+         bmp.SetSource(stream);
 
-            OutputImage.Source = bmp;
-         });
+         OutputImage.Source = bmp;
       }
 
       public void SuspendLayout()

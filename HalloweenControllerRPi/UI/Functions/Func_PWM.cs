@@ -8,36 +8,37 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using System.Xml;
+using static HalloweenControllerRPi.Attributes.FunctionAttribute;
 
 namespace HalloweenControllerRPi.Functions
 {
    public enum PWMFunctions
    {
-      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.CONSTANT | FunctionType.TRIGGERED)]
       FUNC_OFF,
-      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.CONSTANT | FunctionType.TRIGGERED)]
       FUNC_ON,
-      [FunctionAttribute(FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.TRIGGERED)]
       FUNC_RAMP_ON,
-      [FunctionAttribute(FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.TRIGGERED)]
       FUNC_RAMP_OFF,
-      [FunctionAttribute(FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.TRIGGERED)]
       FUNC_RAMP_BOTH,
-      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.CONSTANT | FunctionType.TRIGGERED)]
       FUNC_SWEEP_UP,
-      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.CONSTANT | FunctionType.TRIGGERED)]
       FUNC_SWEEP_DOWN,
-      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.CONSTANT | FunctionType.TRIGGERED)]
       FUNC_SIGNWAVE,
-      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.CONSTANT | FunctionType.TRIGGERED)]
       FUNC_FLICKER_OFF,
-      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.CONSTANT | FunctionType.TRIGGERED)]
       FUNC_FLICKER_ON,
-      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.CONSTANT | FunctionType.TRIGGERED)]
       FUNC_RANDOM,
-      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.CONSTANT | FunctionType.TRIGGERED)]
       FUNC_STROBE,
-      [FunctionAttribute(FunctionAttribute.FunctionType.CONSTANT | FunctionAttribute.FunctionType.TRIGGERED)]
+      [FunctionAttribute(FunctionType.CONSTANT | FunctionType.TRIGGERED)]
       FUNC_CUSTOM,
       FUNC_NO_OF_FUNCTIONS
    };
@@ -107,7 +108,7 @@ namespace HalloweenControllerRPi.Functions
             }
             else
             {
-               SendCommand("FUNCTION", "0");
+               SendCommand("FUNCTION");
             }
          }
          else
@@ -125,25 +126,22 @@ namespace HalloweenControllerRPi.Functions
       {
          List<string> data = new List<string>();
 
-         if (Function != PWMFunctions.FUNC_OFF)
+         SendCommand("MINLEVEL", MinLevel);
+         SendCommand("MAXLEVEL", MaxLevel);
+         SendCommand("RATE", UpdateRate);
+         SendCommand("RAMPRATE", RampRate);
+
+         switch (Function)
          {
-            SendCommand("MINLEVEL", MinLevel);
-            SendCommand("MAXLEVEL", MaxLevel);
-            SendCommand("RATE", UpdateRate);
-            SendCommand("RAMPRATE", RampRate);
+            case PWMFunctions.FUNC_CUSTOM:
+               SendCommand("DATA", CustomLevels.ToArray());
+               break;
 
-            switch (Function)
-            {
-               case PWMFunctions.FUNC_CUSTOM:
-                  SendCommand("DATA", CustomLevels.ToArray());
-                  break;
-
-               default:
-                  break;
-            }
-
-            SendCommand("FUNCTION", (uint)Function);
+            default:
+               break;
          }
+
+         SendCommand("FUNCTION", (uint)Function);
       }
 
       public override void ReadXml(XmlReader reader)

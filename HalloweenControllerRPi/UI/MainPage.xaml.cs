@@ -119,14 +119,17 @@ namespace HalloweenControllerRPi
          textControllerProgressBar.Text = "Detecting available functions... " + data.ToString() + "%";
          ControllerProgressBar.Value = (double)data;
 
-         if(_displayUpdate.IsCompleted)
+         if (HWController.Display != null)
          {
-            _screen_Detecting.UpdateProgressBar((double)data);
-            _screen_Detecting.UpdateLayout();
+            if (_displayUpdate.IsCompleted)
+            {
+               _screen_Detecting.UpdateProgressBar((double)data);
+               _screen_Detecting.UpdateLayout();
 
-            _displayUpdate = Menu.Update();
+               _displayUpdate = Menu.Update();
 
-            await _displayUpdate;
+               await _displayUpdate;
+            }
          }
       }
 
@@ -134,13 +137,16 @@ namespace HalloweenControllerRPi
       {
          HWController HWController = (sender as HWController);
 
-         _displayUpdate.Wait();
+         if (HWController.Display != null)
+         { 
+            _displayUpdate.Wait();
 
-         Menu.EndPopup(_screen_Detecting);
+            Menu.EndPopup(_screen_Detecting);
 
-         _displayUpdate = Menu.Update();
+            _displayUpdate = Menu.Update();
 
-         await _displayUpdate;
+            await _displayUpdate;
+         }
 
          ControllerProgressBar.Visibility = Visibility.Collapsed;
          textControllerProgressBar.Visibility = Visibility.Collapsed;

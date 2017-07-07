@@ -208,6 +208,7 @@ namespace HalloweenControllerRPi.Function_GUI
          writer.WriteAttributeString("CustomName", textTitle.Text);
 
          _Func.WriteXml(writer);
+
          customLevelDraw.WriteXml(writer);
       }
       #endregion
@@ -231,9 +232,11 @@ namespace HalloweenControllerRPi.Function_GUI
             {
                case PWMFunctions.FUNC_OFF:
                   boCanUpdateTick = false;
+                  boCanRamp = false;
                   break;
                case PWMFunctions.FUNC_ON:
                   boCanUpdateTick = false;
+                  boCanRamp = false;
                   break;
                case PWMFunctions.FUNC_FLICKER_OFF:
                   break;

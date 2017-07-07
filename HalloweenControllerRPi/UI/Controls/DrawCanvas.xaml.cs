@@ -442,7 +442,11 @@ namespace HalloweenControllerRPi.UI.Controls
             {
                data = String.Join(" ", data, l.X1.ToString("0.0000"), l.X2.ToString("0.0000"), l.Y1.ToString("0.0000"), l.Y2.ToString("0.0000"));
             }
-            data = data.TrimStart(' ');
+
+            if (data != null)
+            {
+               data = data.TrimStart(' ');
+            }
             writer.WriteAttributeString("CustomLevel", data);
          }
       }
