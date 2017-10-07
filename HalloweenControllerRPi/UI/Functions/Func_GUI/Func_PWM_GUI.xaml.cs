@@ -195,6 +195,8 @@ namespace HalloweenControllerRPi.Function_GUI
             slider_MaxLevel.RangeMax = (int)_Func.MaxLevel;
             slider_UpdateRate.Value = (int)_Func.UpdateRate;
             comboBox_Functions.SelectedIndex = comboBox_Functions.Items.IndexOf(_Func.Function.ToString());
+
+            CheckSelectedFunction(PWMFunctions.FUNC_OFF, _Func.Function);
          }
          catch { }
       }
@@ -221,61 +223,66 @@ namespace HalloweenControllerRPi.Function_GUI
 
       private void comboBox_Functions_DropDownClosed(object sender, object e)
       {
-         bool boCanRamp = true;
-         bool boCanUpdateTick = true;
-
          if (_boInitialised == true)
          {
             PWMFunctions prevFunc = _Func.Function;
 
             _Func.Function = FuncGUIHelper.GetFunctionEnum((sender as ComboBox).SelectedValue.ToString());
 
-            switch(_Func.Function)
-            {
-               case PWMFunctions.FUNC_OFF:
-                  boCanUpdateTick = false;
-                  boCanRamp = false;
-                  break;
-               case PWMFunctions.FUNC_ON:
-                  boCanUpdateTick = false;
-                  boCanRamp = false;
-                  break;
-               case PWMFunctions.FUNC_FLICKER_OFF:
-                  break;
-               case PWMFunctions.FUNC_FLICKER_ON:
-                  break;
-               case PWMFunctions.FUNC_RANDOM:
-                  boCanRamp = false;
-                  break;
-               case PWMFunctions.FUNC_SIGNWAVE:
-                  break;
-               case PWMFunctions.FUNC_STROBE:
-                  boCanRamp = false;
-                  break;
-               case PWMFunctions.FUNC_SWEEP_DOWN:
-                  break;
-               case PWMFunctions.FUNC_SWEEP_UP:
-                  break;
-               case PWMFunctions.FUNC_CUSTOM:
-                  customLevelDraw.SecondaryButtonClick += (s, args) => { _Func.Function = prevFunc; (sender as ComboBox).SelectedValue = prevFunc; };
-                  customLevelDraw.ShowAsync();
-                  boCanRamp = false;
-                  break;
-               case PWMFunctions.FUNC_RAMP_ON:
-                  break;
-               case PWMFunctions.FUNC_RAMP_OFF:
-                  break;
-               case PWMFunctions.FUNC_RAMP_BOTH:
-                  break;
-               default:
-                  break;
-            }
-
-            slider_RampRate.IsEnabled = boCanRamp;
-            textBlock_RampRate.Visibility = (boCanRamp ? Visibility.Visible : Visibility.Collapsed);
-            slider_UpdateRate.IsEnabled = boCanUpdateTick;
-            textBlock_UpdateRate.Visibility = (boCanUpdateTick ? Visibility.Visible : Visibility.Collapsed);
+            CheckSelectedFunction(_Func.Function, prevFunc);
          }
+      }
+
+      private void CheckSelectedFunction(PWMFunctions newFunc, PWMFunctions prevFunc)
+      {
+         bool boCanRamp = true;
+         bool boCanUpdateTick = true;
+
+         switch (_Func.Function)
+         {
+            case PWMFunctions.FUNC_OFF:
+               boCanUpdateTick = false;
+               boCanRamp = false;
+               break;
+            case PWMFunctions.FUNC_ON:
+               boCanUpdateTick = false;
+               boCanRamp = false;
+               break;
+            case PWMFunctions.FUNC_FLICKER_OFF:
+               break;
+            case PWMFunctions.FUNC_FLICKER_ON:
+               break;
+            case PWMFunctions.FUNC_RANDOM:
+               boCanRamp = false;
+               break;
+            case PWMFunctions.FUNC_SIGNWAVE:
+               break;
+            case PWMFunctions.FUNC_STROBE:
+               boCanRamp = false;
+               break;
+            case PWMFunctions.FUNC_SWEEP_DOWN:
+               break;
+            case PWMFunctions.FUNC_SWEEP_UP:
+               break;
+            case PWMFunctions.FUNC_CUSTOM:
+               customLevelDraw.SecondaryButtonClick += (s, args) => { _Func.Function = prevFunc; newFunc = prevFunc; };
+               customLevelDraw.ShowAsync();
+               boCanRamp = false;
+               break;
+            case PWMFunctions.FUNC_RAMP_ON:
+               break;
+            case PWMFunctions.FUNC_RAMP_OFF:
+               break;
+            case PWMFunctions.FUNC_RAMP_BOTH:
+               break;
+            default:
+               break;
+         }
+
+         slider_RampRate.IsEnabled = boCanRamp;
+         textBlock_RampRate.Visibility = (boCanRamp ? Visibility.Visible : Visibility.Collapsed);
+         slider_UpdateRate.IsEnabled = boCanUpdateTick;
+         textBlock_UpdateRate.Visibility = (boCanUpdateTick ? Visibility.Visible : Visibility.Collapsed);
       }
 
       private void slider_Duration_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
