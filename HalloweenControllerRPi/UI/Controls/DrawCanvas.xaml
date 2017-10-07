@@ -9,11 +9,11 @@
     Title="Draw custom sequence"
     PrimaryButtonText="Done"
     SecondaryButtonText="Cancel"
-    MinWidth="1100"
-    HorizontalContentAlignment="Stretch">
+    MinWidth="1100" MaxWidth="1100"
+    MinHeight="340" MaxHeight="340" Width="1100" Height="340">
 
    <Canvas x:Name="grid"
-         MinHeight="200"
+         MinHeight="200" Width="1050"
          Height="200">
       <Canvas 
          x:Name="mouseDraw"

@@ -52,7 +52,11 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       private void Chan_InputLevelChanged(object sender, ChannelFunction_INPUT.EventArgsINPUT e)
       {
-         HostController.OnChannelNotification(this, new CommandEventArgs('I', 'G', e.Index + 1, (uint)e.TriggerLevel));
+         uint index = (uint)Channels.IndexOf((sender as IChannel));
+
+         HostController.OnChannelNotification((sender as IChannel), new CommandEventArgs('I', 'G', index, (uint)e.TriggerLevel));
+
+         System.Diagnostics.Debug.WriteLine("[Status] - Input #" + index.ToString() + "- " + e.TriggerLevel.ToString());
       }
 
       public override void RefreshChannel(IChannel chan)

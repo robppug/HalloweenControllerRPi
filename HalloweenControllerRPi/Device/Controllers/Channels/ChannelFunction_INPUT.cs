@@ -89,10 +89,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
       {
          GpioPinEdge gpEdge = args.Edge;
 
-         if (InputLevelChanged != null)
-         {
-            InputLevelChanged(sender, new EventArgsINPUT((gpEdge == GpioPinEdge.RisingEdge ? tenTriggerLvl.tHigh : tenTriggerLvl.tLow), Index));
-         }
+         InputLevelChanged?.Invoke(this, new EventArgsINPUT((gpEdge == GpioPinEdge.RisingEdge ? tenTriggerLvl.tHigh : tenTriggerLvl.tLow), Index));
 
          _reenableTimer.Interval = PostTriggerTime;
          _reenableTimer.Start();

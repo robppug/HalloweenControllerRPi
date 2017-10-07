@@ -1,4 +1,5 @@
 ﻿using HalloweenControllerRPi.Device.Controllers;
+using HalloweenControllerRPi.Device.Controllers.Channels;
 using HalloweenControllerRPi.UI.ExternalDisplay;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,7 @@ namespace HalloweenControllerRPi.Device
          DiscoveryProgress?.Invoke(percentage);
       }
 
-      public abstract void OnChannelNotification(object sender, CommandEventArgs e);
+      public abstract void OnChannelNotification(IChannel sender, CommandEventArgs e);
 
       public abstract Dictionary<Command, List<Command>> Commands { get; }
       public abstract uint Inputs { get; }

@@ -15,7 +15,7 @@ using Windows.UI.Xaml.Input;
 
 namespace HalloweenControllerRPi.Function_GUI
 {
-   public sealed partial class Func_Sound_GUI : UserControl, IXmlSerializable, IFunctionGUI
+   public partial class Func_Sound_GUI : UserControl, IXmlSerializable, IFunctionGUI
    {
       private Func_SOUND _Func;
       private bool _boInitialised = false;
@@ -138,17 +138,18 @@ namespace HalloweenControllerRPi.Function_GUI
 
          textTitle.Text = reader.GetAttribute("CustomName");
 
-         textBlock_Volume.Text = "Volume: " + (_Func.Volume * 100f).ToString() + " (%)";
+         textBlock_Volume.Text = "Volume: " + _Func.Volume.ToString() + " (%)";
          textBlock_StartDelay.Text = "Start Delay: " + _Func.Delay_ms.ToString() + " (ms)";
          textBlock_Duration.Text = "Duration: " + _Func.Duration_ms.ToString() + " (ms)";
 
          /* Ignore MIN/MAX limits. */
          try
          {
-            comboBox_Track.SelectedIndex = (int)_Func.Track;
+            //comboBox_Track.SelectedIndex = (int)_Func.Track;
             slider_Duration.Value = _Func.Duration_ms;
             slider_StartDelay.Value = _Func.Delay_ms;
-            slider_Volume.Value = _Func.Volume * 100;
+            slider_Volume.Value = _Func.Volume;
+            radioButton_Random.IsChecked = _Func.Randomise;
          }
          catch { }
       }
@@ -164,6 +165,43 @@ namespace HalloweenControllerRPi.Function_GUI
       public void Initialise()
       {
          _Func.Initialise();
+      }
+
+      private void radioButton_Random_Click(object sender, RoutedEventArgs e)
+      {
+         _Func.Randomise = !_Func.Randomise;
+
+         radioButton_Random.IsChecked = _Func.Randomise;
+
+         //if (_Func.Randomise == false)
+         //{
+         //   ContentDialogResult cdr;
+         //   ContentDialog cd = new ContentDialog()
+         //   {
+         //      Title = "Select tracks to randomise",
+         //      IsPrimaryButtonEnabled = true,
+         //      IsSecondaryButtonEnabled = true,
+         //      HorizontalContentAlignment = HorizontalAlignment.Center,
+         //      VerticalContentAlignment = VerticalAlignment.Center
+         //   };
+
+         //   StackPanel sp = new StackPanel();
+         //   ListBox trackList = new ListBox();
+
+         //   trackList.Items.Add(Tracks);
+         //   sp.Children.Add(new TextBlock() { Text = "Available tracks..." });
+         //   sp.Children.Add(trackList);
+         //   Content = sp;
+
+         //   cdr = cd.ShowAsync().GetResults();
+
+         //   if (cdr == ContentDialogResult.Primary)
+         //   {
+         //      _Func.Randomise = true;
+         //   }
+         //}
+         //else
+         //   _Func.Randomise = false;
       }
    }
 }

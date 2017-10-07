@@ -169,6 +169,8 @@ namespace HalloweenControllerRPi.Function_GUI
       public void ReadXml(System.Xml.XmlReader reader)
       {
          _Func.ReadXml(reader);
+         
+         _Func.Function = FuncGUIHelper.GetFunctionEnum(reader.GetAttribute("Function").ToString());
 
          MinLevel = Convert.ToUInt16(reader.GetAttribute("MinLevel"));
          MaxLevel = Convert.ToUInt16(reader.GetAttribute("MaxLevel"));
@@ -192,7 +194,7 @@ namespace HalloweenControllerRPi.Function_GUI
             slider_MaxLevel.RangeMin = (int)_Func.MinLevel;
             slider_MaxLevel.RangeMax = (int)_Func.MaxLevel;
             slider_UpdateRate.Value = (int)_Func.UpdateRate;
-            comboBox_Functions.SelectedIndex = (int)_Func.Function;
+            comboBox_Functions.SelectedIndex = comboBox_Functions.Items.IndexOf(_Func.Function.ToString());
          }
          catch { }
       }
@@ -276,5 +278,16 @@ namespace HalloweenControllerRPi.Function_GUI
          }
       }
 
+      private void slider_Duration_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+      {
+         if(slider_Duration.Maximum > 60000)
+         {
+            slider_Duration.Maximum = 10000;
+         }
+         else
+         {
+            slider_Duration.Maximum += 10000;
+         }
+      }
    }
 }

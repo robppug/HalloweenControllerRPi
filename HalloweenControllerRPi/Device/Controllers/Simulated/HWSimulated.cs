@@ -1,4 +1,5 @@
-﻿using HalloweenControllerRPi.Functions;
+﻿using HalloweenControllerRPi.Device.Controllers.Channels;
+using HalloweenControllerRPi.Functions;
 using HalloweenControllerRPi.UI.ExternalDisplay;
 using System;
 using System.Collections.Generic;
@@ -150,7 +151,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
             OnDiscoveryProgressUpdated(discovery);
 
-            await Task.Delay(500);
+            await Task.Delay(50);
 
             discovery++;
          }
@@ -271,6 +272,10 @@ namespace HalloweenControllerRPi.Device.Controllers
                   case 'V':
                      value = UInt32.Parse(new string(decodedData));
                      break;
+
+                  case 'A':
+                     TransmitCommand(new CommandEventArgs(function.Value, subFunction.Value, index, (uint)new Random().Next(2, 10)));
+                     break;
                }
 
                UIPanel.Update(function, subFunction, index, value);
@@ -371,7 +376,7 @@ namespace HalloweenControllerRPi.Device.Controllers
          return UIPanel;
       }
 
-      public override void OnChannelNotification(object sender, CommandEventArgs e)
+      public override void OnChannelNotification(IChannel sender, CommandEventArgs e)
       {
          throw new NotImplementedException();
       }

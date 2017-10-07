@@ -14,47 +14,48 @@
                  Foreground="Black"
                  Text="SOUND (#)" />
       <Slider x:Name="slider_Duration"
-              Margin="5,77,9,0"
+              Margin="5,90,5,0"
               VerticalAlignment="Top"
               Maximum="60000"
-              Minimum="10"
+              Minimum="0"
               ValueChanged="slider_Duration_ValueChanged"
-              Value="500" TickPlacement="None" />
+              Value="5000" Height="33" />
       <Slider x:Name="slider_Volume"
-              Margin="5,119,9,0"
+              Margin="5,130,5,0"
               VerticalAlignment="Top"
               TickFrequency="5"
               ValueChanged="slider_Volume_ValueChanged"
-              Value="100" />
+              Value="100" Height="33" />
       <Slider x:Name="slider_StartDelay"
-              Margin="5,161,9,0"
+              Margin="5,170,5,0"
               VerticalAlignment="Top"
               Maximum="10000"
               TickFrequency="1000"
               ValueChanged="slider_StartDelay_ValueChanged"
-              Value="0" />
+              Value="0" Height="35" />
       <TextBlock x:Name="textBlock_Duration"
                  Width="109"
-                 Margin="121,108,0,0"
+                 Margin="118,117,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  FontSize="10"
-                 Text="Duration: 500 (ms)" />
+                 Text="Duration: 5000 (ms)" />
       <TextBlock x:Name="textBlock_Volume"
                  Width="109"
-                 Margin="121,152,0,0"
+                 Margin="120,157,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  FontSize="10"
                  Text="Volume: 100 (%)" />
       <TextBlock x:Name="textBlock_StartDelay"
                  Width="109"
-                 Margin="121,192,0,0"
+                 Margin="120,196,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  FontSize="10"
                  Text="Start Delay: 0 (ms)" />
-      <ComboBox x:Name="comboBox_Track" HorizontalAlignment="Left" Margin="5,32,0,0" VerticalAlignment="Top" Width="230" SelectionChanged="comboBox_Track_SelectionChanged"/>
+      <ComboBox x:Name="comboBox_Track" HorizontalAlignment="Left" Margin="9,31,0,0" VerticalAlignment="Top" Width="221" SelectionChanged="comboBox_Track_SelectionChanged"/>
       <Button x:Name="RemoveButton" Content="X" HorizontalAlignment="Right" Margin="0,3,3,0" VerticalAlignment="Top" Width="25" Height="20" FontSize="8" FontFamily="Arial"/>
+      <RadioButton x:Name="radioButton_Random" Content="Randomise Sound" HorizontalAlignment="Left" Margin="11,65,0,0" VerticalAlignment="Top" Width="220" Click="radioButton_Random_Click"/>
    </Grid>
 </UserControl>

@@ -82,10 +82,12 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 
       private void SndDrv_StateChanged(object sender, SoundProviderEventArgs e)
       {
+         uint index = (uint)soundDrivers.IndexOf((sender as ISoundProvider));
+
          switch (e.NewState)
          {
             case SoundProviderEventArgs.State.SoundFinished:
-               HostController.OnChannelNotification(sender, new CommandEventArgs('S', 'F', (uint)soundDrivers.IndexOf((sender as ISoundProvider)), (uint)e.NewState ));
+               HostController.OnChannelNotification(Channels[(int)index], new CommandEventArgs('S', 'F', index, (uint)e.NewState ));
                break;
          }
       }

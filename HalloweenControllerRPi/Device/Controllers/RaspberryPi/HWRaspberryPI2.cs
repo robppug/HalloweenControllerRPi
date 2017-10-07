@@ -281,7 +281,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
                if (rpiHat != null)
                {
-                  //System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - Device found (" + rpiHat.HatType.ToString() + ").");
+                  System.Diagnostics.Debug.WriteLine(Address.ToString("x") + " - Device found (" + rpiHat.HatType.ToString() + ").");
 
                   _lHats.Add(rpiHat);
 
@@ -511,9 +511,22 @@ namespace HalloweenControllerRPi.Device.Controllers
          }
       }
 
-      public override void OnChannelNotification(object sender, CommandEventArgs e)
+      public override void OnChannelNotification(IChannel sender, CommandEventArgs e)
       {
-         TransmitCommand(e);
+         CommandEventArgs evntArgs = e;
+
+         switch(e.Commamd)
+         {
+            case 'I':
+               evntArgs = new CommandEventArgs(e.Commamd, e.SubCommamd, (uint)_lINPUTFunctions.IndexOf(sender) + 1, e.Value);
+               break;
+
+            case 'S':
+               evntArgs = new CommandEventArgs(e.Commamd, e.SubCommamd, (uint)_lSOUNDFunctions.IndexOf(sender) + 1, e.Value);
+               break;
+         }
+
+         TransmitCommand(evntArgs);
       }
    }
 }

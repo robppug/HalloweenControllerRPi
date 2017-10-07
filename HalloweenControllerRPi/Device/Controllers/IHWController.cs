@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Device.Controllers.Channels;
+using System;
 using System.Threading.Tasks;
 
 namespace HalloweenControllerRPi.Device.Controllers
@@ -8,6 +9,6 @@ namespace HalloweenControllerRPi.Device.Controllers
       void Connect();
       void Disconnect();
 
-      void OnChannelNotification(object sender, CommandEventArgs e);
+      void OnChannelNotification(IChannel sender, CommandEventArgs e);
    }
 }

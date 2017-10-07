@@ -76,7 +76,7 @@ namespace HalloweenControllerRPi.Container
       /// <param name="e"></param>
       private void Panel_DragDrop(object sender, DragEventArgs e)
       {
-         Control FuncGUI;
+         Control FuncGUI = null;
          Function_Button draggedItem = (e.DataView.Properties["Object"] as Function_Button);
 
          /* Check if the dragged item is one of the allowed dragged item TYPES. */
@@ -92,11 +92,14 @@ namespace HalloweenControllerRPi.Container
                /* Create an instance of the FUNCTION GUI */
                FuncGUI = (Control)Activator.CreateInstance(draggedItem.GUIType, MainPage.HostApp, draggedItem.Index, Function.tenTYPE.TYPE_CONSTANT);
 
-               Container.Children.Add(FuncGUI);
+               if (FuncGUI != null)
+               {
+                  Container.Children.Add(FuncGUI);
 
-               (FuncGUI as IFunctionGUI).Initialise();
-               (FuncGUI as IFunctionGUI).OnRemove += GroupContainer_OnRemove;
-               return;
+                  (FuncGUI as IFunctionGUI).Initialise();
+                  (FuncGUI as IFunctionGUI).OnRemove += GroupContainer_OnRemove;
+                  return;
+               }
             }
          }
       }
@@ -199,47 +202,29 @@ namespace HalloweenControllerRPi.Container
       /// </summary>
       public void ProcessCommandEvent(CommandEventArgs args)
       {
-         switch(args.Commamd)
+         if (FuncAlwaysActive == true)
          {
-            case 'I':
-               if (FuncAlwaysActive == true)
+            foreach (Control c in Container.Children)
+            {
+               if (c is IFunctionGUI)
                {
-                  foreach (Control c in Container.Children)
+                  if ((c as IFunctionGUI).Func.Index == args.Index)
                   {
-                     if (c is IFunctionGUI)
-                     {
-                        if ((c as IFunctionGUI).Func.Index == args.Index)
-                        {
-                           TriggerFunctions(c, false);
-                        }
-                     }
+                     (c as IFunctionGUI).Func.boProcessRequest(args.Commamd, args.SubCommamd, (char)args.Index, args.Value);
+                     //TriggerFunctions(c, false);
                   }
                }
-               else
+            }
+         }
+         else
+         {
+            foreach (Control c in Container.Children)
+            {
+               if (c is GroupContainerTriggered)
                {
-                  foreach (Control c in Container.Children)
-                  {
-                     if (c is GroupContainerTriggered)
-                     {
-                        (c as GroupContainerTriggered).boProcessRequest(args.Commamd, args.SubCommamd, args.Index, args.Value);
-                     }
-                  }
+                  (c as GroupContainerTriggered).boProcessRequest(args.Commamd, args.SubCommamd, args.Index, args.Value);
                }
-               break;
-
-            default:
-               foreach(Control c in Container.Children)
-               {
-                  if(c is IFunctionGUI)
-                  {
-                     if ((c as IFunctionGUI).Func.boProcessRequest(args.Commamd, args.SubCommamd, Convert.ToChar(args.Index), args.Value) == true)
-                     {
-                        //Target Function found, we can EXIT
-                        return;
-                     }
-                  }
-               }
-               break;
+            }
          }
       }
 

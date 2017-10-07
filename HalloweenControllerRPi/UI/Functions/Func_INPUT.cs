@@ -40,6 +40,9 @@ namespace HalloweenControllerRPi.Functions
             SendCommand("POSTDEBTIME", _postTriggerDelay_ms);
          }
       }
+
+      public bool Enabled { get; set; } = false;
+
       public Func_INPUT()
       {
 
@@ -60,7 +63,12 @@ namespace HalloweenControllerRPi.Functions
 
       public override bool boCheckTriggerConditions(uint u32value)
       {
-         return (u32value == (uint)TriggerLevel);
+         if (Enabled)
+         {
+            return (u32value == (uint)TriggerLevel);
+         }
+         else
+            return false;
       }
 
       public override void ReadXml(XmlReader reader)
@@ -77,8 +85,8 @@ namespace HalloweenControllerRPi.Functions
          base.WriteXml(writer);
 
          writer.WriteAttributeString("TriggerLevel", TriggerLevel.GetHashCode().ToString());
-         writer.WriteAttributeString("DebounceTime", _debounceTime_ms.GetHashCode().ToString());
-         writer.WriteAttributeString("PostTriggerTime", _postTriggerDelay_ms.GetHashCode().ToString());
+         writer.WriteAttributeString("DebounceTime", _debounceTime_ms.ToString());
+         writer.WriteAttributeString("PostTriggerTime", _postTriggerDelay_ms.ToString());
       }
 
       public override bool boProcessRequest(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue)

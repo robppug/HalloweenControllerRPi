@@ -126,5 +126,17 @@ namespace HalloweenControllerRPi.Function_GUI
       {
          
       }
+
+      private void EnableButton_Click(object sender, RoutedEventArgs e)
+      {
+         _Func.Enabled = !_Func.Enabled;
+
+         EnableButton.IsChecked = _Func.Enabled;
+      }
+
+      private void buttonTestFire_Click(object sender, RoutedEventArgs e)
+      {
+         _Func.boProcessRequest('I', 'G', (char)_Func.Index, (uint)_Func.TriggerLevel);
+      }
    }
 }

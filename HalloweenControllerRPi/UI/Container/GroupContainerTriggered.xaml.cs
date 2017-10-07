@@ -25,6 +25,12 @@ namespace HalloweenControllerRPi.Container
          private set;
       }
 
+      public bool GroupTriggerActive
+      {
+         get;
+         private set;
+      } = false;
+
       public GroupContainerTriggered()
       {
          this.InitializeComponent();
@@ -125,32 +131,39 @@ namespace HalloweenControllerRPi.Container
       /// <returns></returns>
       public bool boProcessRequest(char func, char subFunc, uint index, uint value)
       {
-         bool boValidTrigger = false;
+         bool boInputTrigger = false;
 
-         foreach (UIElement f in Container.Children)
+         if (GroupTriggerActive == false)
          {
-            /* Triggered - Compare triggering INPUT to assigned FUNCTION INPUTS and execute TRIGGER on matching INPUT number */
-            if (f is Func_Input_GUI)
+            foreach (UIElement f in Container.Children)
             {
-               Func_Input_GUI inputGUI = (f as Func_Input_GUI);
-               if ((inputGUI.Func.Index == index) && inputGUI.Func.boCheckTriggerConditions(value))
+               /* Triggered - Compare triggering INPUT to assigned FUNCTION INPUTS and execute TRIGGER on matching INPUT number */
+               if (f is Func_Input_GUI)
                {
-                  boValidTrigger = true;
-                  break;
+                  Func_Input_GUI inputGUI = (f as Func_Input_GUI);
+                  if ((inputGUI.Func.Index == index) && inputGUI.Func.boCheckTriggerConditions(value))
+                  {
+                     boInputTrigger = true;
+                     break;
+                  }
+               }
+               else if (f is IFunctionGUI)
+               {
+                  (f as IFunctionGUI).Func.boProcessRequest(func, subFunc, (char)index, value);
                }
             }
-         }
 
-         if (boValidTrigger)
-         {
-            imageTrigger.Source = (BitmapImage)Resources["Triggered"];
-
-            /* Trigger each FUNCTION within the Active Group */
-            foreach (UIElement c in Container.Children)
+            if (boInputTrigger)
             {
-               if (c is IFunctionGUI)
+               imageTrigger.Source = (BitmapImage)Resources["Triggered"];
+
+               /* Trigger each FUNCTION within the Active Group */
+               foreach (UIElement c in Container.Children)
                {
-                  TriggerFunctions(c as IFunctionGUI);
+                  if ((c is IFunctionGUI) && !(c is Func_Input_GUI))
+                  {
+                     TriggerFunctions(c as IFunctionGUI);
+                  }
                }
             }
          }
@@ -163,7 +176,7 @@ namespace HalloweenControllerRPi.Container
       /// <param name="c">Triggering FUNCTION.</param>
       private void TriggerFunctions(IFunctionGUI c)
       {
-         c.Func.boProcessRequest((char)0, (char)0, (char)0, (uint)0);
+         GroupTriggerActive = c.Func.boProcessRequest((char)0, (char)0, (char)0, (uint)0);
       }
 
       /// <summary>
@@ -182,6 +195,8 @@ namespace HalloweenControllerRPi.Container
                }
             }
          }
+
+         GroupTriggerActive = false;
 
          this.imageTrigger.Source = (BitmapImage)Resources["Blank"];
       }
@@ -219,6 +234,7 @@ namespace HalloweenControllerRPi.Container
          {
             Container.Children.Add(ctl);
 
+            (ctl as IFunctionGUI).Initialise();
             (ctl as IFunctionGUI).OnRemove += GroupContainerTriggered_OnRemove;
          }
          else

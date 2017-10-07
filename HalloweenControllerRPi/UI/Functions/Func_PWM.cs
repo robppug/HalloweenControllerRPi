@@ -144,6 +144,14 @@ namespace HalloweenControllerRPi.Functions
          SendCommand("FUNCTION", (uint)Function);
       }
 
+      public override bool boProcessRequest(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue)
+      {
+         if (cFunc == (char)0)
+            return base.boProcessRequest(cFunc, subFunc, cFuncIndex, u32FuncValue);
+
+         return false;
+      }
+
       public override void ReadXml(XmlReader reader)
       {
          base.ReadXml(reader);
@@ -152,7 +160,6 @@ namespace HalloweenControllerRPi.Functions
          Delay_ms = Convert.ToUInt16(reader.GetAttribute("Delay"));
          RampRate = Convert.ToUInt16(reader.GetAttribute("RampRate"));
          UpdateRate = Convert.ToUInt16(reader.GetAttribute("UpdateRate"));
-         Function = (PWMFunctions)Convert.ToUInt16(reader.GetAttribute("Function"));
       }
 
       public override void WriteXml(System.Xml.XmlWriter writer)
@@ -165,7 +172,7 @@ namespace HalloweenControllerRPi.Functions
          writer.WriteAttributeString("MaxLevel", MaxLevel.ToString());
          writer.WriteAttributeString("RampRate", RampRate.ToString());
          writer.WriteAttributeString("UpdateRate", UpdateRate.ToString());
-         writer.WriteAttributeString("Function", ((int)Function).ToString());
+         writer.WriteAttributeString("Function", Function.ToString());
       }
    }
 }

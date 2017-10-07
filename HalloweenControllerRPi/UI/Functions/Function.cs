@@ -148,20 +148,23 @@ namespace HalloweenControllerRPi.Functions
       }
       public void SendCommand(string cmd)
       {
-         List<string> data = new List<string>();
-
-         data.Add(Index.ToString("00"));
-         data.Add("  0");
+         List<string> data = new List<string>
+         {
+            Index.ToString("00"),
+            "  0"
+         };
 
          SendCommandToHost(cmd, data.ToArray());
       }
 
       public void SendCommand<T>(string cmd, T[] val) where T : IConvertible
       {
-         List<string> data = new List<string>();
+         List<string> data = new List<string>
+         {
+            Index.ToString("00")
+         };
 
-         data.Add(Index.ToString("00"));
-         foreach(T v in val)
+         foreach (T v in val)
          {
             data.Add(v.ToString().PadLeft(3));
          }
@@ -171,10 +174,11 @@ namespace HalloweenControllerRPi.Functions
 
       public void SendCommand<T>(string cmd, T val) where T : IConvertible
       {
-         List<string> data = new List<string>();
-
-         data.Add(Index.ToString("00"));
-         data.Add(val.ToString().PadLeft(3));
+         List<string> data = new List<string>
+         {
+            Index.ToString("00"),
+            val.ToString().PadLeft(3)
+         };
 
          SendCommandToHost(cmd, data.ToArray());
       }
