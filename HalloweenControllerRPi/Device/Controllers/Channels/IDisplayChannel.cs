@@ -6,6 +6,6 @@ namespace HalloweenControllerRPi.Device.Controllers
 {
    public interface IDisplayChannel
    {
-      IDriverDisplayProvider Device { get; }
-   }
+       IDriverDisplayProvider Device { get; }
+    }
 }

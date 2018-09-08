@@ -1,10 +1,13 @@
-﻿using System;
+﻿using HalloweenControllerRPi.Device.Controllers.Channels;
+using HalloweenControllerRPi.Device.Controllers.Providers;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
+using Windows.Devices.Gpio;
 using Windows.Foundation;
 using Windows.System.Threading;
 using Windows.UI.Core;
@@ -33,77 +36,95 @@ namespace HalloweenControllerRPi.UI.ExternalDisplay
       }
    }
 
-   public class MenuHandler
-   {
-      private GraphicsProvider _displayDevice;
-      private MenuNode<UserControl> _previousMenuNode;
-      private MenuNode<UserControl> _popUpMenuNode;
-      private List<MenuNode<UserControl>> _menuTree;
+    public class MenuHandler
+    {
+        private GraphicsProvider _displayDevice;
+        private MenuNode<UserControl> _previousMenuNode;
+        private MenuNode<UserControl> _popUpMenuNode;
+        private List<MenuNode<UserControl>> _menuTree;
 
-      public MenuNode<UserControl> CurrentMenuNode;
-      public event EventHandler MenuChanged;
+        public MenuNode<UserControl> CurrentMenuNode;
+        public event EventHandler MenuChanged;
+        public bool BlockButtons
+        {
+            set
+            {
+                if (_displayDevice.Menu != null)
+                {
+                    if (value)
+                    {
+                        _displayDevice.Menu.ButtonStateChanged -= Menu_ButtonStateChanged;
+                    }
+                    else
+                    {
+                        _displayDevice.Menu.ButtonStateChanged += Menu_ButtonStateChanged;
+                    }
+                }
+            }
+        }
 
-      public enum MenuButtons
-      {
-         Left,
-         Right,
-         Up,
-         Down,
-         Enter,
-         Menu_1,
-         Menu_2
-      }
 
-      public MenuHandler(GraphicsProvider g, MenuNode<UserControl> rootNode)
-      {
-         _displayDevice = g;
-         _previousMenuNode = null;
+        public MenuHandler(GraphicsProvider g, MenuNode<UserControl> rootNode)
+        {
+            _displayDevice = g;
+            _previousMenuNode = null;
 
-         _menuTree = new List<MenuNode<UserControl>>();
+            _menuTree = new List<MenuNode<UserControl>>();
 
-         AddNode(rootNode);
+            AddNode(rootNode);
 
-         ChangeCurrentMenu(rootNode);
-      }
+            ChangeCurrentMenu(rootNode);
+        }
 
-      private void ChangeCurrentMenu(MenuNode<UserControl> newNode)
-      {
-         CurrentMenuNode = newNode;
+        private async void Menu_ButtonStateChanged(object sender, ButtonActionEventArgs e)
+        {
+            if (CurrentMenuNode.Control is IMenuButtonUser)
+            {
+                if((CurrentMenuNode.Control as IMenuButtonUser).MenuFunctions.Keys.Contains(e.Button))
+                {
+                    if (e.Action == ButtonAction.Pushed)
+                    {
+                        // User has pushed a menus function button
+                        ChangeCurrentMenu((CurrentMenuNode.Control as IMenuButtonUser).MenuFunctions[MenuButton.Left]);
+                        await Update();
+                    }
+                }
+            }
+        }
 
-         _displayDevice.ActiveCanvas.Children.Add(newNode.Control);
-      }
+        private void ChangeCurrentMenu(MenuNode<UserControl> newNode)
+        {
+            CurrentMenuNode = newNode;
 
-      public async Task Update()
-      {
-         await _displayDevice.Draw();
-      }
+            _displayDevice.ActiveCanvas.Children.Add(newNode.Control);
+        }
 
-      public void HandleButtonInput(MenuButtons button)
-      {
+        public async Task Update()
+        {
+            await _displayDevice.Draw();
+        }
 
-      }
+        public void DisplayPopup(UserControl popup)
+        {
+            _popUpMenuNode = new MenuNode<UserControl>(CurrentMenuNode, popup);
 
-      public void DisplayPopup(UserControl popup)
-      {
-         _popUpMenuNode = new MenuNode<UserControl>(CurrentMenuNode, popup);
+            _displayDevice.ActiveCanvas.Children.Remove(_popUpMenuNode.Parent.Control);
 
-         _displayDevice.ActiveCanvas.Children.Remove(_popUpMenuNode.Parent.Control);
+            ChangeCurrentMenu(_popUpMenuNode);
+        }
 
-         ChangeCurrentMenu(_popUpMenuNode);
-      }
+        public void EndPopup(UserControl popup)
+        {
+            _displayDevice.ActiveCanvas.Children.Remove(_popUpMenuNode.Control);
 
-      public void EndPopup(UserControl popup)
-      {
-         _displayDevice.ActiveCanvas.Children.Remove(_popUpMenuNode.Control);
+            ChangeCurrentMenu(_popUpMenuNode.Parent);
 
-         ChangeCurrentMenu(_popUpMenuNode.Parent);
+            _popUpMenuNode = null;
+        }
 
-         _popUpMenuNode = null;
-      }
-
-      private void AddNode(MenuNode<UserControl> node)
-      {
-         _menuTree.Add(node);
-      }
-   }
+        private void AddNode(MenuNode<UserControl> node)
+        {
+            _menuTree.Add(node);
+        }
+    }
 }

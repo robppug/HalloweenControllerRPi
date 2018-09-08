@@ -8,94 +8,107 @@ using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 using Windows.System.Threading;
 using Windows.UI.Xaml;
+using Microsoft.IoT.Lightning.Providers;
+using static HalloweenControllerRPi.Device.Controllers.Channels.ChannelFunction_BUTTON;
+using static HalloweenControllerRPi.Device.Controllers.Channels.ChannelFunction_INPUT;
 
 namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats
 {
-   public class RPiHat_DISPLAY_v1 : RPiHat, IDisplayChannel
-   {
-      private BusDevice_PCA9501<DeviceComms_I2C> busDevice;
-      private SSD1306<DeviceComms_I2C> displayDriver;
-      private UInt16 address;
-      
-      public IDriverDisplayProvider Device => displayDriver;
+    public class RPiHat_DISPLAY_v1 : RPiHat, IDisplayChannel, IButtonChannelProvider
+    {
+        static readonly uint NO_OF_BUTTONS = 7;
 
-      public RPiHat_DISPLAY_v1(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress) : base(host)
-      {
-         HatType = SupportedHATs.DISPLAY_v1;
-         busDevice = new BusDevice_PCA9501<DeviceComms_I2C>();
-         displayDriver = new SSD1306<DeviceComms_I2C>(128, 64);
-         address = hatAddress;
+        private BusDevice_PCA9501<DeviceComms_I2C> _busDevice;
+        private SSD1306<DeviceComms_I2C> displayDriver;
+        private readonly UInt16? buttonAddress;
+        private readonly UInt16 displayAddress;
+        private DispatcherTimer[] buttonTimers = new DispatcherTimer[NO_OF_BUTTONS];
+        
+        public IDriverDisplayProvider Device => displayDriver;
 
-         /* Open the BUS DEVICE */
-         busDevice.Open(new DeviceComms_I2C(i2cDevice));
+        public Dictionary<MenuButton, IChannel> ButtonList { get; set; }
 
-         /* Initialise the BUS DEVICE */
-         busDevice.InitialiseDriver();
+        public RPiHat_DISPLAY_v1(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress) : base(host)
+        {
+            HatType = SupportedHATs.DISPLAY_v1;
+            _busDevice = null;
+            displayDriver = new SSD1306<DeviceComms_I2C>(128, 64);
+            buttonAddress = null;
+            displayAddress = hatAddress;
 
-         /* Open the DISPLAY driver */
-         displayDriver.Open(new DeviceComms_I2C(i2cDevice));
+            /* Open the DISPLAY driver */
+            displayDriver.Open(new DeviceComms_I2C(i2cDevice));
 
-         /* Initialise the DISPLAY DRIVER */
-         displayDriver.InitialiseDriver();
+            /* Initialise the DISPLAY DRIVER */
+            displayDriver.InitialiseDriver();
 
-         Channels = new List<IChannel>();
+            Channels = new List<IChannel>();
+        }
 
-         /* Initialise availble channels on attached HAT */
-         for (uint i = 0; i < 7; i++)
-         {
-            ChannelFunction_BUTTON chan = null;
-            IIOPin pin = null;
+        public void Initialise(IHWController host, I2cDevice i2cDevice, UInt16 hatAddress)
+        {
+            _busDevice = new BusDevice_PCA9501<DeviceComms_I2C>();
+            ButtonList = new Dictionary<MenuButton, IChannel>();
 
-            pin = busDevice.GetPin((ushort)i);
+            /* Open the BUS DEVICE */
+            _busDevice.Open(new DeviceComms_I2C(i2cDevice));
 
-            pin.SetDriveMode(GpioPinDriveMode.InputPullUp);
+            /* Initialise the BUS DEVICE */
+            _busDevice.InitialiseDriver();
 
-            chan = new ChannelFunction_BUTTON(this, i, pin);
+            IIOPin PWPin = _busDevice.GetPin(7);
 
-            chan.ButtonStateChanged += Chan_ButtonStateChanged;
+            PWPin.SetDriveMode(GpioPinDriveMode.Output);
+            PWPin.Write(GpioPinValue.Low);
 
-            if (chan != null)
+            /* Initialise available channels on attached HAT */
+            for (uint i = 0; i < NO_OF_BUTTONS; i++)
             {
-               Channels.Add(chan);
+                ChannelFunction_BUTTON chan = null;
+                IIOPin pin = null;
+
+                pin = _busDevice.GetPin((ushort)i);
+
+                pin.SetDriveMode(GpioPinDriveMode.InputPullUp);
+
+                chan = new ChannelFunction_BUTTON(this, i, pin);
+                chan.ButtonFunction = GetButtonFunction(i);
+
+                if (chan != null)
+                {
+                    Channels.Add(chan);
+                    ButtonList.Add(GetButtonFunction(i), chan);
+                }
             }
-         }
-      }
+        }
 
-      private void Chan_ButtonStateChanged(object sender, ChannelFunction_BUTTON.ButtonStateEventArgs e)
-      {
-         switch(e.PinNumber)
-         {
-            //Display (Left)
-            case 0:
-               break;
-            //Display (Right)
-            case 1:
-               break;
-            //Left
-            case 2:
-               break;
-            //Right
-            case 3:
-               break;
-            //Up
-            case 4:
-               break;
-            //Down
-            case 5:
-               break;
-            //Enter
-            case 6:
-               break;
-         }
-      }
-      private void Chan_InputLevelChanged(object sender, ChannelFunction_INPUT.EventArgsINPUT e)
-      {
-         //HostController.OnChannelNotification(this, new CommandEventArgs('I', 'G', e.Index + 1, (uint)e.TriggerLevel));
-      }
+        private MenuButton GetButtonFunction(uint i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return MenuButton.Left;
+                case 1:
+                    return MenuButton.Enter;
+                case 2:
+                    return MenuButton.Down;
+                case 3:
+                    return MenuButton.Up;
+                case 4:
+                    return MenuButton.Right;
+                case 5:
+                    return MenuButton.FunctionLeft;
+                case 6:
+                    return MenuButton.FunctionRight;
 
-      public override void RefreshChannel(IChannel chan)
-      {
-         busDevice.RefreshChannel(chan);
-      }
-   }
+                default:
+                    return MenuButton.Invalid;
+            }
+        }
+
+        public override void RefreshChannel(IChannel chan)
+        {
+            _busDevice?.RefreshChannel(chan);
+        }
+    }
 }

@@ -21,7 +21,7 @@
                    HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch"
                    CanDragItems="True"
-                   DragItemsStarting="DragItemsStarting" />
+                   DragItemsStarting="DragItemsStarting" Padding="0,0,0,5" />
       </Border>
       <Border x:Name="StaticsArea"
               Height="150"
@@ -34,9 +34,9 @@
          <GridView x:Name="Available_Statics"
                    HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch"
+                   Background="Black"
                    CanDragItems="True"
-                   DragItemsStarting="DragItemsStarting"
-                   Background="Black">
+                   DragItemsStarting="DragItemsStarting">
             <Canvas x:Name="ExternalDisplayCanvas" MinHeight="64" MinWidth="128" MaxHeight="64" MaxWidth="128"/>
             <Image x:Name="OutputImage" MinHeight="64" MinWidth="128" MaxHeight="64" MaxWidth="128"/>
          </GridView>

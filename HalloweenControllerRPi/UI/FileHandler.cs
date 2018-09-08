@@ -28,7 +28,7 @@ namespace HalloweenControllerRPi
       public object DriveInfo { get; private set; }
 
       #region /* XML Loading */
-      private async void loadSettingsFile()
+      private async Task loadSettingsFile()
       {
          this.checkBox_LoadOnStart.IsChecked = false;
 
@@ -64,15 +64,6 @@ namespace HalloweenControllerRPi
                   if (xmlReader.ReadToFollowing("Settings") == true)
                   {
                      this.checkBox_LoadOnStart.IsChecked = (bool)(xmlReader.GetAttribute("LoadOnStart") == "True" ? true : false);
-
-                     if (this.checkBox_LoadOnStart.IsChecked == true)
-                     {
-                        this.buttonLoadSequence_Click(this, null);
-
-                        await Task.Delay(12000);
-
-                        this.buttonStart_Click(this, null);
-                     }
                   }
                }
             }
@@ -116,6 +107,8 @@ namespace HalloweenControllerRPi
       {
          (sender as Button).IsEnabled = false;
 
+         fileToLoad = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync("HWControllerSequence.sqn");
+
          if (fileToLoad != null)
          {
             StreamReader loadfile = new StreamReader(await fileToLoad.OpenStreamForReadAsync());
@@ -128,15 +121,15 @@ namespace HalloweenControllerRPi
                gc.ClearAllFunctions();
             }
 
-            new ContentDialog()
-            {
-               Title = "Please Wait",
-               IsPrimaryButtonEnabled = false,
-               IsSecondaryButtonEnabled = false,
-               HorizontalContentAlignment = HorizontalAlignment.Center,
-               VerticalContentAlignment = VerticalAlignment.Center,
-               Content = new TextBlock() { Text = "Loading XML file..." }
-            }.ShowAsync();
+            //new ContentDialog()
+            //{
+            //   Title = "Please Wait",
+            //   IsPrimaryButtonEnabled = false,
+            //   IsSecondaryButtonEnabled = false,
+            //   HorizontalContentAlignment = HorizontalAlignment.Center,
+            //   VerticalContentAlignment = VerticalAlignment.Center,
+            //   Content = new TextBlock() { Text = "Loading XML file..." }
+            //}.ShowAsync();
 
             //pbControl.MaxValue = xDoc.Descendants().Count();
             //pbControl.Show(this);
@@ -268,15 +261,15 @@ namespace HalloweenControllerRPi
                if( GetVisibleContentDialog() != null)
                   GetVisibleContentDialog().Hide();
 
-               new ContentDialog()
-               {
-                  Title = "Error",
-                  IsSecondaryButtonEnabled = false,
-                  PrimaryButtonText = "Exit",
-                  HorizontalContentAlignment = HorizontalAlignment.Center,
-                  VerticalContentAlignment = VerticalAlignment.Center,
-                  Content = new TextBlock() { Text = "File version mismatch (" + data + ")." }
-               }.ShowAsync();
+               //new ContentDialog()
+               //{
+               //   Title = "Error",
+               //   IsSecondaryButtonEnabled = false,
+               //   PrimaryButtonText = "Exit",
+               //   HorizontalContentAlignment = HorizontalAlignment.Center,
+               //   VerticalContentAlignment = VerticalAlignment.Center,
+               //   Content = new TextBlock() { Text = "File version mismatch (" + data + ")." }
+               //}.ShowAsync();
             }
          }
       }

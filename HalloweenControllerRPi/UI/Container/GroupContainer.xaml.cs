@@ -70,7 +70,7 @@ namespace HalloweenControllerRPi.Container
       }
 
       /// <summary>
-      /// FUNCTION DROP event handling when the user drags an Available Function Button into the GroupContainer.
+      /// FUNCTION DROP event handling when the user drags an Available Function MenuButton into the GroupContainer.
       /// </summary>
       /// <param name="sender"></param>
       /// <param name="e"></param>
@@ -187,6 +187,14 @@ namespace HalloweenControllerRPi.Container
          groupContainerTriggered.HorizontalAlignment = HorizontalAlignment.Stretch;
 
          Container.Children.Add(groupContainerTriggered);
+      }
+
+      internal void EnableAllInputs()
+      {
+         foreach (GroupContainerTriggered gt in this.Container.Children)
+         {
+            gt.EnableAllInputs();
+         }
       }
 
       /// <summary>

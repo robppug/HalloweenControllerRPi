@@ -75,7 +75,7 @@ namespace HalloweenControllerRPi.Container
                }
             }
 
-            /* If Function Button is not STATIC, remove from sending flow panel (availables). */
+            /* If Function MenuButton is not STATIC, remove from sending flow panel (availables). */
             //if (draggedItem.IsRemoveable == true)
             //   draggedItem.Dispose();
 
@@ -94,7 +94,7 @@ namespace HalloweenControllerRPi.Container
 
       /// <summary>
       /// UIElement DRAG Enter event, check if the dragged item is;
-      ///   - Of type Function Button
+      ///   - Of type Function MenuButton
       ///   - Has a Function that is configured as Only One
       /// </summary>
       /// <param name="sender"></param>
@@ -177,6 +177,18 @@ namespace HalloweenControllerRPi.Container
       private void TriggerFunctions(IFunctionGUI c)
       {
          GroupTriggerActive = c.Func.boProcessRequest((char)0, (char)0, (char)0, (uint)0);
+      }
+
+      public void EnableAllInputs()
+      {
+         /* Go through all Panel Group controls and ENABLE each INPUT */
+         foreach (UIElement c in Container.Children)
+         {
+            if (c is Func_Input_GUI)
+            {
+               (c as Func_Input_GUI).EnableButton_Click(this, null);
+            }
+         }
       }
 
       /// <summary>

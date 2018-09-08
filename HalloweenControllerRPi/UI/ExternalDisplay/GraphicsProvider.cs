@@ -1,4 +1,5 @@
 ﻿using HalloweenControllerRPi.Device.Controllers.Providers;
+using HalloweenControllerRPi.UI.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +37,8 @@ namespace HalloweenControllerRPi.UI.ExternalDisplay
       public Canvas ActiveCanvas { get; set; }
 
       public Image OutputImage { get; internal set; }
+
+      public MenuControl Menu { get; set; }
 
       public GraphicsProvider(IDriverDisplayProvider dev)
       {

@@ -56,7 +56,7 @@ namespace HalloweenControllerRPi.UI.Functions.Function_Button
 
       public Function_Button()
       {
-         this.InitializeComponent();
+         InitializeComponent();
       }
 
 

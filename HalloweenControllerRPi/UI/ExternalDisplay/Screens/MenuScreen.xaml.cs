@@ -18,15 +18,15 @@ using Windows.UI.Xaml.Navigation;
 
 namespace HalloweenControllerRPi.UI.ExternalDisplay
 {
-    public sealed partial class MainScreen : UserControl, IMenuButtonUser
+    public sealed partial class MenuScreen : UserControl, IMenuButtonUser
     {
-        public MainScreen()
+        public MenuScreen()
         {
             this.InitializeComponent();
 
             MenuFunctions = new Dictionary<MenuButton, MenuNode<UserControl>>();
 
-            MenuFunctions.Add(MenuButton.Left, new MenuNode<UserControl>(null, new MenuScreen()));
+            MenuFunctions.Add(MenuButton.Left, new MenuNode<UserControl>(null, new DetectingScreen()));
             MenuFunctions.Add(MenuButton.Right, new MenuNode<UserControl>(null, new DetectingScreen()));
 
             foreach (UIElement c in MainCanvas.Children)

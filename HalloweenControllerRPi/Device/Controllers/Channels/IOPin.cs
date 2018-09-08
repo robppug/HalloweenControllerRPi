@@ -50,7 +50,14 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
          DebounceTimer.Interval = DebounceTimeout;
       }
 
-      private void DebounceTimer_Tick(object sender, object e)
+      public IOPin(uint pin, GpioPinValue activeState) : this(pin)
+      {
+          m_value = (activeState == GpioPinValue.High ? GpioPinValue.Low : GpioPinValue.High);
+          m_lastEdge = (activeState == GpioPinValue.High ? GpioPinEdge.FallingEdge : GpioPinEdge.RisingEdge);
+          m_lastValue = (activeState == GpioPinValue.High ? GpioPinValue.Low : GpioPinValue.High);
+      }
+
+        private void DebounceTimer_Tick(object sender, object e)
       {
          DebounceTimer.Stop();
 

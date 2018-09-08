@@ -22,7 +22,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
          UIPanel.OnInputTrigger += UIPanel_OnInputTrigger;
 
-         HWController.Display = new GraphicsProvider(null);
+         //HWController.Display = new GraphicsProvider(null);
       }
 
       private void UIPanel_OnInputTrigger(object sender, EventArgs e)

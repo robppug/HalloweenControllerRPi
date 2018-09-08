@@ -8,211 +8,213 @@ using Windows.Devices.I2c;
 
 namespace HalloweenControllerRPi.Device.Controllers.BusDevices
 {
-   public class BusDevice_PCA9501<T> : IDeviceCommsProvider<T>, IChannelProvider, IGpioChannelProvider, IEepromChannelProvider where T : IDeviceComms
-   {
-      private T _stream;
-      private List<IIOPin> m_GpioPins = new List<IIOPin>(8);
+    public class BusDevice_PCA9501<T> : IDeviceCommsProvider<T>, IChannelProvider, IGpioChannelProvider, IEepromChannelProvider where T : IDeviceComms
+    {
+        private T _stream;
+        private List<IIOPin> m_GpioPins = new List<IIOPin>(8);
 
-      public bool Initialised { get; private set; }  
-      
-      /// <summary>
-      /// PCA9685 register addresses
-      /// </summary>
-      public enum Registers : byte
-      {
-         WRITE_IO = 0x00,     //b0xxxxxx0
-         READ_IO = 0x01,      //b0xxxxxx1
-         WRITE_EEPROM = 0x40, //b1xxxxxx0
-         READ_EEPROM = 0x41,  //b1xxxxxx1
-      };
+        public bool Initialised { get; private set; }
 
-      public uint NumberOfChannels
-      {
-         get { return NumberOfGpioChannels; }
-      }
+        /// <summary>
+        /// PCA9685 register addresses
+        /// </summary>
+        public enum Registers : byte
+        {
+            WRITE_IO = 0x00,     //b0xxxxxx0
+            READ_IO = 0x01,      //b0xxxxxx1
+            WRITE_EEPROM = 0x40, //b1xxxxxx0
+            READ_EEPROM = 0x41,  //b1xxxxxx1
+        };
 
-      public uint NumberOfGpioChannels
-      {
-         get { return (uint)m_GpioPins.Count; }
-      }
+        public uint NumberOfChannels
+        {
+            get { return NumberOfGpioChannels; }
+        }
 
-      public ushort EEPROMSize
-      {
-         get { return 256; }
-      }
+        public uint NumberOfGpioChannels
+        {
+            get { return (uint)m_GpioPins.Count; }
+        }
 
-      public T BusDeviceComms
-      {
-         get { return _stream; }
-         private set { _stream = value; }
-      }
+        public ushort EEPROMSize
+        {
+            get { return 256; }
+        }
 
-      public BusDevice_PCA9501()
-      {
-         Initialised = false;
-      }
+        public T BusDeviceComms
+        {
+            get { return _stream; }
+            private set { _stream = value; }
+        }
 
-      public void Open(T stream)
-      {
-         if (Initialised == false)
-         {
-            _stream = stream;
-            Initialised = true;
-         }
-         else
-         {
-            throw new Exception("Bus Device (" + this + ") is already Open.");
-         }
-      }
-
-      public void Close()
-      {
-         if (Initialised == true)
-         {
-            _stream = default(T);
-
+        public BusDevice_PCA9501()
+        {
             Initialised = false;
-         }
-      }
+        }
 
-      /// <summary>
-      /// Initialises the available CHANNELS provided by the BusDevice.
-      /// </summary>
-      public void InitialiseDriver(bool proceedOnFail = false)
-      {
-         /* Initialise GPIO channels */
-         for (uint i = 0; i < 8; i++)
-         {
-            m_GpioPins.Add(new IOPin(i));
-         }
+        public void Open(T stream)
+        {
+            if (Initialised == false)
+            {
+                _stream = stream;
+                Initialised = true;
+            }
+            else
+            {
+                throw new Exception("Bus Device (" + this + ") is already Open.");
+            }
+        }
 
-         Initialised = true;
-      }
+        public void Close()
+        {
+            if (Initialised == true)
+            {
+                _stream = default(T);
 
-      /// <summary>
-      /// Will READ/WRITE the BUS device and physical update each Channel
-      /// </summary>
-      public void RefreshChannel(IChannel chan)
-      {
-         IIOPin pin = GetPin((ushort)chan.Index);
+                Initialised = false;
+            }
+        }
 
-         if (pin.GetDriveMode() == GpioPinDriveMode.InputPullUp)
-         {
-            ReadPin(pin);
-         }
-         else if (pin.GetDriveMode() == GpioPinDriveMode.Output)
-         {
-            WritePin(pin, (GpioPinValue)chan.GetValue());
-         }
-      }
+        /// <summary>
+        /// Initialises the available CHANNELS provided by the BusDevice.
+        /// </summary>
+        public void InitialiseDriver(bool proceedOnFail = false)
+        {
+            /* Initialise GPIO channels */
+            for (uint i = 0; i < 8; i++)
+            {
+                m_GpioPins.Add(new IOPin(i));
+            }
 
-      #region EEPROM Handling
+            Initialised = true;
+        }
 
-      public byte ReadByte(ushort address)
-      {
-         throw new NotImplementedException();
-      }
+        /// <summary>
+        /// Will READ/WRITE the BUS device and physical update each Channel
+        /// </summary>
+        public void RefreshChannel(IChannel chan)
+        {
+            IIOPin pin = GetPin((ushort)chan.Index);
 
-      public List<byte> ReadBytes(ushort address, ushort length)
-      {
-         throw new NotImplementedException();
-      }
+            if (pin.GetDriveMode() == GpioPinDriveMode.InputPullUp)
+            {
+                ReadPin(pin);
+            }
+            else if (pin.GetDriveMode() == GpioPinDriveMode.Output)
+            {
+                WritePin(pin, (GpioPinValue)chan.GetValue());
+            }
+        }
 
-      public void WriteByte(ushort address, byte data)
-      {
-         if (address < EEPROMSize)
-         {
-            /* Write the EEPROM_WRITE register, address and data */
-            _stream.Write(new byte[3] { (byte)Registers.WRITE_EEPROM, (byte)address, data });
-         }
-      }
+        #region EEPROM Handling
 
-      public void WriteBytes(ushort address, List<byte> data)
-      {
-         foreach (byte b in data)
-         {
-            WriteByte((ushort)(address + data.IndexOf(b)), b);
-         }
-      }
+        public byte ReadByte(ushort address)
+        {
+            throw new NotImplementedException();
+        }
 
-      #endregion EEPROM Handling
+        public List<byte> ReadBytes(ushort address, ushort length)
+        {
+            throw new NotImplementedException();
+        }
 
-      #region IO PIN Handling
+        public void WriteByte(ushort address, byte data)
+        {
+            if (address < EEPROMSize)
+            {
+                /* Write the EEPROM_WRITE register, address and data */
+                _stream.Write(new byte[3] { (byte)Registers.WRITE_EEPROM, (byte)address, data });
+            }
+        }
 
-      public IIOPin GetPin(ushort pin)
-      {
-         if (pin < NumberOfChannels)
-         {
-            return m_GpioPins[pin];
-         }
+        public void WriteBytes(ushort address, List<byte> data)
+        {
+            foreach (byte b in data)
+            {
+                WriteByte((ushort)(address + data.IndexOf(b)), b);
+            }
+        }
 
-         return null;
-      }
+        #endregion EEPROM Handling
 
-      /// <summary>
-      /// Write's to a PIN on the PCA9501 device.
-      /// </summary>
-      /// <param name="pin"></param>
-      /// <param name="value"></param>
-      public void WritePin(IIOPin pin, GpioPinValue value)
-      {
-         if (pin.GetDriveMode() == GpioPinDriveMode.Output)
-         {
-            pin.Write(value);
+        #region IO PIN Handling
 
-            UpdateDeviceIO(Registers.WRITE_IO);
-         }
-         else
-         {
-            throw new Exception("Pin is READ ONLY");
-         }
-      }
+        public IIOPin GetPin(ushort pin)
+        {
+            if (pin < NumberOfChannels)
+            {
+                return m_GpioPins[pin];
+            }
 
-      public GpioPinValue ReadPin(IIOPin pin)
-      {
-         UpdateDeviceIO(Registers.READ_IO);
+            return null;
+        }
 
-         return m_GpioPins.Find(x => x == pin).Read();
-      }
+        /// <summary>
+        /// Write's to a PIN on the PCA9501 device.
+        /// </summary>
+        /// <param name="pin"></param>
+        /// <param name="value"></param>
+        public void WritePin(IIOPin pin, GpioPinValue value)
+        {
+            if (pin.GetDriveMode() == GpioPinDriveMode.Output)
+            {
+                pin.Write(value);
 
-      private void UpdateDeviceIO(Registers reg)
-      {
-         //byte[] data = new byte[NumberOfChannels];
-         byte[] data = new byte[1] { 0x00 };
+                UpdateDeviceIO(Registers.WRITE_IO);
+            }
+            else
+            {
+                throw new Exception("Pin is READ ONLY");
+            }
+        }
 
-         switch (reg)
-         {
-            /* WRITE TO PIN */
-            case Registers.WRITE_IO:
-               foreach (IIOPin pin in m_GpioPins)
-               {
-                  data[0] |= (byte)((byte)pin.Read() << (byte)pin.PinNumber);
-               }
+        public GpioPinValue ReadPin(IIOPin pin)
+        {
+            UpdateDeviceIO(Registers.READ_IO);
 
-               /* Write to the DEVICE - Address = b0xxxxxx0 */
-               (_stream as DeviceComms_I2C).i2cDevice.ConnectionSettings.SlaveAddress &= ~(byte)reg;
+            return m_GpioPins.Find(x => x == pin).Read();
+        }
 
-               _stream.Write(data);
-               break;
+        private void UpdateDeviceIO(Registers reg)
+        {
+            //byte[] data = new byte[NumberOfChannels];
+            byte[] data = new byte[1] { 0x00 };
 
-            /* READ FROM PIN */
-            case Registers.READ_IO:
-               /* Read from the DEVICE - Address = b0xxxxxx1 */
-               (_stream as DeviceComms_I2C).i2cDevice.ConnectionSettings.SlaveAddress |= (byte)reg;
+            switch (reg)
+            {
+                /* WRITE TO PIN */
+                case Registers.WRITE_IO:
+                    foreach (IIOPin pin in m_GpioPins)
+                    {
+                        data[0] |= (byte)((byte)pin.Read() << (byte)pin.PinNumber);
+                    }
 
-               while ((_stream as DeviceComms_I2C).i2cDevice.ReadPartial(data).Status != I2cTransferStatus.FullTransfer) { }
+                    /* Write to the DEVICE - Address = b0xxxxxx0 */
+                    (_stream as DeviceComms_I2C).i2cDevice.ConnectionSettings.SlaveAddress &= ~(byte)reg;
 
-               //Debug.WriteLine(Convert.ToString(data[0], 2).PadLeft(8, '0'));
-               foreach (IIOPin pin in m_GpioPins)
-               {
-                  pin.Write((GpioPinValue)((data[0] >> (byte)(NumberOfChannels - (pin.PinNumber + 1))) & 0x01));
-               }
-               break;
+                    _stream.Write(data);
+                    break;
 
-            default:
-               break;
-         }
-      }
-      #endregion IO PIN Handling
-   }
+                /* READ FROM PIN */
+                case Registers.READ_IO:
+                    /* Read from the DEVICE - Address = b0xxxxxx1 */
+                    (_stream as DeviceComms_I2C).i2cDevice.ConnectionSettings.SlaveAddress |= (byte)reg;
+
+                    while ((_stream as DeviceComms_I2C).i2cDevice.ReadPartial(data).Status != I2cTransferStatus.FullTransfer) { }
+
+                    //Debug.WriteLine("PIN LEVEL: " + Convert.ToString(data[0], 2).PadLeft(8, '0'));
+
+                    foreach (IIOPin pin in m_GpioPins)
+                    {
+                        pin.Write((GpioPinValue)((data[0] >> (byte)(NumberOfChannels - (pin.PinNumber + 1))) & 0x01));
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        #endregion IO PIN Handling
+    }
 }

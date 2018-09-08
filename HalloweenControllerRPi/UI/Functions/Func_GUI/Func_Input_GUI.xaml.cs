@@ -127,9 +127,12 @@ namespace HalloweenControllerRPi.Function_GUI
          
       }
 
-      private void EnableButton_Click(object sender, RoutedEventArgs e)
+      public void EnableButton_Click(object sender, RoutedEventArgs e)
       {
-         _Func.Enabled = !_Func.Enabled;
+         if(e == null)
+            _Func.Enabled = true;
+         else
+            _Func.Enabled = !_Func.Enabled;
 
          EnableButton.IsChecked = _Func.Enabled;
       }
