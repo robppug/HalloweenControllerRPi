@@ -7,8 +7,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    d:DesignHeight="300"
-    d:DesignWidth="400">
+    d:DesignHeight="240"
+    d:DesignWidth="200">
 
    <UserControl.Resources>
       <ResourceDictionary>
@@ -19,7 +19,7 @@
 
    <Border BorderThickness="1" BorderBrush="Black">
       <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-         <StackPanel x:Name="Container" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" AllowDrop="True" MinHeight="300" MinWidth="400" Background="LightGray" Loaded="Panel_Loaded">
+         <StackPanel x:Name="Container" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" AllowDrop="True" MinHeight="240" MinWidth="200" Background="LightGray" Loaded="Panel_Loaded">
             <Image x:Name="imageTrigger" MinHeight="300" MinWidth="50" MaxWidth="50" Source="{StaticResource Blank}" Stretch="Fill"/>
          </StackPanel>
       </ScrollViewer>

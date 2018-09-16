@@ -70,15 +70,15 @@ namespace HalloweenControllerRPi.Functions
         {
             get { return (uint)new Random().Next((int)MinDuration_ms, (int)MaxDuration_ms); }
         }
-        public uint MinDuration_ms { get; set; }
-        public uint MaxDuration_ms { get; set; }
+        public uint MinDuration_ms { get; set; } = 1000;
+        public uint MaxDuration_ms { get; set; } = 2000;
 
         public uint Delay_ms
         {
             get { return (uint)new Random().Next((int)MinDelay_ms, (int)MaxDelay_ms); }
         }
-        public uint MinDelay_ms { get; set; }
-        public uint MaxDelay_ms { get; set; }
+        public uint MinDelay_ms { get; set; } = 0;
+        public uint MaxDelay_ms { get; set; } = 1000;
 
         public uint Index { get; set; }
         public tenTYPE Type { get; set; }
@@ -237,9 +237,9 @@ namespace HalloweenControllerRPi.Functions
             {
                 TriggerActive = true;
 
-                if (MinDelay_ms > 0)
+                if (Delay_ms > 0)
                 {
-                    SetTimerInterval(_timerDelay, MinDelay_ms);
+                    SetTimerInterval(_timerDelay, Delay_ms);
                     _timerDelay.Start();
                 }
                 else
@@ -266,8 +266,7 @@ namespace HalloweenControllerRPi.Functions
 
         private void PostDelay()
         {
-            if (evOnDelayEnd != null)
-                evOnDelayEnd.Invoke(this, EventArgs.Empty);
+            evOnDelayEnd?.Invoke(this, EventArgs.Empty);
 
             if (Type == tenTYPE.TYPE_TRIGGER)
             {

@@ -7,10 +7,12 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Windows.Storage;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -47,9 +49,11 @@ namespace HalloweenControllerRPi.Function_GUI
 
         public Func_Sound_GUI()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+
             Tracks = new List<string>();
             Tracks.Add("N/A");
+
             comboBox_Track.DataContext = this;
             comboBox_Track.ItemsSource = Tracks;
 
@@ -71,6 +75,10 @@ namespace HalloweenControllerRPi.Function_GUI
             _Func.Volume = (uint)slider_Volume.Value;
             _Func.evOnFunctionUpdated += UpdateGUI;
             _Func.Loop = false;
+
+            _Func.evOnTrigger += (sender, e) => { Grid.Background = new SolidColorBrush(Colors.LightYellow); };
+            _Func.evOnDelayEnd += (sender, e) => { Grid.Background = new SolidColorBrush(Colors.LightGreen); };
+            _Func.evOnDurationEnd += (sender, e) => { Grid.Background = new SolidColorBrush(Colors.LightGray); };
 
             textTitle.DoubleTapped += TextTitle_DoubleTapped;
             textTitle.Text = "Sound #" + index;

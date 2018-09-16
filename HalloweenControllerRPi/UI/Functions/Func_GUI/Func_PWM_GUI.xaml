@@ -5,11 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              x:Name="_this"
-             d:DesignHeight="286"
              d:DesignWidth="240"
-             mc:Ignorable="d">
+             mc:Ignorable="d" Height="248">
 
-    <Grid Background="LightGray" BorderThickness="2" >
+    <Grid x:Name="Grid" Background="LightGray" BorderThickness="2" >
         <TextBlock x:Name="textTitle"
                  Margin="5,2,35,213"
                  Foreground="Black"
@@ -33,29 +32,40 @@
         <Controls:RangeSlider x:Name="slider_StartDelay"
               Margin="5,131,5,0"
               VerticalAlignment="Top"
-              Maximum="100"
+              Maximum="30000"
               Minimum="0"
               RangeMax="{Binding MaxStartDelay, ElementName=_this, Mode=TwoWay}"
               RangeMin="{Binding MinStartDelay, ElementName=_this, Mode=TwoWay}" />
-        <Slider x:Name="slider_UpdateRate"
-              Margin="5,186,5,0"
+        <Controls:RangeSlider x:Name="slider_UpdateRate"
+              Margin="5,166,5,0"
               VerticalAlignment="Top"
               Minimum="1"
-              TickFrequency="1"
-              ValueChanged="slider_UpdateRate_ValueChanged"
-              Value="1" Maximum="20" />
-        <Slider x:Name="slider_RampRate"
-              Margin="5,230,5,0"
+              Maximum="20"
+              RangeMax="{Binding MaxUpdateRate, ElementName=_this, Mode=TwoWay}"
+              RangeMin="{Binding MinUpdateRate, ElementName=_this, Mode=TwoWay}" />
+        <Controls:RangeSlider x:Name="slider_RampRate"
+              Margin="5,205,5,0"
               VerticalAlignment="Top"
+              Maximum="1000"
               Minimum="1"
-              TickFrequency="100"
-              Value="100" ValueChanged="slider_RampRate_ValueChanged" Maximum="1000" />
+              RangeMax="{Binding MaxRampRate, ElementName=_this, Mode=TwoWay}"
+              RangeMin="{Binding MinRampRate, ElementName=_this, Mode=TwoWay}" />
         <ComboBox x:Name="comboBox_Functions"
                 Width="215"
                 Margin="10,30,10,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                SelectionChanged="comboBox_Functions_SelectionChanged" DropDownClosed="comboBox_Functions_DropDownClosed" />
+                SelectionChanged="comboBox_Functions_SelectionChanged"
+                DropDownClosed="comboBox_Functions_DropDownClosed" >
+            <ComboBox.ItemContainerStyle>
+                <Style TargetType="ComboBoxItem">
+                    <Setter Property="Margin" Value="2,-5"/>
+                    <Setter Property="Height" Value="30" />
+                    <Setter Property="MaxHeight" Value="30" />
+                    <Setter Property="FontSize" Value="12" />
+                </Style>
+            </ComboBox.ItemContainerStyle>
+        </ComboBox>
         <TextBlock x:Name="textBlock_Level"
                  Width="215"
                  Margin="10,120,0,0"
@@ -74,14 +84,14 @@
                  Text="{Binding StartDelayText, ElementName=_this}"
                  TextWrapping="Wrap" />
         <TextBlock x:Name="textBlock_UpdateRate"
-                 Width="109"
-                 Margin="121,217,0,0"
+                 Width="217"
+                 Margin="10,194,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  FontSize="10"
-                 Text="Update Rate: 1 (ms)"
+                 Text="{Binding UpdateRateText, ElementName=_this}"
                  TextWrapping="Wrap" />
-        <TextBlock x:Name="textBlock_RampRate" Width="109" Margin="123,263,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10" Text="Ramp Rate: 100" TextWrapping="Wrap" />
+        <TextBlock x:Name="textBlock_RampRate" Width="226" Margin="10,228,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10" Text="{Binding RampRateText, ElementName=_this}" TextWrapping="Wrap" />
         <Button x:Name="RemoveButton" Content="X" HorizontalAlignment="Right" Margin="0,3,3,0" VerticalAlignment="Top" Width="25" Height="20" FontSize="8" FontFamily="Arial"/>
         <TextBlock x:Name="textBlock_Duration"
             Width="213"

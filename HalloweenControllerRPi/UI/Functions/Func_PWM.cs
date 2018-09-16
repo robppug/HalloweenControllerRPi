@@ -72,9 +72,21 @@ namespace HalloweenControllerRPi.Functions
 
         public uint MaxLevel { get; set; } = 100;
 
-        public uint UpdateRate { get; set; } = 1;
+        public uint UpdateRate
+        {
+            get { return (uint)new Random().Next((int)MinUpdateRate, (int)MaxUpdateRate); }
+        }
+        public uint MinUpdateRate { get; set; } = 1;
 
-        public uint RampRate { get; set; } = 1;
+        public uint MaxUpdateRate { get; set; } = 20;
+
+        public uint RampRate
+        {
+            get { return (uint)new Random().Next((int)MinRampRate, (int)MaxRampRate); }
+        }
+        public uint MinRampRate { get; set; } = 1;
+
+        public uint MaxRampRate { get; set; } = 1000;
 
         public PWMFunctions Function { get; set; } = PWMFunctions.FUNC_OFF;
 
@@ -156,8 +168,10 @@ namespace HalloweenControllerRPi.Functions
         {
             base.ReadXml(reader);
 
-            RampRate = Convert.ToUInt16(reader.GetAttribute("RampRate"));
-            UpdateRate = Convert.ToUInt16(reader.GetAttribute("UpdateRate"));
+            MinRampRate = Convert.ToUInt16(reader.GetAttribute("MinRampRate"));
+            MaxRampRate = Convert.ToUInt16(reader.GetAttribute("MaxRampRate"));
+            MinUpdateRate = Convert.ToUInt16(reader.GetAttribute("MinUpdateRate"));
+            MaxUpdateRate = Convert.ToUInt16(reader.GetAttribute("MaxUpdateRate"));
             MinLevel = Convert.ToUInt16(reader.GetAttribute("MinLevel"));
             MaxLevel = Convert.ToUInt16(reader.GetAttribute("MaxLevel"));
 
@@ -169,8 +183,10 @@ namespace HalloweenControllerRPi.Functions
 
             writer.WriteAttributeString("MinLevel", MinLevel.ToString());
             writer.WriteAttributeString("MaxLevel", MaxLevel.ToString());
-            writer.WriteAttributeString("RampRate", RampRate.ToString());
-            writer.WriteAttributeString("UpdateRate", UpdateRate.ToString());
+            writer.WriteAttributeString("MinRampRate", MinRampRate.ToString());
+            writer.WriteAttributeString("MaxRampRate", MaxRampRate.ToString());
+            writer.WriteAttributeString("MinUpdateRate", MinUpdateRate.ToString());
+            writer.WriteAttributeString("MaxUpdateRate", MaxUpdateRate.ToString());
             writer.WriteAttributeString("Function", Function.ToString());
         }
     }

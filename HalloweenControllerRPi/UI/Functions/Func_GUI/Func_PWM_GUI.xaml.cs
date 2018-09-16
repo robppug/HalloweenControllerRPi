@@ -1,13 +1,8 @@
-﻿using HalloweenControllerRPi.Controls;
-using HalloweenControllerRPi.Functions;
+﻿using HalloweenControllerRPi.Functions;
 using HalloweenControllerRPi.UI.Controls;
 using HalloweenControllerRPi.UI.Functions.Func_GUI;
-using MathNet.Numerics;
-using MathNet.Numerics.Interpolation;
 using System;
-using System.ComponentModel;
 using System.Xml.Serialization;
-using Windows.System;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -46,9 +41,23 @@ namespace HalloweenControllerRPi.Function_GUI
             set { SetValue(StartDelayTextProperty, value); }
         }
 
+        public string RampRateText
+        {
+            get { return (string)GetValue(RampRateTextProperty); }
+            set { SetValue(RampRateTextProperty, value); }
+        }
+
+        public string UpdateRateText
+        {
+            get { return (string)GetValue(UpdateRateTextProperty); }
+            set { SetValue(UpdateRateTextProperty, value); }
+        }
+
         public static readonly DependencyProperty DurationTextProperty = DependencyProperty.Register("DurationText", typeof(string), typeof(UserControl), new PropertyMetadata("Duration: xxx (ms)"));
         public static readonly DependencyProperty LevelTextProperty = DependencyProperty.Register("LevelText", typeof(string), typeof(UserControl), new PropertyMetadata("Level: xxx %"));
         public static readonly DependencyProperty StartDelayTextProperty = DependencyProperty.Register("StartDelayText", typeof(string), typeof(UserControl), new PropertyMetadata("Start Delay: xxx (ms)"));
+        public static readonly DependencyProperty RampRateTextProperty = DependencyProperty.Register("RampRateText", typeof(string), typeof(UserControl), new PropertyMetadata("Ramp Rate: xxx"));
+        public static readonly DependencyProperty UpdateRateTextProperty = DependencyProperty.Register("UpdateRateText", typeof(string), typeof(UserControl), new PropertyMetadata("Update Rate: xxx"));
 
         public uint MaxDuration
         {
@@ -82,15 +91,37 @@ namespace HalloweenControllerRPi.Function_GUI
             get { return _Func.MinDelay_ms; }
             set { _Func.MinDelay_ms = value; StartDelayText = "Start Delay: " + _Func.MinDelay_ms.ToString() + " to " + _Func.MaxDelay_ms.ToString() + " (ms)"; }
         }
+
+        public uint MaxUpdateRate
+        {
+            get { return _Func.MaxUpdateRate; }
+            set { _Func.MaxUpdateRate = value; UpdateRateText = "Update Rate: " + _Func.MinUpdateRate.ToString() + " to " + _Func.MaxUpdateRate.ToString(); }
+        }
+        public uint MinUpdateRate
+        {
+            get { return _Func.MinUpdateRate; }
+            set { _Func.MinUpdateRate = value; UpdateRateText = "Update Rate: " + _Func.MinUpdateRate.ToString() + " to " + _Func.MaxUpdateRate.ToString(); }
+        }
+
+        public uint MaxRampRate
+        {
+            get { return _Func.MaxRampRate; }
+            set { _Func.MaxRampRate = value; RampRateText = "Ramp Rate: " + _Func.MinRampRate.ToString() + " to " + _Func.MaxRampRate.ToString(); }
+        }
+        public uint MinRampRate
+        {
+            get { return _Func.MinRampRate; }
+            set { _Func.MinRampRate = value; RampRateText = "Ramp Rate: " + _Func.MinRampRate.ToString() + " to " + _Func.MaxRampRate.ToString(); }
+        }
         public Function Func
         {
-            get { return this._Func; }
-            set { this._Func = (value as Func_PWM); }
+            get { return _Func; }
+            set { _Func = (value as Func_PWM); }
         }
 
         public Func_PWM_GUI()
         {
-            this.InitializeComponent();
+            InitializeComponent();
 
             _boInitialised = true;
         }
@@ -106,13 +137,12 @@ namespace HalloweenControllerRPi.Function_GUI
             customLevelDraw.PrimaryButtonClick += MouseDraw_PrimaryButtonClick;
 
             _Func.Index = index;
+            _Func.evOnTrigger += (sender, e) => { Grid.Background = new SolidColorBrush(Colors.LightYellow); };
+            _Func.evOnDelayEnd += (sender, e) => { Grid.Background = new SolidColorBrush(Colors.LightGreen); };
+            _Func.evOnDurationEnd += (sender, e) => { Grid.Background = new SolidColorBrush(Colors.LightGray); };
 
             textTitle.Text = "PWM #" + index;
             textTitle.DoubleTapped += TextTitle_DoubleTapped;
-            _Func.MinDuration_ms = (uint)slider_Duration.RangeMin;
-            _Func.MaxDuration_ms = (uint)slider_Duration.RangeMax;
-            _Func.MinDelay_ms = (uint)slider_StartDelay.RangeMin;
-            _Func.MaxDelay_ms = (uint)slider_StartDelay.RangeMax;
 
             /* Populate the comboBox list with available PWM Functions */
             foreach (PWMFunctions f in Enum.GetValues(typeof(PWMFunctions)))
@@ -130,7 +160,7 @@ namespace HalloweenControllerRPi.Function_GUI
             comboBox_Functions.SelectedValue = PWMFunctions.FUNC_ON.ToString();
             comboBox_Functions_DropDownClosed(comboBox_Functions, EventArgs.Empty);
 
-            if (entype == Func_PWM.tenTYPE.TYPE_CONSTANT)
+            if (entype == Function.tenTYPE.TYPE_CONSTANT)
             {
                 slider_Duration.IsEnabled = false;
                 slider_StartDelay.IsEnabled = false;
@@ -140,8 +170,9 @@ namespace HalloweenControllerRPi.Function_GUI
 
             _Func.FuncButtonType = typeof(Function_Button_PWM);
 
-            this.RemoveButton.Click += RemoveButton_Click;
+            RemoveButton.Click += RemoveButton_Click;
         }
+
 
         private void RemoveButton_Click(object sender, RoutedEventArgs e)
         {
@@ -153,24 +184,6 @@ namespace HalloweenControllerRPi.Function_GUI
             if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
             {
                 textTitle.Text = FuncGUIHelper.SetCustomName(textTitle.Text).Result;
-            }
-        }
-
-        private void slider_UpdateRate_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-        {
-            if (_boInitialised == true)
-            {
-                this._Func.UpdateRate = (uint)(sender as Slider).Value;
-                this.textBlock_UpdateRate.Text = "Update Rate: " + this._Func.UpdateRate.ToString();
-            }
-        }
-
-        private void slider_RampRate_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-        {
-            if (_boInitialised == true)
-            {
-                this._Func.RampRate = (uint)(sender as Slider).Value;
-                this.textBlock_RampRate.Text = "Ramp Rate: " + this._Func.RampRate.ToString();
             }
         }
 
@@ -208,12 +221,12 @@ namespace HalloweenControllerRPi.Function_GUI
             DurationText = "Duration: " + _Func.MinDuration_ms.ToString() + " to " + _Func.MaxDuration_ms.ToString() + " (ms)";
             LevelText = "Level: " + _Func.MinLevel.ToString() + " to " + _Func.MaxLevel.ToString() + " %";
             StartDelayText = "Start Delay: " + _Func.MinDelay_ms.ToString() + " to " + _Func.MaxDelay_ms.ToString() + " (ms)";
-            textBlock_UpdateRate.Text = "Update Rate: " + _Func.UpdateRate.ToString();
-            textBlock_RampRate.Text = "Ramp Rate: " + _Func.RampRate.ToString();
+            UpdateRateText = "Update Rate: " + _Func.MinUpdateRate.ToString() + " to " + _Func.MaxUpdateRate.ToString();
+            RampRateText = "Ramp Rate: " + _Func.MinRampRate.ToString() + " to " + _Func.MaxRampRate.ToString();
 
             if (_Func.Function == PWMFunctions.FUNC_CUSTOM)
             {
-                this.customLevelDraw.ReadXml(reader);
+                customLevelDraw.ReadXml(reader);
             }
 
             /* Ignore MIN/MAX limits. */
@@ -225,7 +238,10 @@ namespace HalloweenControllerRPi.Function_GUI
                 slider_StartDelay.RangeMax = (int)_Func.MaxDelay_ms;
                 slider_MaxLevel.RangeMin = (int)_Func.MinLevel;
                 slider_MaxLevel.RangeMax = (int)_Func.MaxLevel;
-                slider_UpdateRate.Value = (int)_Func.UpdateRate;
+                slider_UpdateRate.RangeMin = (int)_Func.MinUpdateRate;
+                slider_UpdateRate.RangeMax = (int)_Func.MaxUpdateRate;
+                slider_RampRate.RangeMin = (int)_Func.MinRampRate;
+                slider_RampRate.RangeMax = (int)_Func.MaxRampRate;
                 comboBox_Functions.SelectedIndex = comboBox_Functions.Items.IndexOf(_Func.Function.ToString());
 
                 CheckSelectedFunction(PWMFunctions.FUNC_OFF, _Func.Function);
@@ -270,7 +286,7 @@ namespace HalloweenControllerRPi.Function_GUI
             bool boCanRamp = true;
             bool boCanUpdateTick = true;
 
-            switch (_Func.Function)
+            switch (newFunc)
             {
                 case PWMFunctions.FUNC_OFF:
                     boCanUpdateTick = false;
@@ -311,22 +327,16 @@ namespace HalloweenControllerRPi.Function_GUI
                     break;
             }
 
+            DurationText = "Duration: " + _Func.MinDuration_ms.ToString() + " to " + _Func.MaxDuration_ms.ToString() + " (ms)";
+            LevelText = "Level: " + _Func.MinLevel.ToString() + " to " + _Func.MaxLevel.ToString() + " %";
+            StartDelayText = "Start Delay: " + _Func.MinDelay_ms.ToString() + " to " + _Func.MaxDelay_ms.ToString() + " (ms)";
+            UpdateRateText = "Update Rate: " + _Func.MinUpdateRate.ToString() + " to " + _Func.MaxUpdateRate.ToString();
+            RampRateText = "Ramp Rate: " + _Func.MinRampRate.ToString() + " to " + _Func.MaxRampRate.ToString();
+
             slider_RampRate.IsEnabled = boCanRamp;
             textBlock_RampRate.Visibility = (boCanRamp ? Visibility.Visible : Visibility.Collapsed);
             slider_UpdateRate.IsEnabled = boCanUpdateTick;
             textBlock_UpdateRate.Visibility = (boCanUpdateTick ? Visibility.Visible : Visibility.Collapsed);
-        }
-
-        private void slider_Duration_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
-        {
-            if (slider_Duration.Maximum > 60000)
-            {
-                slider_Duration.Maximum = 10000;
-            }
-            else
-            {
-                slider_Duration.Maximum += 10000;
-            }
         }
     }
 }
