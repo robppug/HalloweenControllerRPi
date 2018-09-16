@@ -1,4 +1,5 @@
-﻿using HalloweenControllerRPi.Functions;
+﻿using HalloweenControllerRPi.Controls;
+using HalloweenControllerRPi.Functions;
 using HalloweenControllerRPi.UI.Functions.Func_GUI;
 using System;
 using System.Xml.Serialization;
@@ -11,116 +12,124 @@ using Windows.UI.Xaml.Input;
 
 namespace HalloweenControllerRPi.Function_GUI
 {
-   public partial class Func_Relay_GUI : UserControl, IXmlSerializable, IFunctionGUI
-   {
-      private Func_RELAY _Func;
-      private bool _boInitialised = false;
+    public partial class Func_Relay_GUI : UserControl, IXmlSerializable, IFunctionGUI
+    {
+        private Func_RELAY _Func;
+        private bool _boInitialised = false;
 
-      public event EventHandler OnRemove;
+        public event EventHandler OnRemove;
 
-      public Function Func
-      {
-         get { return _Func; }
-         set { _Func = (value as Func_RELAY); }
-      }
+        public uint MaxDuration
+        {
+            get { textBlock_MaxDuration.Text = "Max Duration: " + _Func.MaxDuration_ms.ToString() + " (ms)"; return _Func.MaxDuration_ms; }
+            set { _Func.MaxDuration_ms = value; textBlock_MaxDuration.Text = "Max Duration: " + value.ToString() + " (ms)"; }
+        }
+        public uint MinDuration
+        {
+            get { textBlock_MinDuration.Text = "Min Duration: " + _Func.MinDuration_ms.ToString() + " (ms)"; return _Func.MinDuration_ms; }
+            set { _Func.MinDuration_ms = value; textBlock_MinDuration.Text = "Min Duration: " + value.ToString() + " (ms)"; }
+        }
 
-      public Func_Relay_GUI()
-      {
-         this.InitializeComponent();
+        public Function Func
+        {
+            get { return _Func; }
+            set { _Func = (value as Func_RELAY); }
+        }
 
-         _boInitialised = true;
-      }
+        public Func_Relay_GUI()
+        {
+            this.InitializeComponent();
 
-      public Func_Relay_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
-      {
-         _Func = new Func_RELAY(host, entype);
+            _boInitialised = true;
+        }
 
-         _Func.Index = index;
-         
-         textTitle.Text = "Relay #" + index;
-         textTitle.DoubleTapped += TextTitle_DoubleTapped;
-         _Func.Duration_ms = (uint)slider_Duration.Value;
-         _Func.Delay_ms = (uint)slider_StartDelay.Value;
+        public Func_Relay_GUI(IHostApp host, uint index, Function.tenTYPE entype) : this()
+        {
+            _Func = new Func_RELAY(host, entype);
 
-         /* If function is in an ALWAYS_ACTIVE group, disable pointless controls */
-         if (entype == Func_RELAY.tenTYPE.TYPE_CONSTANT)
-         {
-            slider_Duration.IsEnabled = false;
-            slider_StartDelay.IsEnabled = false;
-         }
+            _Func.Index = index;
 
-         _Func.FuncButtonType = typeof(Function_Button_RELAY);
+            textTitle.Text = "Relay #" + index;
+            textTitle.DoubleTapped += TextTitle_DoubleTapped;
+            _Func.MinDuration_ms = (uint)slider_Duration.RangeMin;
+            _Func.MaxDuration_ms = (uint)slider_Duration.RangeMax;
+            _Func.MinDelay_ms = (uint)slider_StartDelay.Value;
 
-         RemoveButton.Click += RemoveButton_Click;
-      }
+            /* If function is in an ALWAYS_ACTIVE group, disable pointless controls */
+            if (entype == Func_RELAY.tenTYPE.TYPE_CONSTANT)
+            {
+                slider_Duration.IsEnabled = false;
+                slider_StartDelay.IsEnabled = false;
+                textBlock_MaxDuration.Visibility = Visibility.Collapsed;
+                textBlock_MinDuration.Visibility = Visibility.Collapsed;
+                textBlock_StartDelay.Visibility = Visibility.Collapsed;
+            }
 
-      private void RemoveButton_Click(object sender, RoutedEventArgs e)
-      {
-         OnRemove?.Invoke(this, EventArgs.Empty);
-      }
+            _Func.FuncButtonType = typeof(Function_Button_RELAY);
 
-      private void TextTitle_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
-      {
-         if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
-         {
-            textTitle.Text = FuncGUIHelper.SetCustomName(textTitle.Text).Result;
-         }
-      }
+            RemoveButton.Click += RemoveButton_Click;
+        }
 
-      private void slider_Duration_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-      {
-         if (_boInitialised == true)
-         {
-            _Func.Duration_ms = (uint)(sender as Slider).Value;
-            textBlock_Duration.Text = "Duration: " + _Func.Duration_ms.ToString() + " (ms)";
-         }
-      }
+        private void RemoveButton_Click(object sender, RoutedEventArgs e)
+        {
+            OnRemove?.Invoke(this, EventArgs.Empty);
+        }
 
-      private void slider_StartDelay_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-      {
-         if (_boInitialised == true)
-         {
-            _Func.Delay_ms = (uint)(sender as Slider).Value;
-            textBlock_StartDelay.Text = "Start Delay: " + Func.Delay_ms.ToString() + " (ms)";
-         }
-      }
+        private void TextTitle_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
+            {
+                textTitle.Text = FuncGUIHelper.SetCustomName(textTitle.Text).Result;
+            }
+        }
 
-      #region XML Handling
-      public void ReadXml(System.Xml.XmlReader reader)
-      {
-         _Func.ReadXml(reader);
+        private void slider_StartDelay_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            if (_boInitialised == true)
+            {
+                _Func.MinDelay_ms = (uint)(sender as Slider).Value;
+                textBlock_StartDelay.Text = "Start Delay: " + Func.MinDelay_ms.ToString() + " (ms)";
+            }
+        }
 
-         textTitle.Text = reader.GetAttribute("CustomName");
+        #region XML Handling
+        public void ReadXml(System.Xml.XmlReader reader)
+        {
+            _Func.ReadXml(reader);
 
-         textBlock_StartDelay.Text = "Start Delay: " + _Func.Delay_ms.ToString() + " (ms)";
-         textBlock_Duration.Text = "Duration: " + _Func.Duration_ms.ToString() + " (ms)";
+            textTitle.Text = reader.GetAttribute("CustomName");
 
-         /* Ignore MIN/MAX limits. */
-         try
-         {
-            slider_Duration.Value = (int)_Func.Duration_ms;
-            slider_StartDelay.Value = (int)_Func.Delay_ms;
-         }
-         catch { }
-      }
+            textBlock_StartDelay.Text = "Start Delay: " + _Func.MinDelay_ms.ToString() + " (ms)";
+            textBlock_MinDuration.Text = "Min Duration: " + _Func.MinDuration_ms.ToString() + " (ms)";
+            textBlock_MaxDuration.Text = "Max Duration: " + _Func.MaxDuration_ms.ToString() + " (ms)";
 
-      public System.Xml.Schema.XmlSchema GetSchema()
-      {
-         throw new NotImplementedException();
-      }
+            /* Ignore MIN/MAX limits. */
+            try
+            {
+                slider_Duration.RangeMin = (int)_Func.MinDuration_ms;
+                slider_Duration.RangeMax = (int)_Func.MaxDuration_ms;
+                slider_StartDelay.Value = (int)_Func.MinDelay_ms;
+            }
+            catch { }
+        }
 
-      public void WriteXml(System.Xml.XmlWriter writer)
-      {
-         writer.WriteAttributeString("Type", GetType().ToString());
-         writer.WriteAttributeString("CustomName", textTitle.Text);
+        public System.Xml.Schema.XmlSchema GetSchema()
+        {
+            throw new NotImplementedException();
+        }
 
-         _Func.WriteXml(writer);
-      }
+        public void WriteXml(System.Xml.XmlWriter writer)
+        {
+            writer.WriteAttributeString("Type", GetType().ToString());
+            writer.WriteAttributeString("CustomName", textTitle.Text);
 
-      #endregion
+            _Func.WriteXml(writer);
+        }
 
-      public void Initialise()
-      {
-      }
-   }
+        #endregion
+
+        public void Initialise()
+        {
+        }
+    }
 }

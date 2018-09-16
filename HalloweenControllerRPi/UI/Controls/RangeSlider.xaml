@@ -9,13 +9,13 @@
     d:DesignHeight="32"
     d:DesignWidth="400">
 
-   <Grid Height="32" Margin="4,0">
-      <Grid.Resources>
-         <Style TargetType="Thumb">
-            <Setter Property="Template">
-               <Setter.Value>
-                  <ControlTemplate TargetType="Thumb">
-                     <Rectangle Width="16" 
+    <Grid Height="32" Margin="4,0">
+        <Grid.Resources>
+            <Style TargetType="Thumb">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Thumb">
+                            <Rectangle Width="16" 
                                 Height="16" 
                                 Fill="White" 
                                 RenderTransformOrigin="0.5 0.5" 
@@ -23,24 +23,24 @@
                                 RadiusY="2" 
                                 Stroke="Black" 
                                 StrokeThickness="1" >
-                        <Rectangle.RenderTransform>
-                           <TranslateTransform X="-4" Y="8"/>
-                        </Rectangle.RenderTransform>
-                     </Rectangle>
-                  </ControlTemplate>
-               </Setter.Value>
-            </Setter>
-         </Style>
-      </Grid.Resources>
-      <Rectangle Height="8" Margin="4,12" Fill="#FFE0E0E0" RadiusX="2" RadiusY="2" />
-      <Canvas x:Name="ContainerCanvas" Margin="4,0" SizeChanged="ContainerCanvas_SizeChanged">
-         <Thumb x:Name="MinThumb" DragCompleted="MinThumb_DragCompleted" DragDelta="MinThumb_DragDelta" />
-         <Thumb x:Name="MaxThumb" DragCompleted="MaxThumb_DragCompleted" DragDelta="MaxThumb_DragDelta" />
-         <Rectangle x:Name="ActiveRectangle"
+                                <Rectangle.RenderTransform>
+                                    <TranslateTransform X="-4" Y="8"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
+        <Rectangle Height="8" Margin="4,12" Fill="#FFE0E0E0" RadiusX="2" RadiusY="2" />
+        <Canvas x:Name="ContainerCanvas" Margin="4,0" SizeChanged="ContainerCanvas_SizeChanged">
+            <Thumb x:Name="MinThumb" DragCompleted="MinThumb_DragCompleted" DragDelta="MinThumb_DragDelta" RightTapped="Thumb_RightTapped"/>
+            <Thumb x:Name="MaxThumb" DragCompleted="MaxThumb_DragCompleted" DragDelta="MaxThumb_DragDelta" RightTapped="Thumb_RightTapped"/>
+            <Rectangle x:Name="ActiveRectangle"
                        Canvas.Top="12"
                        Height="8"
                        Canvas.ZIndex="-1"
                        Fill="#FF757575" />
-      </Canvas>
-   </Grid>
+        </Canvas>
+    </Grid>
 </UserControl>

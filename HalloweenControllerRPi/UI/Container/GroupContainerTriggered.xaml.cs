@@ -141,7 +141,7 @@ namespace HalloweenControllerRPi.Container
                if (f is Func_Input_GUI)
                {
                   Func_Input_GUI inputGUI = (f as Func_Input_GUI);
-                  if ((inputGUI.Func.Index == index) && inputGUI.Func.boCheckTriggerConditions(value))
+                  if ((inputGUI.Func.Index == index) && inputGUI.Func.CheckTriggerConditions(value))
                   {
                      boInputTrigger = true;
                      break;
@@ -149,7 +149,7 @@ namespace HalloweenControllerRPi.Container
                }
                else if (f is IFunctionGUI)
                {
-                  (f as IFunctionGUI).Func.boProcessRequest(func, subFunc, (char)index, value);
+                  (f as IFunctionGUI).Func.ProcessRequest(func, subFunc, (char)index, value);
                }
             }
 
@@ -176,7 +176,7 @@ namespace HalloweenControllerRPi.Container
       /// <param name="c">Triggering FUNCTION.</param>
       private void TriggerFunctions(IFunctionGUI c)
       {
-         GroupTriggerActive = c.Func.boProcessRequest((char)0, (char)0, (char)0, (uint)0);
+         GroupTriggerActive = c.Func.ProcessRequest((char)0, (char)0, (char)0, (uint)0);
       }
 
       public void EnableAllInputs()

@@ -224,7 +224,7 @@ namespace HalloweenControllerRPi.Device
       /// <summary>
       /// Connect HW interface device (ie. Serial Port).
       /// </summary>
-      public abstract void Connect();
+      public abstract Task Connect();
 
       /// <summary>
       /// Disconnect HW interface device (ie. Serial Port).

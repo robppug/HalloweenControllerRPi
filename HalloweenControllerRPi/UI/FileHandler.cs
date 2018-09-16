@@ -27,26 +27,34 @@ namespace HalloweenControllerRPi
 
       public object DriveInfo { get; private set; }
 
+      public event EventHandler OnLoadCompleted;
+
       #region /* XML Loading */
-      private async Task loadSettingsFile()
+      private async Task loadSettingsFileAsync( )
       {
-         this.checkBox_LoadOnStart.IsChecked = false;
+         System.Diagnostics.Debug.WriteLine("Loading settings file...");
 
          try
          {
+            System.Diagnostics.Debug.WriteLine("  Finding saved file...");
             fileToLoad = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync("HWControllerSequence.sqn");
+            System.Diagnostics.Debug.WriteLine("     Loaded");
          }
-         catch
+         catch (FileNotFoundException)
          {
+            System.Diagnostics.Debug.WriteLine("     No file!");
             fileToLoad = null;
          }
 
          try
          {
+            System.Diagnostics.Debug.WriteLine("  Finding settings file...");
             fileSettings = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync("HWController.cfg");
+            System.Diagnostics.Debug.WriteLine("     Loaded");
          }
-         catch
+         catch (FileNotFoundException)
          {
+            System.Diagnostics.Debug.WriteLine("     No file!");
             fileSettings = null;
          }
 
@@ -72,14 +80,20 @@ namespace HalloweenControllerRPi
          }
          else
          {
+            System.Diagnostics.Debug.WriteLine("  No file!");
+
             fileSettings = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync("HWController.cfg", CreationCollisionOption.ReplaceExisting);
 
+            System.Diagnostics.Debug.WriteLine("    Saving one...");
+
             /* File doesnt exist */
-            saveSettingsFile();
+            await saveSettingsFile();
          }
+
+         OnLoadCompleted?.Invoke(this, EventArgs.Empty);
       }
 
-      private async void saveSettingsFile()
+      private async Task saveSettingsFile()
       {
          XmlWriterSettings xmlSettings = new XmlWriterSettings();
          Stream settingsfile = await fileSettings.OpenStreamForWriteAsync();
@@ -107,6 +121,13 @@ namespace HalloweenControllerRPi
       {
          (sender as Button).IsEnabled = false;
 
+         await LoadSequenceFile();
+
+         (sender as Button).IsEnabled = true;
+      }
+
+      private async Task LoadSequenceFile()
+      {
          fileToLoad = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync("HWControllerSequence.sqn");
 
          if (fileToLoad != null)
@@ -116,7 +137,7 @@ namespace HalloweenControllerRPi
 
             XDocument xDoc = XDocument.Load(XmlReader.Create(new StreamReader(await fileToLoad.OpenStreamForReadAsync())));
 
-            foreach(GroupContainer gc in lGroupContainers)
+            foreach (GroupContainer gc in lGroupContainers)
             {
                gc.ClearAllFunctions();
             }
@@ -141,18 +162,16 @@ namespace HalloweenControllerRPi
 
             loadfile.Dispose();
          }
-
-         (sender as Button).IsEnabled = true;
       }
 
-      private void checkBox_LoadOnStart_Checked(object sender, RoutedEventArgs e)
+      private async void checkBox_LoadOnStart_Checked(object sender, RoutedEventArgs e)
       {
-         saveSettingsFile();
+         await saveSettingsFile();
       }
 
-      private void checkBox_LoadOnStart_Unchecked(object sender, RoutedEventArgs e)
+      private async void checkBox_LoadOnStart_Unchecked(object sender, RoutedEventArgs e)
       {
-         saveSettingsFile();
+         await saveSettingsFile();
       }
 
       public void ReadXml(System.Xml.XmlReader reader)

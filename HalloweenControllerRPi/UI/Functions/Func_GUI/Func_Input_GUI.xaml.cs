@@ -139,7 +139,7 @@ namespace HalloweenControllerRPi.Function_GUI
 
       private void buttonTestFire_Click(object sender, RoutedEventArgs e)
       {
-         _Func.boProcessRequest('I', 'G', (char)_Func.Index, (uint)_Func.TriggerLevel);
+         _Func.ProcessRequest('I', 'G', (char)_Func.Index, (uint)_Func.TriggerLevel);
       }
    }
 }

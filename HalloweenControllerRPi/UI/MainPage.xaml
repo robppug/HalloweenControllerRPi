@@ -7,8 +7,8 @@
       mc:Ignorable="d">
 
 
-   <Grid x:Name="MainArea" Margin="10,10,10,10" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-      <Border x:Name="AvailablesArea"
+    <Grid x:Name="MainArea" Margin="10,10,10,10" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Border x:Name="AvailablesArea"
               Width="745"
               Height="150"
               Margin="10,42,10,10"
@@ -17,13 +17,19 @@
               BorderBrush="Black"
               BorderThickness="1"
               CornerRadius="2">
-         <GridView x:Name="Available_Board"
-                   HorizontalAlignment="Stretch"
-                   VerticalAlignment="Stretch"
-                   CanDragItems="True"
-                   DragItemsStarting="DragItemsStarting" Padding="0,0,0,5" />
-      </Border>
-      <Border x:Name="StaticsArea"
+            <GridView x:Name="Available_Board"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    CanDragItems="True"
+                    DragItemsStarting="DragItemsStarting" >
+                <GridView.ItemContainerStyle>
+                    <Style TargetType="GridViewItem">
+                        <Setter Property="Margin" Value="2,-5"/>
+                    </Style>
+                </GridView.ItemContainerStyle>
+            </GridView>
+        </Border>
+        <Border x:Name="StaticsArea"
               Height="150"
               Margin="760,42,475,0"
               HorizontalAlignment="Stretch"
@@ -31,17 +37,17 @@
               BorderBrush="Black"
               BorderThickness="1"
               CornerRadius="2">
-         <GridView x:Name="Available_Statics"
+            <GridView x:Name="Available_Statics"
                    HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch"
                    Background="Black"
                    CanDragItems="True"
                    DragItemsStarting="DragItemsStarting">
-            <Canvas x:Name="ExternalDisplayCanvas" MinHeight="64" MinWidth="128" MaxHeight="64" MaxWidth="128"/>
-            <Image x:Name="OutputImage" MinHeight="64" MinWidth="128" MaxHeight="64" MaxWidth="128"/>
-         </GridView>
-      </Border>
-      <Border x:Name="SimulatedArea"
+                <Canvas x:Name="ExternalDisplayCanvas" MinHeight="64" MinWidth="128" MaxHeight="64" MaxWidth="128"/>
+                <Image x:Name="OutputImage" MinHeight="64" MinWidth="128" MaxHeight="64" MaxWidth="128"/>
+            </GridView>
+        </Border>
+        <Border x:Name="SimulatedArea"
               Width="460"
               Height="150"
               Margin="0,42,10,0"
@@ -50,83 +56,83 @@
               BorderBrush="Black"
               BorderThickness="1"
               CornerRadius="2">
-         <GridView x:Name="HWSimulatedGrid"
+            <GridView x:Name="HWSimulatedGrid"
                    HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch" />
-      </Border>
-      <Pivot x:Name="pivotContainer"
+        </Border>
+        <Pivot x:Name="pivotContainer"
              Width="Auto"
              Margin="10,196,10,0"
              HorizontalAlignment="Stretch"
              VerticalAlignment="Stretch"
              FontSize="10">
-         <PivotItem x:Name="pivotItemContainer"
+            <PivotItem x:Name="pivotItemContainer"
                     Margin="10,10,10,10"
                     FontSize="10"
                     Header="Always Active">
-            <Border HorizontalAlignment="Stretch"
+                <Border HorizontalAlignment="Stretch"
                     BorderBrush="Black"
                     BorderThickness="1"
                     CornerRadius="2">
-               <Grid x:Name="gridAlwaysActives"
+                    <Grid x:Name="gridAlwaysActives"
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch">
-                  <Container:GroupContainer x:Name="groupContainer_AlwaysActive"
+                        <Container:GroupContainer x:Name="groupContainer_AlwaysActive"
                                             Margin="0,0,72,0"
                                             VerticalAlignment="Stretch"
                                             HorizontalContentAlignment="Stretch"
                                             AllowDrop="True"
                                             FuncAlwaysActive="True" />
-                  <Button x:Name="buttonStart"
+                        <Button x:Name="buttonStart"
                           Width="72"
                           HorizontalAlignment="Right"
                           VerticalAlignment="Top"
                           Click="buttonStart_Click"
                           Content="START" />
-                  <Button x:Name="buttonStop"
+                        <Button x:Name="buttonStop"
                           Width="72"
                           Margin="1184,32,0,0"
                           HorizontalAlignment="Right"
                           VerticalAlignment="Top"
                           Click="buttonStop_Click"
                           Content="STOP" />
-               </Grid>
-            </Border>
-         </PivotItem>
-         <PivotItem x:Name="pivotItemContainerTriggered"
+                    </Grid>
+                </Border>
+            </PivotItem>
+            <PivotItem x:Name="pivotItemContainerTriggered"
                     Margin="10,10,10,10"
                     FontSize="10"
                     Header="Triggered">
-            <Border BorderBrush="Black"
+                <Border BorderBrush="Black"
                     BorderThickness="1"
                     CornerRadius="2">
-               <Grid x:Name="gridTriggered"
+                    <Grid x:Name="gridTriggered"
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch">
-                  <Container:GroupContainer x:Name="groupContainer_Triggered"
+                        <Container:GroupContainer x:Name="groupContainer_Triggered"
                                             Margin="0,0,72,0"
                                             VerticalAlignment="Stretch"
                                             HorizontalContentAlignment="Stretch"
                                             AllowDrop="True"
                                             FuncAlwaysActive="False" />
-                  <Button x:Name="buttonAdd"
+                        <Button x:Name="buttonAdd"
                           Width="72"
                           HorizontalAlignment="Right"
                           VerticalAlignment="Top"
                           Click="buttonAdd_Click"
                           Content="ADD" />
-                  <Button x:Name="buttonTrigger"
+                        <Button x:Name="buttonTrigger"
                           Width="72"
                           Margin="1184,32,0,0"
                           HorizontalAlignment="Right"
                           VerticalAlignment="Top"
                           Click="buttonTrigger_Click"
                           Content="FIRE" />
-               </Grid>
-            </Border>
-         </PivotItem>
-      </Pivot>
-      <Button x:Name="buttonLoadSequence"
+                    </Grid>
+                </Border>
+            </PivotItem>
+        </Pivot>
+        <Button x:Name="buttonLoadSequence"
               Width="74"
               Height="27"
               Margin="10,10,0,0"
@@ -135,7 +141,7 @@
               Click="buttonLoadSequence_Click"
               Content="Load"
               FontSize="12" />
-      <Button x:Name="buttonSaveSequence"
+        <Button x:Name="buttonSaveSequence"
               Width="74"
               Height="27"
               Margin="89,10,0,0"
@@ -144,14 +150,14 @@
               Click="buttonSaveSequence_Click"
               Content="Save"
               FontSize="12" />
-      <CheckBox x:Name="checkBox_LoadOnStart"
+        <CheckBox x:Name="checkBox_LoadOnStart"
                 Margin="188,8,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Checked="checkBox_LoadOnStart_Checked"
                 Content="Load 'saved' file on startup."
                 Unchecked="checkBox_LoadOnStart_Unchecked" />
-      <ProgressBar x:Name="ControllerProgressBar"
+        <ProgressBar x:Name="ControllerProgressBar"
                    Width="736"
                    Height="28"
                    Margin="14,160,2,0"
@@ -163,7 +169,7 @@
                    IsHoldingEnabled="False"
                    IsRightTapEnabled="False"
                    IsTapEnabled="False" HorizontalAlignment="Left" />
-      <TextBlock x:Name="textControllerProgressBar"
+        <TextBlock x:Name="textControllerProgressBar"
                  Width="736"
                  Height="28"
                  Margin="14,160,0,0"
@@ -174,6 +180,5 @@
                  FontWeight="Bold"
                  Text="0%"
                  TextAlignment="Center" />
-
-   </Grid>
+    </Grid>
 </Page>

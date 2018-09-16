@@ -3,105 +3,77 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:Controls="using:HalloweenControllerRPi.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="using:HalloweenControllerRPi.Function_GUI"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              x:Name="_this"
              d:DesignHeight="286"
              d:DesignWidth="240"
              mc:Ignorable="d">
 
-   <Grid Background="LightGray" BorderThickness="2" >
-      <TextBlock x:Name="textTitle"
+    <Grid Background="LightGray" BorderThickness="2" >
+        <TextBlock x:Name="textTitle"
                  Margin="5,2,35,213"
                  Foreground="Black"
                  Text="PWM (#)"
                  TextWrapping="Wrap" />
-      <Slider x:Name="slider_Duration"
+        <Controls:RangeSlider x:Name="slider_Duration"
               Margin="5,60,5,0"
               VerticalAlignment="Top"
               Maximum="60000"
               Minimum="10"
-              TickFrequency="10000"
-              ValueChanged="slider_Duration_ValueChanged"
-              DoubleTapped="slider_Duration_DoubleTapped"
-              Value="2000" />
-      <Controls:RangeSlider x:Name="slider_MaxLevel"
-                            Margin="5,108,5,0"
+              RangeMax="{Binding MaxDuration, ElementName=_this, Mode=TwoWay}"
+              RangeMin="{Binding MinDuration, ElementName=_this, Mode=TwoWay}" />
+        <Controls:RangeSlider x:Name="slider_MaxLevel"
+                            Margin="5,95,5,0"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Top"
                             Maximum="100"
                             Minimum="0"
-                            RangeMax="{Binding MaxLevel,
-                                               ElementName=_this,
-                                               Mode=TwoWay}"
-                            RangeMin="{Binding MinLevel,
-                                               ElementName=_this,
-                                               Mode=TwoWay}" />
-      <Slider x:Name="slider_StartDelay"
-              Margin="5,144,5,0"
+                            RangeMax="{Binding MaxLevel, ElementName=_this, Mode=TwoWay}"
+                            RangeMin="{Binding MinLevel, ElementName=_this, Mode=TwoWay}" />
+        <Controls:RangeSlider x:Name="slider_StartDelay"
+              Margin="5,131,5,0"
               VerticalAlignment="Top"
-              Maximum="30000"
-              TickFrequency="1000"
-              ValueChanged="slider_StartDelay_ValueChanged"
-              Value="0" />
-      <Slider x:Name="slider_UpdateRate"
+              Maximum="100"
+              Minimum="0"
+              RangeMax="{Binding MaxStartDelay, ElementName=_this, Mode=TwoWay}"
+              RangeMin="{Binding MinStartDelay, ElementName=_this, Mode=TwoWay}" />
+        <Slider x:Name="slider_UpdateRate"
               Margin="5,186,5,0"
               VerticalAlignment="Top"
               Minimum="1"
               TickFrequency="1"
               ValueChanged="slider_UpdateRate_ValueChanged"
               Value="1" Maximum="20" />
-      <Slider x:Name="slider_RampRate"
+        <Slider x:Name="slider_RampRate"
               Margin="5,230,5,0"
               VerticalAlignment="Top"
               Minimum="1"
               TickFrequency="100"
               Value="100" ValueChanged="slider_RampRate_ValueChanged" Maximum="1000" />
-      <ComboBox x:Name="comboBox_Functions"
-                Width="220"
+        <ComboBox x:Name="comboBox_Functions"
+                Width="215"
                 Margin="10,30,10,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 SelectionChanged="comboBox_Functions_SelectionChanged" DropDownClosed="comboBox_Functions_DropDownClosed" />
-      <TextBlock x:Name="textBlock_Duration"
-                 Width="109"
-                 Margin="121,91,0,0"
+        <TextBlock x:Name="textBlock_Level"
+                 Width="215"
+                 Margin="10,120,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  FontSize="10"
-                 Text="Duration: 2000 (ms)"
-                 TextWrapping="Wrap" />
-      <TextBlock x:Name="textBlock_MinLevel"
-                 Width="109"
-                 Margin="8,133,0,0"
-                 HorizontalAlignment="Left"
-                 VerticalAlignment="Top"
-                 FontSize="10"
-                 Text="{Binding MinLevel,
-                                ElementName=_this,
-                                Mode=OneWay}"
+                 Text="{Binding LevelText, ElementName=_this}"
                  TextAlignment="Left"
                  TextWrapping="Wrap" />
-      <TextBlock x:Name="textBlock_MaxLevel"
-                 Width="109"
-                 Margin="121,133,0,0"
+        <TextBlock x:Name="textBlock_StartDelay"
+                 Width="213"
+                 Margin="10,155,0,0"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  FontSize="10"
-                 Text="{Binding MaxLevel,
-                                ElementName=_this,
-                                Mode=OneWay}"
-                 TextAlignment="Right"
+                 Text="{Binding StartDelayText, ElementName=_this}"
                  TextWrapping="Wrap" />
-      <TextBlock x:Name="textBlock_StartDelay"
-                 Width="109"
-                 Margin="121,175,0,0"
-                 HorizontalAlignment="Left"
-                 VerticalAlignment="Top"
-                 FontSize="10"
-                 Text="Start Delay: 0 (ms)"
-                 TextWrapping="Wrap" />
-      <TextBlock x:Name="textBlock_UpdateRate"
+        <TextBlock x:Name="textBlock_UpdateRate"
                  Width="109"
                  Margin="121,217,0,0"
                  HorizontalAlignment="Left"
@@ -109,7 +81,16 @@
                  FontSize="10"
                  Text="Update Rate: 1 (ms)"
                  TextWrapping="Wrap" />
-      <TextBlock x:Name="textBlock_RampRate" Width="109" Margin="123,263,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10" Text="Ramp Rate: 100" TextWrapping="Wrap" />
-      <Button x:Name="RemoveButton" Content="X" HorizontalAlignment="Right" Margin="0,3,3,0" VerticalAlignment="Top" Width="25" Height="20" FontSize="8" FontFamily="Arial"/>
-   </Grid>
+        <TextBlock x:Name="textBlock_RampRate" Width="109" Margin="123,263,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10" Text="Ramp Rate: 100" TextWrapping="Wrap" />
+        <Button x:Name="RemoveButton" Content="X" HorizontalAlignment="Right" Margin="0,3,3,0" VerticalAlignment="Top" Width="25" Height="20" FontSize="8" FontFamily="Arial"/>
+        <TextBlock x:Name="textBlock_Duration"
+            Width="213"
+            Margin="10,83,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            FontSize="10"
+            Text="{Binding DurationText, ElementName=_this}"
+            TextAlignment="Left"
+            TextWrapping="Wrap" />
+    </Grid>
 </UserControl>

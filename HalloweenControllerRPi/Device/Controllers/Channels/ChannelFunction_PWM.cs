@@ -9,7 +9,8 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
    internal class ChannelFunction_PWM : IChannel, IProcessTick
    {
       private IInterpolation curve = Interpolate.Common(new double[] { 0, 455, 910, 1365, 1820, 2275, 2730, 3185, 3640, 4095 },  /* 4095 / 9 points  */
-                                                        new double[] { 0, 40,  140, 320,  620,  1000, 1450, 2200, 3100, 4095 }); /* y = x * x / 4095 */
+                                                        //new double[] { 0, 40, 140, 320, 620, 1000, 1450, 2200, 3100, 4095 }); /* y = x * x / 4095 */
+                                                        new double[] { 0, 6,   45,  152,  360,  703,  1215, 1929, 2879, 4095 }); /* y = 0.0000000597 * x ^ 3 */
 
       private PWMFunctions _enRampingFunction;
       private PWMFunctions _enFunction;

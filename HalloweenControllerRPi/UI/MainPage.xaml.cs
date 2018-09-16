@@ -38,6 +38,8 @@ namespace HalloweenControllerRPi
         static public IHostApp HostApp;
         static public MenuHandler Menu;
 
+        static public List<Task> Tasks;
+
         public MainPage()
         {
             InitializeComponent();
@@ -46,6 +48,8 @@ namespace HalloweenControllerRPi
 
             buttonStart.IsEnabled = false;
             buttonStop.IsEnabled = false;
+
+            Tasks = new List<Task>();
 
             lGroupContainers.Add(groupContainer_AlwaysActive);
             lGroupContainers.Add(groupContainer_Triggered);
@@ -89,7 +93,14 @@ namespace HalloweenControllerRPi
             HWController.DiscoveryProgress += HWController_DiscoveryProgress;
             HWController.Initialised += HWController_DisplayInitialised;
 
+
             HWController.Connect();
+            //Task loadController = Task.Run(() =>
+            //{
+            //   HWController.Connect();
+            //});
+
+            //Tasks.Add(loadController);
 
             lHWControllers.Add(HWController);
         }
@@ -101,15 +112,18 @@ namespace HalloweenControllerRPi
 
         public void HWController_DisplayInitialised(object sender, EventArgs e)
         {
-            HWController.Display.ActiveCanvas = ExternalDisplayCanvas;
-            HWController.Display.OutputImage = OutputImage;
+            if (HWController.Display != null)
+            {
+                HWController.Display.ActiveCanvas = ExternalDisplayCanvas;
+                HWController.Display.OutputImage = OutputImage;
 
-            Menu = new MenuHandler(HWController.Display, new MenuNode<UserControl>(null, _screen_Main));
+                Menu = new MenuHandler(HWController.Display, new MenuNode<UserControl>(null, _screen_Main));
 
-            Menu.BlockButtons = true;
-            Menu.DisplayPopup(_screen_Detecting);
+                Menu.BlockButtons = true;
+                Menu.DisplayPopup(_screen_Detecting);
 
-            _displayUpdate = Menu.Update();
+                _displayUpdate = Menu.Update();
+            }
         }
 
         /// <summary>
@@ -139,22 +153,13 @@ namespace HalloweenControllerRPi
         {
             HWController HWController = (sender as HWController);
 
-            if (HWController.Display != null)
-            {
-                _displayUpdate.Wait();
-
-                Menu.EndPopup(_screen_Detecting);
-
-                /* Activate Menu Button Control */
-                Menu.BlockButtons = false;
-
-                _displayUpdate = Menu.Update();
-
-                await _displayUpdate;
-            }
-
             ControllerProgressBar.Visibility = Visibility.Collapsed;
             textControllerProgressBar.Visibility = Visibility.Collapsed;
+            checkBox_LoadOnStart.IsChecked = false;
+
+            // Start the Tasks
+            Tasks.Add(loadSettingsFileAsync());
+            Tasks.Add(UpdateControllerDisplay(_screen_Detecting));
 
             /* Populate the available Functions the HWDevice provides. */
             //this.Available_Statics.Items.Add(new Function_Button_SOUND(1));
@@ -178,20 +183,6 @@ namespace HalloweenControllerRPi
 
             //Func_SOUND.GetAvailableSounds();
 
-            await loadSettingsFile();
-
-            if (checkBox_LoadOnStart.IsChecked == true)
-            {
-                buttonLoadSequence_Click(buttonLoadSequence, null);
-
-                await Task.Delay(5000);
-
-                buttonStart_Click(buttonStart, null);
-
-                groupContainer_Triggered.EnableAllInputs();
-
-            }
-
             if (HWController.GetUIPanel() != null)
             {
                 HWSimulatedGrid.Items.Add(HWController.GetUIPanel());
@@ -201,8 +192,44 @@ namespace HalloweenControllerRPi
                 MainArea.Children.Remove(SimulatedArea);
             }
 
+            System.Diagnostics.Debug.WriteLine("Task: " + Task.CurrentId);
+
+            await Task.WhenAll(Tasks.ToArray());
+
+            Tasks.Clear();
+
+            System.Diagnostics.Debug.WriteLine("Continue");
+
+            if (checkBox_LoadOnStart.IsChecked == true)
+            {
+                await LoadSequenceFile();
+
+                buttonStart_Click(buttonStart, null);
+
+                groupContainer_Triggered.EnableAllInputs();
+
+            }
+
             buttonStart.IsEnabled = true;
             buttonStop.IsEnabled = true;
+        }
+
+        public async Task UpdateControllerDisplay(UserControl screen)
+        {
+            System.Diagnostics.Debug.WriteLine("Update Display " + Task.CurrentId.ToString());
+
+            if (HWController.Display != null)
+            {
+                // Wait for the current Task to complete.
+                await _displayUpdate;
+
+                Menu.EndPopup(screen);
+
+                /* Activate Menu Button Control */
+                Menu.BlockButtons = false;
+
+                _displayUpdate = Menu.Update();
+            }
         }
 
         /// <summary>

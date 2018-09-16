@@ -6,7 +6,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 {
    public interface IHWController : ISupportedFunctions
    {
-      void Connect();
+      Task Connect();
       void Disconnect();
 
       void OnChannelNotification(IChannel sender, CommandEventArgs e);

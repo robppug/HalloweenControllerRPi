@@ -137,9 +137,9 @@ namespace HalloweenControllerRPi.Container
             Function func = (c as IFunctionGUI).Func;
 
             if (boStart)
-               func.boProcessRequest((char)0, (char)0, (char)0, (uint)0);
+               func.ProcessRequest((char)0, (char)0, (char)0, (uint)0);
             else
-               func.vStopFunction((char)0, (char)0, (char)0, (uint)0);
+               func.StopFunction((char)0, (char)0, (char)0, (uint)0);
          }
          else
          {
@@ -189,7 +189,7 @@ namespace HalloweenControllerRPi.Container
          Container.Children.Add(groupContainerTriggered);
       }
 
-      internal void EnableAllInputs()
+      public void EnableAllInputs()
       {
          foreach (GroupContainerTriggered gt in this.Container.Children)
          {
@@ -218,7 +218,7 @@ namespace HalloweenControllerRPi.Container
                {
                   if ((c as IFunctionGUI).Func.Index == args.Index)
                   {
-                     (c as IFunctionGUI).Func.boProcessRequest(args.Commamd, args.SubCommamd, (char)args.Index, args.Value);
+                     (c as IFunctionGUI).Func.ProcessRequest(args.Commamd, args.SubCommamd, (char)args.Index, args.Value);
                      //TriggerFunctions(c, false);
                   }
                }

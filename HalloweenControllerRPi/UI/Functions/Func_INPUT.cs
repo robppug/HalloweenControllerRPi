@@ -61,7 +61,7 @@ namespace HalloweenControllerRPi.Functions
          //throw new NotImplementedException();
       }
 
-      public override bool boCheckTriggerConditions(uint u32value)
+      public override bool CheckTriggerConditions(uint u32value)
       {
          if (Enabled)
          {
@@ -89,13 +89,13 @@ namespace HalloweenControllerRPi.Functions
          writer.WriteAttributeString("PostTriggerTime", _postTriggerDelay_ms.ToString());
       }
 
-      public override bool boProcessRequest(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue)
+      public override bool ProcessRequest(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue)
       {
          bool boValid = false;
 
-         if (boCheckTriggerConditions(u32FuncValue))
+         if (CheckTriggerConditions(u32FuncValue))
          {
-            boValid = base.boProcessRequest(cFunc, subFunc, cFuncIndex, u32FuncValue);
+            boValid = base.ProcessRequest(cFunc, subFunc, cFuncIndex, u32FuncValue);
          }
 
          return boValid;
