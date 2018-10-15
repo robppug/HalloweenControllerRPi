@@ -212,6 +212,7 @@
     <Compile Include="UI\Functions\IFunctionGUI.cs" />
     <Compile Include="UI\ExternalDisplay\GraphicsProvider.cs" />
     <Compile Include="UI\IHostApp.cs" />
+    <Compile Include="UI\IXmlFunction.cs" />
     <Compile Include="UI\MainPage.xaml.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

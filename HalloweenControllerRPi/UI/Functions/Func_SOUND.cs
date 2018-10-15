@@ -8,12 +8,16 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using System.Xml;
+using System.Xml.Linq;
+using System.Linq;
 
 namespace HalloweenControllerRPi.Functions
 {
-    public class Func_SOUND : Function
+    public class Func_SOUND : Function, IXmlFunction
     {
         private uint _volume;
+
+        private DispatcherTimer _pollTimer;
 
         #region Parameters
         public uint AvailableTracks { get; set; } = 0;
@@ -30,9 +34,14 @@ namespace HalloweenControllerRPi.Functions
 
         public uint Track { get; set; } = 0;
 
+        public List<int> RandomTracks { get; set; } = new List<int>();
+
         public bool Loop { get; set; } = false;
 
         public bool Randomise { get; set; } = false;
+
+        public int Status { get; private set; } = 0;
+
         #endregion
 
         public Func_SOUND() { }
@@ -48,6 +57,19 @@ namespace HalloweenControllerRPi.Functions
         internal void Initialise()
         {
             SendCommand("AVAILABLE TRACKS");
+
+            _pollTimer = new DispatcherTimer();
+            _pollTimer.Interval = TimeSpan.FromSeconds(10);
+            _pollTimer.Tick += PollTimer_Tick;
+            _pollTimer.Start();
+        }
+
+
+        private void PollTimer_Tick(object sender, object e)
+        {
+            SendCommand("GETSTATUS");
+
+            System.Diagnostics.Debug.WriteLine("Sound Status: " + Status.ToString());
         }
 
         /// <summary>
@@ -59,13 +81,20 @@ namespace HalloweenControllerRPi.Functions
         {
             uint track = Track;
 
-            if (Randomise == true)
-            {
-                track = (uint)(new Random().Next(1, (int)AvailableTracks));
-            }
+            GetRandomTrack(ref track);
+
             SendCommand("TRACK", track);
+            SendCommand("VOLUME", Volume);
             SendCommand("LOOP", (Loop ? 1 : 0));
             SendCommand("PLAY");
+        }
+
+        private void GetRandomTrack(ref uint track)
+        {
+            if ((Randomise == true) && (RandomTracks.Count > 0))
+            {
+                track = (uint)RandomTracks[new Random().Next(0, RandomTracks.Count - 1)];
+            }
         }
 
         private void OnDurationEnd(object sender, EventArgs e)
@@ -85,17 +114,32 @@ namespace HalloweenControllerRPi.Functions
             }
         }
 
-        public override void ReadXml(XmlReader reader)
+        public override void ReadXML(XElement element)
         {
-            base.ReadXml(reader);
+            base.ReadXML(element);
 
-            Volume = Convert.ToUInt32(reader.GetAttribute("Volume"));
-            Track = Convert.ToUInt32(reader.GetAttribute("Track"));
-            Loop = Convert.ToBoolean(reader.GetAttribute("Loop"));
-            Randomise = Convert.ToBoolean(reader.GetAttribute("Randomise"));
+            Volume = Convert.ToUInt32(element.Attribute("Volume").Value);
+            Track = Convert.ToUInt32(element.Attribute("Track").Value);
+            Loop = Convert.ToBoolean(element.Attribute("Loop").Value);
+            Randomise = Convert.ToBoolean(element.Attribute("Randomise").Value);
+
+            if (Randomise == true)
+            {
+                RandomTracks.Clear();
+
+                foreach (var elem in element.Descendants())
+                {
+                    if (elem.Name.LocalName == "RandomTracks")
+                    {
+                        RandomTracks.AddRange(elem.Attributes().Select((x => Convert.ToInt32(x.Value))).ToList());
+                    }
+                }
+            }
+
+            evOnFunctionUpdated?.Invoke(this, EventArgs.Empty);
         }
 
-        public override void WriteXml(System.Xml.XmlWriter writer)
+        public override void WriteXml(XmlWriter writer)
         {
             base.WriteXml(writer);
 
@@ -103,6 +147,12 @@ namespace HalloweenControllerRPi.Functions
             writer.WriteAttributeString("Track", Track.ToString());
             writer.WriteAttributeString("Loop", Loop.ToString());
             writer.WriteAttributeString("Randomise", Randomise.ToString());
+            writer.WriteStartElement("RandomTracks");
+            foreach (int t in RandomTracks)
+            {
+                writer.WriteAttributeString("Track" + t.ToString(), t.ToString());
+            }
+            writer.WriteEndElement();
         }
 
         public override bool ProcessRequest(char cFunc, char subFunc, char cFuncIndex, uint u32FuncValue)
@@ -126,15 +176,26 @@ namespace HalloweenControllerRPi.Functions
                         case 'F':
                             if (Loop == true)
                             {
-                                uint track = Track;
-                                if (Randomise == true)
-                                {
-                                    track = (uint)(new Random().Next((int)AvailableTracks));
-                                }
-                                SendCommand("TRACK", track);
-                                SendCommand("PLAY");
+                                OnTrigger(this, EventArgs.Empty);
                                 return true;
                             }
+                            break;
+
+                        case 'C':
+                            int lastStatus = Status;
+
+                            Status = (int)(u32FuncValue & 0xFF);
+
+                            // Was playing but now it's stopped
+                            if ( (lastStatus == 1) && (Status == 0) )
+                            {
+                                if (Loop == true)
+                                { 
+                                    OnTrigger(this, EventArgs.Empty);
+                                    return true;
+                                }
+                            }
+                            
                             break;
 
                         default:

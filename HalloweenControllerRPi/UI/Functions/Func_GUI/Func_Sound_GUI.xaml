@@ -68,6 +68,12 @@
                  Text="Start Delay: 0 (ms)" />
         <ComboBox x:Name="comboBox_Track" HorizontalAlignment="Left" Margin="9,31,0,0" VerticalAlignment="Top" Width="221" SelectionChanged="comboBox_Track_SelectionChanged"/>
         <Button x:Name="RemoveButton" Content="X" HorizontalAlignment="Right" Margin="0,3,3,0" VerticalAlignment="Top" Width="25" Height="20" FontSize="8" FontFamily="Arial"/>
-        <RadioButton x:Name="radioButton_Random" Content="Randomise Sound" HorizontalAlignment="Left" Margin="11,65,0,0" VerticalAlignment="Top" Width="220" Click="radioButton_Random_Click"/>
+        <RadioButton x:Name="radioButton_Random" 
+                     Content="Randomise Sound"
+                     HorizontalAlignment="Left"
+                     Margin="11,65,0,0" 
+                     VerticalAlignment="Top" 
+                     Width="220" 
+                     Click="radioButton_Random_Click"/>
     </Grid>
 </UserControl>

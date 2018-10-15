@@ -2,6 +2,8 @@
 using HalloweenControllerRPi.UI.Controls;
 using HalloweenControllerRPi.UI.Functions.Func_GUI;
 using System;
+using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using Windows.UI;
 using Windows.UI.Xaml;
@@ -15,7 +17,7 @@ using Windows.UI.Xaml.Shapes;
 
 namespace HalloweenControllerRPi.Function_GUI
 {
-    public sealed partial class Func_PWM_GUI : UserControl, IXmlSerializable, IFunctionGUI
+    public sealed partial class Func_PWM_GUI : UserControl, IXmlFunction, IFunctionGUI
     {
         private Func_PWM _Func;
         private DrawCanvas customLevelDraw;
@@ -209,15 +211,20 @@ namespace HalloweenControllerRPi.Function_GUI
         }
 
         #region XML Handling
-        public void ReadXml(System.Xml.XmlReader reader)
+        public void ReadXml(XmlReader reader)
         {
-            _Func.ReadXml(reader);
+            throw new Exception("Deprecated");
+        }
+
+        public void ReadXML(XElement element)
+        {
+            _Func.ReadXML(element);
 
             _boInitialised = false;
-            _Func.Function = FuncGUIHelper.GetFunctionEnum(reader.GetAttribute("Function").ToString());
+            _Func.Function = FuncGUIHelper.GetFunctionEnum(element.Attribute("Function").Value);
             _boInitialised = true;
 
-            textTitle.Text = reader.GetAttribute("CustomName");
+            textTitle.Text = element.Attribute("CustomName").Value;
             DurationText = "Duration: " + _Func.MinDuration_ms.ToString() + " to " + _Func.MaxDuration_ms.ToString() + " (ms)";
             LevelText = "Level: " + _Func.MinLevel.ToString() + " to " + _Func.MaxLevel.ToString() + " %";
             StartDelayText = "Start Delay: " + _Func.MinDelay_ms.ToString() + " to " + _Func.MaxDelay_ms.ToString() + " (ms)";
@@ -226,7 +233,7 @@ namespace HalloweenControllerRPi.Function_GUI
 
             if (_Func.Function == PWMFunctions.FUNC_CUSTOM)
             {
-                customLevelDraw.ReadXml(reader);
+                customLevelDraw.ReadXML(element);
             }
 
             /* Ignore MIN/MAX limits. */

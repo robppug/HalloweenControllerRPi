@@ -105,6 +105,7 @@ namespace HalloweenControllerRPi.Device.Controllers
                new Command("LOOP", 'L'),
                new Command("VOLUME", 'V'),
                new Command("FEEDBACK", 'F'),
+               new Command("GETSTATUS", 'C'),
                new Command("AVAILABLE TRACKS", 'A')
             }
          }

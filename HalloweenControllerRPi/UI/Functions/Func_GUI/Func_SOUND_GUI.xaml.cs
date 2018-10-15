@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using Windows.Storage;
 using Windows.UI;
@@ -18,10 +20,11 @@ using Windows.UI.Xaml.Media;
 
 namespace HalloweenControllerRPi.Function_GUI
 {
-    public partial class Func_Sound_GUI : UserControl, IXmlSerializable, IFunctionGUI
+    public partial class Func_Sound_GUI : UserControl, IXmlFunction, IFunctionGUI
     {
         private Func_SOUND _Func;
         private bool _boInitialised = false;
+        private readonly string _TrackPrefix = "Track #";
 
         public event EventHandler OnRemove;
 
@@ -40,6 +43,7 @@ namespace HalloweenControllerRPi.Function_GUI
         {
             get; set;
         }
+
 
         public Function Func
         {
@@ -109,7 +113,7 @@ namespace HalloweenControllerRPi.Function_GUI
 
             for (uint i = _Func.AvailableTracks; i > 0; i--)
             {
-                Tracks.Add("Track #" + i.ToString());
+                Tracks.Add(_TrackPrefix + i.ToString());
             }
         }
 
@@ -155,12 +159,12 @@ namespace HalloweenControllerRPi.Function_GUI
             throw new NotImplementedException();
         }
 
-        public void ReadXml(System.Xml.XmlReader reader)
+
+        public void ReadXML(XElement element)
         {
-            _Func.ReadXml(reader);
+            _Func.ReadXML(element);
 
-            textTitle.Text = reader.GetAttribute("CustomName");
-
+            textTitle.Text = element.Attribute("CustomName").Value;
             textBlock_Volume.Text = "Volume: " + _Func.Volume.ToString() + " (%)";
             textBlock_StartDelay.Text = "Start Delay: " + _Func.MinDelay_ms.ToString() + " (ms)";
             textBlock_MinDuration.Text = "Min Duration: " + _Func.MinDuration_ms.ToString() + " (ms)";
@@ -177,9 +181,15 @@ namespace HalloweenControllerRPi.Function_GUI
                 radioButton_Random.IsChecked = _Func.Randomise;
             }
             catch { }
+
         }
 
-        public void WriteXml(System.Xml.XmlWriter writer)
+        public void ReadXml(XmlReader reader)
+        {
+
+        }
+
+        public void WriteXml(XmlWriter writer)
         {
             writer.WriteAttributeString("Type", GetType().ToString());
             writer.WriteAttributeString("CustomName", textTitle.Text);
@@ -192,41 +202,56 @@ namespace HalloweenControllerRPi.Function_GUI
             _Func.Initialise();
         }
 
-        private void radioButton_Random_Click(object sender, RoutedEventArgs e)
+        private async void radioButton_Random_Click(object sender, RoutedEventArgs e)
         {
-            _Func.Randomise = !_Func.Randomise;
+            if (_Func.Randomise == false)
+            {
+                ContentDialogResult cdr;
+                ContentDialog cd = new ContentDialog()
+                {
+                    Title = "Select tracks to randomise",
+                    PrimaryButtonText = "OK",
+                    SecondaryButtonText = "CANCEL",
+                    IsPrimaryButtonEnabled = true,
+                    IsSecondaryButtonEnabled = true,
+                    HorizontalContentAlignment = HorizontalAlignment.Center,
+                    VerticalContentAlignment = VerticalAlignment.Center
+                };
 
+                StackPanel sp = new StackPanel();
+                ListBox trackList = new ListBox();
+
+                trackList.SelectionMode = SelectionMode.Multiple;
+                foreach (string s in Tracks)
+                {
+                    trackList.Items.Add(s);
+                }
+                sp.Orientation = Orientation.Vertical;
+                sp.Children.Add(trackList);
+                cd.Content = sp;
+
+                cdr = await cd.ShowAsync();
+
+                if ( (cdr == ContentDialogResult.Primary) && (trackList.SelectedItems.Count > 0) )
+                {
+                    foreach (string s in trackList.SelectedItems)
+                    {
+                        _Func.RandomTracks.Add(Convert.ToInt32(s.Remove(0, _TrackPrefix.Length)));
+                    }
+
+                    _Func.Randomise = true;
+                }
+            }
+            else
+            {
+                _Func.RandomTracks.Clear();
+                _Func.Randomise = false;
+                UpdateGUI(this, EventArgs.Empty);
+
+            }
+
+            comboBox_Track.IsEnabled = !_Func.Randomise;
             radioButton_Random.IsChecked = _Func.Randomise;
-
-            //if (_Func.Randomise == false)
-            //{
-            //   ContentDialogResult cdr;
-            //   ContentDialog cd = new ContentDialog()
-            //   {
-            //      Title = "Select tracks to randomise",
-            //      IsPrimaryButtonEnabled = true,
-            //      IsSecondaryButtonEnabled = true,
-            //      HorizontalContentAlignment = HorizontalAlignment.Center,
-            //      VerticalContentAlignment = VerticalAlignment.Center
-            //   };
-
-            //   StackPanel sp = new StackPanel();
-            //   ListBox trackList = new ListBox();
-
-            //   trackList.Items.Add(Tracks);
-            //   sp.Children.Add(new TextBlock() { Text = "Available tracks..." });
-            //   sp.Children.Add(trackList);
-            //   Content = sp;
-
-            //   cdr = cd.ShowAsync().GetResults();
-
-            //   if (cdr == ContentDialogResult.Primary)
-            //   {
-            //      _Func.Randomise = true;
-            //   }
-            //}
-            //else
-            //   _Func.Randomise = false;
         }
     }
 }

@@ -1,12 +1,14 @@
 ﻿using HalloweenControllerRPi.Device;
 using System;
 using System.Collections.Generic;
+using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using Windows.UI.Xaml;
 
 namespace HalloweenControllerRPi.Functions
 {
-    abstract public class Function : IFunction, IXmlSerializable
+    abstract public class Function : IFunction, IXmlFunction
     {
         public enum tenTYPE
         {
@@ -299,16 +301,20 @@ namespace HalloweenControllerRPi.Functions
             throw new NotImplementedException();
         }
 
-        virtual public void ReadXml(System.Xml.XmlReader reader)
+        public virtual void ReadXML(XElement element)
         {
-            MinDuration_ms = Convert.ToUInt16(reader.GetAttribute("MinDuration"));
-            MaxDuration_ms = Convert.ToUInt16(reader.GetAttribute("MaxDuration"));
-            MinDelay_ms = Convert.ToUInt16(reader.GetAttribute("MinDelay"));
-            MaxDelay_ms = Convert.ToUInt16(reader.GetAttribute("MaxDelay"));
-
+            MinDuration_ms = Convert.ToUInt16(element.Attribute("MinDuration").Value);
+            MaxDuration_ms = Convert.ToUInt16(element.Attribute("MaxDuration").Value);
+            MinDelay_ms = Convert.ToUInt16(element.Attribute("MinDelay").Value);
+            MaxDelay_ms = Convert.ToUInt16(element.Attribute("MaxDelay").Value);
         }
 
-        virtual public void WriteXml(System.Xml.XmlWriter writer)
+        public void ReadXml(XmlReader reader)
+        {
+            throw new Exception("Deprecated");
+        }
+
+        public virtual void WriteXml(XmlWriter writer)
         {
             writer.WriteAttributeString("Index", this.Index.ToString("00"));
             writer.WriteAttributeString("MinDuration", MinDuration_ms.ToString());

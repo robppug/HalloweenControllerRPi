@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using System.Xml;
 using static HalloweenControllerRPi.Attributes.FunctionAttribute;
+using System.Xml.Linq;
 
 namespace HalloweenControllerRPi.Functions
 {
@@ -164,16 +165,16 @@ namespace HalloweenControllerRPi.Functions
             return false;
         }
 
-        public override void ReadXml(XmlReader reader)
+        public override void ReadXML(XElement element)
         {
-            base.ReadXml(reader);
+            base.ReadXML(element);
 
-            MinRampRate = Convert.ToUInt16(reader.GetAttribute("MinRampRate"));
-            MaxRampRate = Convert.ToUInt16(reader.GetAttribute("MaxRampRate"));
-            MinUpdateRate = Convert.ToUInt16(reader.GetAttribute("MinUpdateRate"));
-            MaxUpdateRate = Convert.ToUInt16(reader.GetAttribute("MaxUpdateRate"));
-            MinLevel = Convert.ToUInt16(reader.GetAttribute("MinLevel"));
-            MaxLevel = Convert.ToUInt16(reader.GetAttribute("MaxLevel"));
+            MinRampRate = Convert.ToUInt16(element.Attribute("MinRampRate").Value);
+            MaxRampRate = Convert.ToUInt16(element.Attribute("MaxRampRate").Value);
+            MinUpdateRate = Convert.ToUInt16(element.Attribute("MinUpdateRate").Value);
+            MaxUpdateRate = Convert.ToUInt16(element.Attribute("MaxUpdateRate").Value);
+            MinLevel = Convert.ToUInt16(element.Attribute("MinLevel").Value);
+            MaxLevel = Convert.ToUInt16(element.Attribute("MaxLevel").Value);
 
         }
 

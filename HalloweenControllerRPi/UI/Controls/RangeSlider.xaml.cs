@@ -106,6 +106,12 @@ namespace HalloweenControllerRPi.Controls
             {
                 if (update || !MinThumb.IsDragging)
                 {
+                    if (Minimum > min)
+                        Minimum = min;
+
+                    if (min > RangeMax)
+                        min = RangeMax;
+
                     var relativeLeft = ((min - Minimum) / (Maximum - Minimum)) * ContainerCanvas.ActualWidth;
 
                     Canvas.SetLeft(MinThumb, relativeLeft);
@@ -122,6 +128,12 @@ namespace HalloweenControllerRPi.Controls
             {
                 if (update || !MaxThumb.IsDragging)
                 {
+                    if (Minimum > max)
+                        Minimum = max;
+                    
+                    if (RangeMin > max)
+                        RangeMin = max;
+
                     var relativeRight = (max - Minimum) / (Maximum - Minimum) * ContainerCanvas.ActualWidth;
 
                     Canvas.SetLeft(MaxThumb, relativeRight);

@@ -2,6 +2,8 @@
 using HalloweenControllerRPi.Functions;
 using HalloweenControllerRPi.UI.Functions.Func_GUI;
 using System;
+using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -12,7 +14,7 @@ using Windows.UI.Xaml.Input;
 
 namespace HalloweenControllerRPi.Function_GUI
 {
-    public partial class Func_Relay_GUI : UserControl, IXmlSerializable, IFunctionGUI
+    public partial class Func_Relay_GUI : UserControl, IXmlFunction, IFunctionGUI
     {
         private Func_RELAY _Func;
         private bool _boInitialised = false;
@@ -93,11 +95,16 @@ namespace HalloweenControllerRPi.Function_GUI
         }
 
         #region XML Handling
-        public void ReadXml(System.Xml.XmlReader reader)
+        public void ReadXml(XmlReader reader)
         {
-            _Func.ReadXml(reader);
+            throw new Exception("Deprecated");
+        }
 
-            textTitle.Text = reader.GetAttribute("CustomName");
+        public void ReadXML(XElement element)
+        {
+            _Func.ReadXML(element);
+
+            textTitle.Text = element.Attribute("CustomName").Value;
 
             textBlock_StartDelay.Text = "Start Delay: " + _Func.MinDelay_ms.ToString() + " (ms)";
             textBlock_MinDuration.Text = "Min Duration: " + _Func.MinDuration_ms.ToString() + " (ms)";

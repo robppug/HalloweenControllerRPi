@@ -1,12 +1,9 @@
 ﻿using HalloweenControllerRPi.Container;
 using HalloweenControllerRPi.Device;
 using HalloweenControllerRPi.Device.Controllers;
-using HalloweenControllerRPi.Device.Drivers;
 using HalloweenControllerRPi.Function_GUI;
 using HalloweenControllerRPi.Functions;
-using HalloweenControllerRPi.UI.Controls;
 using HalloweenControllerRPi.UI.Functions.Function_Button;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,13 +12,8 @@ using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Media.Imaging;
-using Windows.UI.Xaml.Shapes;
-using Windows.Storage.Streams;
-using Windows.Foundation;
-using Windows.Graphics.Imaging;
 using HalloweenControllerRPi.UI.ExternalDisplay;
-using HalloweenControllerRPi.Device.Controllers.Providers;
+using System.Xml.Linq;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -109,6 +101,8 @@ namespace HalloweenControllerRPi
         public static MainScreen _screen_Main = new MainScreen();
 
         public static Task _displayUpdate;
+
+        public XDocument xmlDocument { get; private set; }
 
         public void HWController_DisplayInitialised(object sender, EventArgs e)
         {
