@@ -175,9 +175,10 @@ namespace HalloweenControllerRPi.Device.Controllers
 
             OnDisplayInitialised();
 
+            System.Diagnostics.Debug.WriteLine("\n\nUPDATE: " + discovery.ToString());
             while (discovery < 100)
             {
-                System.Diagnostics.Debug.WriteLine("\n\nUPDATE: " + discovery.ToString());
+                System.Diagnostics.Debug.Write(" " + discovery.ToString());
 
                 OnDiscoveryProgressUpdated(discovery);
 

@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace HalloweenControllerRPi.Device.Controllers
 {
-   public interface IHWController : ISupportedFunctions
-   {
-      Task Connect();
-      void Disconnect();
+    public interface IHWController : ISupportedFunctions
+    {
+        Task Connect();
+        void Disconnect();
 
-      void OnChannelNotification(IChannel sender, CommandEventArgs e);
-   }
+        void OnChannelNotification(IChannel sender, CommandEventArgs e);
+    }
 }

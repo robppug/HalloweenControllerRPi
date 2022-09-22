@@ -9,22 +9,22 @@ using Windows.UI;
 
 namespace HalloweenControllerRPi.Function_GUI
 {
-   public class Function_Button_SOUND : Function_Button
-   {
-      public Function_Button_SOUND(uint idx)
-         : base(typeof(Func_Sound_GUI), "SOUND", idx, Colors.Orchid)
-      {
-         IsRemoveable = false;
-         OneOnly = false;
-         TriggerOnly = false;//RPUGLIESE - true;
-      }
+    public class Function_Button_SOUND : Function_Button
+    {
+        public Function_Button_SOUND(uint idx)
+           : base(typeof(Func_Sound_GUI), "SOUND", idx, Colors.Orchid)
+        {
+            IsRemoveable = false;
+            OneOnly = false;
+            TriggerOnly = false;//RPUGLIESE - true;
+        }
 
-      public Function_Button_SOUND(uint idx, Function.tenTYPE enType)
-         : base(typeof(Func_Sound_GUI), "SOUND", idx, Colors.Orchid)
-      {
-         IsRemoveable = false;
-         OneOnly = false;
-         TriggerOnly = false;//RPUGLIESE - true;
-      }
-   }
+        public Function_Button_SOUND(uint idx, Function.tenTYPE enType)
+           : base(typeof(Func_Sound_GUI), "SOUND", idx, Colors.Orchid)
+        {
+            IsRemoveable = false;
+            OneOnly = false;
+            TriggerOnly = false;//RPUGLIESE - true;
+        }
+    }
 }

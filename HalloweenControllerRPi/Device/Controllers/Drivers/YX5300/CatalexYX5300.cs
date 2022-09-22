@@ -65,6 +65,9 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
         QUERY_TOTAL_TRACKS_TF = 0X48,
         [AccessType("R"), RxLength(10)]
         QUERY_CURRENT_TRACKS_TF = 0X4C,
+        [AccessType("R"), RxLength(1)]
+        COMMAND_UNKNOWN = 0X62,
+
     }
 
     /// <summary>
@@ -74,29 +77,45 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
     {
         public static bool CanRead(this Commands cmd)
         {
-            AccessTypeAttribute mde = EnumExtension<AccessTypeAttribute, Commands>.GetModeAttribute(cmd);
-            if (mde != null)
-                return mde.Read;
-            else
-                return true;
+            if (cmd < Commands.COMMAND_UNKNOWN)
+            {
+                AccessTypeAttribute mde = EnumExtension<AccessTypeAttribute, Commands>.GetModeAttribute(cmd);
+                if (mde != null)
+                    return mde.Read;
+                else
+                    return true;
+            }
+
+            return false;
         }
 
         public static bool CanWrite(this Commands cmd)
         {
-            AccessTypeAttribute mde = EnumExtension<AccessTypeAttribute, Commands>.GetModeAttribute(cmd);
-            if (mde != null)
-                return mde.Write;
-            else
-                return true;
+            if (cmd < Commands.COMMAND_UNKNOWN)
+            {
+                AccessTypeAttribute mde = EnumExtension<AccessTypeAttribute, Commands>.GetModeAttribute(cmd);
+                if (mde != null)
+                    return mde.Write;
+                else
+                    return true;
+            }
+
+            return false;
         }
 
         public static int GetExpectedRxLength(this Commands cmd)
         {
-            RxLengthAttribute mde = EnumExtension<RxLengthAttribute, Commands>.GetModeAttribute(cmd);
-            if (mde != null)
-                return mde.ExpectedLength;
-            else
-                return 0;
+            if (cmd < Commands.COMMAND_UNKNOWN)
+            {
+                RxLengthAttribute mde = EnumExtension<RxLengthAttribute, Commands>.GetModeAttribute(cmd);
+
+                if (mde != null)
+                    return mde.ExpectedLength;
+                else
+                    return 0;
+            }
+
+            return 0;
         }
     }
 
@@ -109,7 +128,6 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
     public class Catalex_YX5300<T> : ISoundProvider, IDeviceCommsProvider<T> where T : IDeviceComms
     {
         private bool _initialised = false;
-        private T _stream;
         private List<byte> _rxBuffer = new List<byte>();
         private const byte MAX_VOLUME = 30;
         private const byte COMMAND_START_BYTE = 0x7E;
@@ -118,11 +136,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
         public event EventHandler<SoundProviderEventArgs> StateChanged;
         public event EventHandler<SoundProviderStatusEventArgs> StatusChanged;
 
-        public T BusDeviceComms
-        {
-            get { return _stream; }
-            private set { _stream = value; }
-        }
+        public T BusDeviceComms { get; private set; }
 
         private static void BuildCommand(ref List<byte> buffer, Commands command, bool feedback, ushort dat = 0)
         {
@@ -198,10 +212,10 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
 
             if (_initialised == true)
             {
-                _stream.DataReceived += _stream_DataReceived;
+                BusDeviceComms.DataReceived += _stream_DataReceived;
                 BuildCommand(ref _dataBuffer, Commands.SEL_DEV, false, 0x02);
 
-                _stream.WriteRead(_dataBuffer.ToArray());
+                BusDeviceComms.WriteRead(_dataBuffer.ToArray());
 
                 Task.Delay(200).Wait();
             }
@@ -242,7 +256,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
         {
             if (_initialised == false)
             {
-                _stream = stream;
+                BusDeviceComms = stream;
                 _initialised = true;
             }
             else
@@ -254,7 +268,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
         public void Close()
         {
             _initialised = false;
-            _stream = default(T);
+            BusDeviceComms = default(T);
         }
 
         public void Play(byte track, bool loop)
@@ -263,7 +277,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
 
             BuildCommand(ref _dataBuffer, Commands.PLAY_W_INDEX, false, (ushort)track);
 
-            _stream.WriteRead(_dataBuffer.ToArray());
+            BusDeviceComms.WriteRead(_dataBuffer.ToArray());
         }
 
         public void Stop()
@@ -272,7 +286,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
 
             BuildCommand(ref _dataBuffer, Commands.STOP_PLAY, false);
 
-            _stream.Write(_dataBuffer.ToArray());
+            BusDeviceComms.Write(_dataBuffer.ToArray());
         }
 
         public void Status()
@@ -281,7 +295,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
 
             BuildCommand(ref _dataBuffer, Commands.QUERY_CURRENT_STATUS, false);
 
-            _stream.Write(_dataBuffer.ToArray());
+            BusDeviceComms.Write(_dataBuffer.ToArray());
         }
 
         public ushort GetNumberOfTracks()
@@ -292,7 +306,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
 
             BuildCommand(ref _dataBuffer, Commands.QUERY_TOTAL_TRACKS_TF, false);
 
-            rxData = _stream.WriteRead(_dataBuffer.ToArray());
+            rxData = BusDeviceComms.WriteRead(_dataBuffer.ToArray());
 
             List<CataLexCommand> commands = DecodeCommand(rxData);
 
@@ -320,7 +334,7 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
 
             BuildCommand(ref _dataBuffer, Commands.SET_VOLUME, false, vol);
 
-            _stream.WriteRead(_dataBuffer.ToArray());
+            BusDeviceComms.WriteRead(_dataBuffer.ToArray());
         }
 
         public void Next()

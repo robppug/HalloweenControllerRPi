@@ -59,8 +59,9 @@ namespace HalloweenControllerRPi.Functions
             SendCommand("AVAILABLE TRACKS");
 
             _pollTimer = new DispatcherTimer();
-            _pollTimer.Interval = TimeSpan.FromSeconds(10);
+            _pollTimer.Interval = TimeSpan.FromSeconds(30);
             _pollTimer.Tick += PollTimer_Tick;
+            //RPUGLIESE - Causing High CPU load?
             _pollTimer.Start();
         }
 
