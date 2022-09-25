@@ -1,7 +1,7 @@
 ﻿namespace HalloweenControllerRPi.Device.Controllers
-{ 
-   public interface IProcessTick
-   {
-      void Tick();
-   }
+{
+    public interface IProcessTick
+    {
+        void Tick();
+    }
 }

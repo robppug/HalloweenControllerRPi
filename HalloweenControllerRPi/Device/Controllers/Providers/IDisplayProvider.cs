@@ -1,6 +1,6 @@
 ﻿namespace HalloweenControllerRPi.Device.Controllers.Providers
 {
-   interface IDisplayProvider
-   {
-   }
+    interface IDisplayProvider
+    {
+    }
 }

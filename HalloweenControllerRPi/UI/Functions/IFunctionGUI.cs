@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace HalloweenControllerRPi.Function_GUI
 {
-   /// <summary>
-   /// Controller FUNCTION GUI interface definition
-   /// </summary>
-   interface IFunctionGUI
-   {
-      Function Func { get; set; }
+    /// <summary>
+    /// Controller FUNCTION GUI interface definition
+    /// </summary>
+    interface IFunctionGUI
+    {
+        Function Func { get; set; }
 
-      event EventHandler OnRemove;
+        event EventHandler OnRemove;
 
-      void Initialise();
-   }
+        void Initialise();
+    }
 }

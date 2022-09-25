@@ -4,8 +4,8 @@ using HalloweenControllerRPi.Device.Drivers;
 
 namespace HalloweenControllerRPi.Device.Controllers
 {
-   public interface IDisplayChannel
-   {
-       IDriverDisplayProvider Device { get; }
+    public interface IDisplayChannel
+    {
+        IDriverDisplayProvider Device { get; }
     }
 }

@@ -121,7 +121,14 @@ namespace HalloweenControllerRPi
         {
             (sender as Button).IsEnabled = false;
 
-            await LoadSequenceFile();
+            try
+            {
+                await LoadSequenceFile();
+            }
+            catch (FileNotFoundException)
+            {
+                System.Diagnostics.Debug.WriteLine("     No file!");
+            }
 
             (sender as Button).IsEnabled = true;
         }

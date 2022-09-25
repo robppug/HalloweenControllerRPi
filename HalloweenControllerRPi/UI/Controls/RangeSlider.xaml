@@ -14,9 +14,9 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Thumb">
-                            <Rectangle Width="16" 
+                            <Rectangle Width="10" 
                                 Height="16" 
-                                Fill="White" 
+                                Fill="#FF98A592" 
                                 RenderTransformOrigin="0.5 0.5" 
                                 RadiusX="2" 
                                 RadiusY="2" 
@@ -33,8 +33,19 @@
         </Grid.Resources>
         <Rectangle Height="8" Margin="4,12" Fill="#FFE0E0E0" RadiusX="2" RadiusY="2" />
         <Canvas x:Name="ContainerCanvas" Margin="4,0" SizeChanged="ContainerCanvas_SizeChanged">
-            <Thumb x:Name="MinThumb" DragCompleted="MinThumb_DragCompleted" DragDelta="MinThumb_DragDelta" RightTapped="Thumb_RightTapped"/>
-            <Thumb x:Name="MaxThumb" DragCompleted="MaxThumb_DragCompleted" DragDelta="MaxThumb_DragDelta" RightTapped="Thumb_RightTapped"/>
+            <Thumb x:Name="MinThumb" DragCompleted="MinThumb_DragCompleted" DragDelta="MinThumb_DragDelta" RightTapped="Thumb_RightTapped" RenderTransformOrigin="0.5,0.5" ScrollViewer.VerticalScrollBarVisibility="Disabled" Canvas.Left="0" Canvas.Top="0">
+                <Thumb.Foreground>
+                    <ImageBrush/>
+                </Thumb.Foreground>
+                <Thumb.RenderTransform>
+                    <CompositeTransform ScaleY="0.5" ScaleX="0.5"/>
+                </Thumb.RenderTransform>
+            </Thumb>
+            <Thumb x:Name="MaxThumb" DragCompleted="MaxThumb_DragCompleted" DragDelta="MaxThumb_DragDelta" RightTapped="Thumb_RightTapped" RenderTransformOrigin="0.5,0.5" ScrollViewer.VerticalScrollBarVisibility="Disabled" Canvas.Left="128" Canvas.Top="8">
+                <Thumb.RenderTransform>
+                    <CompositeTransform ScaleX="0.5" ScaleY="0.5"/>
+                </Thumb.RenderTransform>
+            </Thumb>
             <Rectangle x:Name="ActiveRectangle"
                        Canvas.Top="12"
                        Height="8"

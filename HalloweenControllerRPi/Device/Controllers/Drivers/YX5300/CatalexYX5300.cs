@@ -65,6 +65,8 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
         QUERY_TOTAL_TRACKS_TF = 0X48,
         [AccessType("R"), RxLength(10)]
         QUERY_CURRENT_TRACKS_TF = 0X4C,
+        [AccessType("R"), RxLength(1)]
+        COMMAND_UNKNOWN = 0X62,
     }
 
     /// <summary>
@@ -74,29 +76,45 @@ namespace HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats.Interfaces.
     {
         public static bool CanRead(this Commands cmd)
         {
+            if (cmd < Commands.COMMAND_UNKNOWN)
+            {
             AccessTypeAttribute mde = EnumExtension<AccessTypeAttribute, Commands>.GetModeAttribute(cmd);
-            if (mde != null)
-                return mde.Read;
-            else
-                return true;
+                if (mde != null)
+                    return mde.Read;
+                else
+                    return true;
+            }
+
+            return false;
         }
 
         public static bool CanWrite(this Commands cmd)
         {
-            AccessTypeAttribute mde = EnumExtension<AccessTypeAttribute, Commands>.GetModeAttribute(cmd);
-            if (mde != null)
-                return mde.Write;
-            else
-                return true;
+            if (cmd < Commands.COMMAND_UNKNOWN)
+            {
+                AccessTypeAttribute mde = EnumExtension<AccessTypeAttribute, Commands>.GetModeAttribute(cmd);
+                if (mde != null)
+                    return mde.Write;
+                else
+                    return true;
+            }
+
+            return false;
         }
 
         public static int GetExpectedRxLength(this Commands cmd)
         {
-            RxLengthAttribute mde = EnumExtension<RxLengthAttribute, Commands>.GetModeAttribute(cmd);
-            if (mde != null)
-                return mde.ExpectedLength;
-            else
-                return 0;
+            if (cmd < Commands.COMMAND_UNKNOWN)
+            {
+                RxLengthAttribute mde = EnumExtension<RxLengthAttribute, Commands>.GetModeAttribute(cmd);
+
+                if (mde != null)
+                    return mde.ExpectedLength;
+                else
+                    return 0;
+            }
+
+            return 0;
         }
     }
 

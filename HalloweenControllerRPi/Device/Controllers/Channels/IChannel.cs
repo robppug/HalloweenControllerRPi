@@ -1,10 +1,10 @@
 ﻿namespace HalloweenControllerRPi.Device.Controllers.Channels
 {
-   public interface IChannel
-   {
-      IChannelHost ChannelHost { get; }
-      uint Index { get; set; }
+    public interface IChannel
+    {
+        IChannelHost ChannelHost { get; }
+        uint Index { get; set; }
 
-      uint GetValue();
-   }
+        uint GetValue();
+    }
 }
