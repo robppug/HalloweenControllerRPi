@@ -81,6 +81,7 @@ namespace HalloweenControllerRPi.Functions
         }
         public uint MinDelay_ms { get; set; } = 0;
         public uint MaxDelay_ms { get; set; } = 1000;
+        public double Value { get; set; } = 0;
 
         public uint Index { get; set; }
         public tenTYPE Type { get; set; }

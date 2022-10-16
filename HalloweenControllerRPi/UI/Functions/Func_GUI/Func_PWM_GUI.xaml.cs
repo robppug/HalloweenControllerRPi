@@ -55,12 +55,23 @@ namespace HalloweenControllerRPi.Function_GUI
             set { SetValue(UpdateRateTextProperty, value); }
         }
 
+        public double CurrentLevelOpacity
+        {
+            get { return (double)GetValue(OpacityProperty); }
+            set { SetValue(OpacityProperty, value); }
+        }
+
         public static readonly DependencyProperty DurationTextProperty = DependencyProperty.Register("DurationText", typeof(string), typeof(UserControl), new PropertyMetadata("Duration: xxx (ms)"));
         public static readonly DependencyProperty LevelTextProperty = DependencyProperty.Register("LevelText", typeof(string), typeof(UserControl), new PropertyMetadata("Level: xxx %"));
         public static readonly DependencyProperty StartDelayTextProperty = DependencyProperty.Register("StartDelayText", typeof(string), typeof(UserControl), new PropertyMetadata("Start Delay: xxx (ms)"));
         public static readonly DependencyProperty RampRateTextProperty = DependencyProperty.Register("RampRateText", typeof(string), typeof(UserControl), new PropertyMetadata("Ramp Rate: xxx"));
         public static readonly DependencyProperty UpdateRateTextProperty = DependencyProperty.Register("UpdateRateText", typeof(string), typeof(UserControl), new PropertyMetadata("Update Rate: xxx"));
+        public static readonly DependencyProperty OpacityProperty = DependencyProperty.Register("CurrentLevel", typeof(double), typeof(UserControl), new PropertyMetadata("Update Rate: xxx"));
 
+        //public double CurrentLevel
+        //{
+            //set { this.rect_OutputIndicator.Opacity = _Func.Level; }
+        //}
         public uint MaxDuration
         {
             get { return _Func.MaxDuration_ms; }

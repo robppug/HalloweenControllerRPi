@@ -2,19 +2,17 @@
 using HalloweenControllerRPi.Device.Controllers.Providers;
 using HalloweenControllerRPi.Device.Controllers.RaspberryPi.Hats;
 using HalloweenControllerRPi.Functions;
-using HalloweenControllerRPi.UI.Controls;
 using HalloweenControllerRPi.UI.ExternalDisplay;
 using Microsoft.IoT.Lightning.Providers;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Windows.Devices;
 using Windows.Devices.Enumeration;
-using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 using Windows.Devices.Spi;
-using Windows.System.Threading;
 using Windows.UI.Xaml;
 
 namespace HalloweenControllerRPi.Device.Controllers
@@ -36,6 +34,7 @@ namespace HalloweenControllerRPi.Device.Controllers
 
         //private static Stopwatch sWatch;
         private static DispatcherTimer CycleTimer;
+        private static TaskFactory TaskFactory;
 
         private static List<IHat> _lHats = new List<IHat>();
         private static List<IChannel> _lAllFunctions = new List<IChannel>();
@@ -346,11 +345,18 @@ namespace HalloweenControllerRPi.Device.Controllers
             //sWatch = new Stopwatch();
             //sWatch.Start();
 
+            TaskFactory.StartNew(new Action(FGTaskRunner));
+
             /* Create the Background Task handle */
             CycleTimer = new DispatcherTimer();
             CycleTimer.Tick += ControllerTask;
             CycleTimer.Interval = new TimeSpan(0, 0, 0, 0, 1); //Unlikely to run this fast, but trigger as fast as possible
             CycleTimer.Start();
+        }
+
+        async void FGTaskRunner()
+        {
+            Task.Delay(1);
         }
 
         public override void Disconnect()

@@ -67,40 +67,54 @@
             </ComboBox.ItemContainerStyle>
         </ComboBox>
         <TextBlock x:Name="textBlock_Level"
-                 Width="215"
-                 Margin="10,120,0,0"
-                 HorizontalAlignment="Left"
-                 VerticalAlignment="Top"
-                 FontSize="10"
-                 Text="{Binding LevelText, ElementName=_this}"
-                 TextAlignment="Left"
-                 TextWrapping="Wrap" />
+                   Width="215"
+                   Margin="10,120,0,0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   FontSize="10"
+                   Text="{Binding LevelText, ElementName=_this}"
+                   TextAlignment="Left"
+                   TextWrapping="Wrap" />
         <TextBlock x:Name="textBlock_StartDelay"
-                 Width="213"
-                 Margin="10,155,0,0"
-                 HorizontalAlignment="Left"
-                 VerticalAlignment="Top"
-                 FontSize="10"
-                 Text="{Binding StartDelayText, ElementName=_this}"
-                 TextWrapping="Wrap" />
+                   Width="213"
+                   Margin="10,155,0,0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   FontSize="10"
+                   Text="{Binding StartDelayText, ElementName=_this}"
+                   TextWrapping="Wrap" />
         <TextBlock x:Name="textBlock_UpdateRate"
-                 Width="217"
-                 Margin="10,194,0,0"
-                 HorizontalAlignment="Left"
-                 VerticalAlignment="Top"
-                 FontSize="10"
-                 Text="{Binding UpdateRateText, ElementName=_this}"
-                 TextWrapping="Wrap" />
-        <TextBlock x:Name="textBlock_RampRate" Width="226" Margin="10,228,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10" Text="{Binding RampRateText, ElementName=_this}" TextWrapping="Wrap" />
+                   Width="217"
+                   Margin="10,194,0,0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   FontSize="10"
+                   Text="{Binding UpdateRateText, ElementName=_this}"
+                   TextWrapping="Wrap" />
+        <TextBlock x:Name="textBlock_RampRate" 
+                   Width="226" 
+                   Margin="10,228,0,0" 
+                   HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   FontSize="10" 
+                   Text="{Binding RampRateText, ElementName=_this}" 
+                   TextWrapping="Wrap" />
         <Button x:Name="RemoveButton" Content="X" HorizontalAlignment="Right" Margin="0,3,3,0" VerticalAlignment="Top" Width="25" Height="20" FontSize="8" FontFamily="Arial"/>
         <TextBlock x:Name="textBlock_Duration"
-            Width="213"
-            Margin="10,83,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            FontSize="10"
-            Text="{Binding DurationText, ElementName=_this}"
-            TextAlignment="Left"
-            TextWrapping="Wrap" />
+                   Width="213"
+                   Margin="10,83,0,0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   FontSize="10"
+                   Text="{Binding DurationText, ElementName=_this}"
+                   TextAlignment="Left"
+                   TextWrapping="Wrap" />
+        <Rectangle x:Name="rect_OutputIndicator"
+                   HorizontalAlignment="Left" 
+                   Height="20" 
+                   Margin="166,4,0,0" 
+                   VerticalAlignment="Top" 
+                   Width="32"
+                   Fill="Red" Opacity="{Binding OpacityProperty, ElementName=rect_OutputIndicator, Mode=OneWay}"/>
     </Grid>
 </UserControl>

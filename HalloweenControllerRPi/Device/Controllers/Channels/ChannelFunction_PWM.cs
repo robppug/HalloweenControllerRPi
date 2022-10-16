@@ -168,7 +168,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
                             _functionLevel = (_functionLevel + (uint)(toggle ? -_rampRate : _rampRate));
                         }
 
-                        if ((toggle == true && _functionLevel <= MinLevel)
+                        if (   (toggle == true && _functionLevel <= MinLevel)
                             || (toggle == false && _functionLevel >= MaxLevel))
                         {
                             toggle = (toggle ? false : true);
@@ -177,6 +177,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
 
                     case PWMFunctions.FUNC_FLICKER_OFF:
                         count = (uint)(new Random().Next((int)PWMResolution));
+
                         if (count > (MaxLevel / _rampRate))
                         {
                             _functionLevel = count;
@@ -189,6 +190,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
 
                     case PWMFunctions.FUNC_FLICKER_ON:
                         count = (uint)(new Random().Next((int)PWMResolution));
+                        
                         if (count < (MaxLevel - (MaxLevel / _rampRate)))
                         {
                             _functionLevel = MinLevel;
@@ -201,6 +203,7 @@ namespace HalloweenControllerRPi.Device.Controllers.Channels
 
                     case PWMFunctions.FUNC_RANDOM:
                         value = (uint)(new Random().Next((int)PWMResolution));
+                        
                         if (value > MaxLevel)
                         {
                             _functionLevel = MaxLevel;

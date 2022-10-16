@@ -81,6 +81,8 @@ namespace HalloweenControllerRPi.Functions
 
         public uint MaxUpdateRate { get; set; } = 20;
 
+        public bool Negative { get; set; } = false;
+
         public uint RampRate
         {
             get { return (uint)new Random().Next((int)MinRampRate, (int)MaxRampRate); }

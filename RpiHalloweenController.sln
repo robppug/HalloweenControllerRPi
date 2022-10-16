@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RpiHalloweenController", "HalloweenControllerRPi\RpiHalloweenController.csproj", "{A6140177-A84A-49BA-98AD-A2653B7FA207}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "HalloweenControllerRPy", "HalloweenControllerRPy\HalloweenControllerRPy.pyproj", "{82D7A15B-553F-479D-A374-7566DDE484C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,8 +39,19 @@ Global
 		{A6140177-A84A-49BA-98AD-A2653B7FA207}.Release|x86.ActiveCfg = Release|x86
 		{A6140177-A84A-49BA-98AD-A2653B7FA207}.Release|x86.Build.0 = Release|x86
 		{A6140177-A84A-49BA-98AD-A2653B7FA207}.Release|x86.Deploy.0 = Release|x86
+		{82D7A15B-553F-479D-A374-7566DDE484C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82D7A15B-553F-479D-A374-7566DDE484C0}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{82D7A15B-553F-479D-A374-7566DDE484C0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{82D7A15B-553F-479D-A374-7566DDE484C0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{82D7A15B-553F-479D-A374-7566DDE484C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82D7A15B-553F-479D-A374-7566DDE484C0}.Release|ARM.ActiveCfg = Release|Any CPU
+		{82D7A15B-553F-479D-A374-7566DDE484C0}.Release|x64.ActiveCfg = Release|Any CPU
+		{82D7A15B-553F-479D-A374-7566DDE484C0}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3D2833A1-D050-498A-8EF8-E94459FB4CD0}
 	EndGlobalSection
 EndGlobal
